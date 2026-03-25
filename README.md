@@ -10,8 +10,8 @@ Space themed math trainer for elementary school kids
 - **20-question multiplication quizzes** — randomized every time
 - **Pick your numbers** — select any combination of 0–12
 - **Keyboard-first navigation** — Enter to submit, ← → to move between questions, no mouse needed
-- **Space sound effects** — lightsaber hums, R2-D2 beeps, and Imperial buzzes (Web Audio API, no files needed)
-- **Spaceship flyby celebration** — passing scores (75%+) trigger an animated X-Wing fly-through with exhaust trails
+- **Space sound effects** — lightsaber hums, drioid beeps, and blaster buzzes (Web Audio API, no files needed)
+- **Spaceship flyby celebration** — passing scores (75%+) trigger a fly-by with exhaust trails
 - **Live grading** — see your score as you go, full breakdown at the end with missed problems reviewed
 - **Rank system** — Youngling → Rebel Recruit → Padawan → Jedi Knight → Jedi Master ⭐
 - **Zero dependencies** — one HTML file, works offline, no internet required after first load
@@ -41,7 +41,7 @@ Or download `index.html` and open it in any modern browser.
 No build step, no server required.
 
 ```bash
-git clone https://github.com/yourusername/galactic-math.git
+git clone https://github.com/bmschimmel/galactic-math.git
 cd galactic-math
 open index.html   # macOS
 # or just double-click index.html in your file explorer
@@ -51,7 +51,7 @@ open index.html   # macOS
 
 ## 🤝 Contributing
 
-Contributions? Yeah sure...It's a side project to help my kids learn math I don't know? Sure.
+Contributions? Yeah sure...it's a side project to help my kids learn math I don't know? Sure.
 
 Open an issue or submit a PR.
 
