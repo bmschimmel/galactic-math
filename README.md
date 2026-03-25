@@ -16,7 +16,7 @@ Space themed math trainer for elementary school kids
 - **Rank system** — Youngling → Rebel Recruit → Padawan → Jedi Knight → Jedi Master ⭐
 - **Zero dependencies** — one HTML file, works offline, no internet required after first load
 
----
+----
 
 ## 🚀 Play It Now
 
