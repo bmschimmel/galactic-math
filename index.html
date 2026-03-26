@@ -669,7 +669,7 @@
 <div class="container">
   <div class="title-logo">
     <div class="title-main">GALACTIC MATH</div>
-    <div class="title-sub">Academy · Multiplication Division</div>
+    <div class="title-sub">Academy · Math Trainer</div>
   </div>
 
   <div class="saber-divider" style="margin: 16px 0 24px;"></div>
@@ -691,7 +691,10 @@
       <div class="quick-btns" id="modeButtons">
         <button class="quick-btn mode-btn selected-mode" data-mode="multiply" onclick="setMode('multiply')">× Multiply</button>
         <button class="quick-btn mode-btn" data-mode="divide" onclick="setMode('divide')">÷ Divide</button>
-        <button class="quick-btn mode-btn" data-mode="both" onclick="setMode('both')">⊕ Both</button>
+        <button class="quick-btn mode-btn" data-mode="add" onclick="setMode('add')">+ Add</button>
+        <button class="quick-btn mode-btn" data-mode="subtract" onclick="setMode('subtract')">− Subtract</button>
+        <button class="quick-btn mode-btn" data-mode="both" onclick="setMode('both')">⊕ ×÷ Both</button>
+        <button class="quick-btn mode-btn" data-mode="all" onclick="setMode('all')">★ All Ops</button>
       </div>
 
       <div class="error-msg" id="setupError"></div>
@@ -1234,12 +1237,20 @@ function startQuiz() {
   const pool = [];
   const opPool = [];
 
-  if (gameMode === 'multiply' || gameMode === 'both') {
+  if (gameMode === 'multiply' || gameMode === 'both' || gameMode === 'all') {
     nums.forEach(a => nums.forEach(b => { pool.push([a, b]); opPool.push('multiply'); }));
   }
-  if (gameMode === 'divide' || gameMode === 'both') {
+  if (gameMode === 'divide' || gameMode === 'both' || gameMode === 'all') {
     nums.forEach(a => nums.forEach(b => {
       if (b > 0) { pool.push([a * b, b]); opPool.push('divide'); }
+    }));
+  }
+  if (gameMode === 'add' || gameMode === 'all') {
+    nums.forEach(a => nums.forEach(b => { pool.push([a, b]); opPool.push('add'); }));
+  }
+  if (gameMode === 'subtract' || gameMode === 'all') {
+    nums.forEach(a => nums.forEach(b => {
+      if (a >= b) { pool.push([a, b]); opPool.push('subtract'); }
     }));
   }
 
@@ -1276,12 +1287,18 @@ function startQuiz() {
 // ===== HELPERS =====
 function getCorrectAnswer(i) {
   const [a, b] = questions[i];
-  return questionOps[i] === 'divide' ? a / b : a * b;
+  if (questionOps[i] === 'divide')   return a / b;
+  if (questionOps[i] === 'add')      return a + b;
+  if (questionOps[i] === 'subtract') return a - b;
+  return a * b;
 }
 
 function getQuestionText(i) {
   const [a, b] = questions[i];
-  return questionOps[i] === 'divide' ? `${a} ÷ ${b} = ?` : `${a} × ${b} = ?`;
+  if (questionOps[i] === 'divide')   return `${a} ÷ ${b} = ?`;
+  if (questionOps[i] === 'add')      return `${a} + ${b} = ?`;
+  if (questionOps[i] === 'subtract') return `${a} − ${b} = ?`;
+  return `${a} × ${b} = ?`;
 }
 
 // ===== QUIZ =====
