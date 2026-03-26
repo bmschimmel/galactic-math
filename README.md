@@ -7,7 +7,7 @@ Space themed math trainer for elementary school kids
 
 ## ✨ Features
 
-- **20-question multiplication or diviision quizzes** — randomized every time
+- **20-question quizzes** — multiplication, division, addition, subtraction, or any combo — randomized every time
 - **Pick your numbers** — select any combination of 0–12
 - **Keyboard-first navigation** — Enter to submit, ← → to move between questions, no mouse needed
 - **Space sound effects** — lightsaber hums, drioid beeps, and blaster buzzes (Web Audio API, no files needed)
@@ -29,7 +29,7 @@ Or download `index.html` and open it in any modern browser.
 ## 🎮 How to Play
 
 1. Select which numbers you want to practice (e.g. just the 6s and 7s, or all 0–12)
-2. Select multiplication, division or both and hit **Begin Training Mission**
+2. Select an operation mode (multiply, divide, add, subtract, or a combo) and hit **Begin Training Mission**
 3. Type your answer and press **Enter**
 4. Use **← →** arrow keys to skip around questions
 5. Finish all 20 to see your rank and review any missed problems
