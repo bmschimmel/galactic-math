@@ -111,4 +111,9 @@ When picking up a Linear issue:
 6. Open a PR with `Fixes IDT-XX` in the description
 7. Do not merge — leave the PR for human review and approval
 
-After committing, always open a PR using: gh pr create --base main --title "IDT-XX description" --body "Fixes IDT-XX"
+  After committing, always:
+
+1. Push the branch: `git push origin <branch-name>`
+2. Open a PR using GitHub CLI:
+   `gh pr create --base main --title "IDT-XX description" --body "Fixes IDT-XX"`
+
