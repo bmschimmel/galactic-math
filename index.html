@@ -689,12 +689,11 @@
 
       <span class="setup-label" style="margin-top:16px;">▸ Select operation mode</span>
       <div class="quick-btns" id="modeButtons">
-        <button class="quick-btn mode-btn selected-mode" data-mode="multiply" onclick="setMode('multiply')">× Multiply</button>
-        <button class="quick-btn mode-btn" data-mode="divide" onclick="setMode('divide')">÷ Divide</button>
-        <button class="quick-btn mode-btn" data-mode="add" onclick="setMode('add')">+ Add</button>
-        <button class="quick-btn mode-btn" data-mode="subtract" onclick="setMode('subtract')">− Subtract</button>
-        <button class="quick-btn mode-btn" data-mode="both" onclick="setMode('both')">⊕ ×÷ Both</button>
-        <button class="quick-btn mode-btn" data-mode="all" onclick="setMode('all')">★ All Ops</button>
+        <button class="quick-btn mode-btn selected-mode" data-mode="multiply" onclick="toggleOp('multiply')">× Multiply</button>
+        <button class="quick-btn mode-btn" data-mode="divide" onclick="toggleOp('divide')">÷ Divide</button>
+        <button class="quick-btn mode-btn" data-mode="add" onclick="toggleOp('add')">+ Add</button>
+        <button class="quick-btn mode-btn" data-mode="subtract" onclick="toggleOp('subtract')">− Subtract</button>
+        <button class="quick-btn mode-btn" data-mode="all" onclick="selectAllOps()">★ All</button>
       </div>
 
       <div class="error-msg" id="setupError"></div>
@@ -1175,7 +1174,7 @@ let questionOps = [];   // 'multiply' | 'divide' per question
 let answers = [];
 let currentQ = 0;
 let score = 0;
-let gameMode = 'multiply';
+let selectedOps = new Set(['multiply']);
 
 // ===== SETUP =====
 const grid = document.getElementById('numGrid');
@@ -1209,12 +1208,29 @@ function selectNone() {
   document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
 }
 
-function setMode(m) {
-  gameMode = m;
-  document.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.classList.toggle('selected-mode', btn.dataset.mode === m);
-  });
+function toggleOp(op) {
+  if (selectedOps.has(op) && selectedOps.size === 1) return; // keep at least one
+  if (selectedOps.has(op)) selectedOps.delete(op);
+  else selectedOps.add(op);
+  updateOpButtons();
   document.getElementById('setupError').textContent = '';
+}
+
+function selectAllOps() {
+  selectedOps = new Set(['multiply', 'divide', 'add', 'subtract']);
+  updateOpButtons();
+  document.getElementById('setupError').textContent = '';
+}
+
+function updateOpButtons() {
+  document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+    const mode = btn.dataset.mode;
+    if (mode === 'all') {
+      btn.classList.toggle('selected-mode', selectedOps.size === 4);
+    } else {
+      btn.classList.toggle('selected-mode', selectedOps.has(mode));
+    }
+  });
 }
 
 function selectRange(a, b) {
@@ -1237,18 +1253,18 @@ function startQuiz() {
   const pool = [];
   const opPool = [];
 
-  if (gameMode === 'multiply' || gameMode === 'both' || gameMode === 'all') {
+  if (selectedOps.has('multiply')) {
     nums.forEach(a => nums.forEach(b => { pool.push([a, b]); opPool.push('multiply'); }));
   }
-  if (gameMode === 'divide' || gameMode === 'both' || gameMode === 'all') {
+  if (selectedOps.has('divide')) {
     nums.forEach(a => nums.forEach(b => {
       if (b > 0) { pool.push([a * b, b]); opPool.push('divide'); }
     }));
   }
-  if (gameMode === 'add' || gameMode === 'all') {
+  if (selectedOps.has('add')) {
     nums.forEach(a => nums.forEach(b => { pool.push([a, b]); opPool.push('add'); }));
   }
-  if (gameMode === 'subtract' || gameMode === 'all') {
+  if (selectedOps.has('subtract')) {
     nums.forEach(a => nums.forEach(b => {
       if (a >= b) { pool.push([a, b]); opPool.push('subtract'); }
     }));
