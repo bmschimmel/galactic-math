@@ -53,7 +53,7 @@ open index.html   # macOS
 
 Contributions? Yeah sure...it's a side project to help my kids learn math I don't know? Sure.
 
-Open an issue or submit a PR.
+[Open an issue or submit a PR.](https://github.com/bmschimmel/galactic-math/issues/new)
 
 ---
 
