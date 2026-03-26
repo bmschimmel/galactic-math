@@ -29,7 +29,7 @@ Or download `index.html` and open it in any modern browser.
 ## 🎮 How to Play
 
 1. Select which numbers you want to practice (e.g. just the 6s and 7s, or all 0–12)
-2. Hit **Begin Training Mission**
+2. Select multiplication, division or both and hit **Begin Training Mission**
 3. Type your answer and press **Enter**
 4. Use **← →** arrow keys to skip around questions
 5. Finish all 20 to see your rank and review any missed problems
