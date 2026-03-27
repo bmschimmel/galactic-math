@@ -19,6 +19,63 @@
     --glow-blue: rgba(0, 212, 255, 0.3);
     --glow-green: rgba(57, 255, 20, 0.3);
     --glow-gold: rgba(255, 215, 0, 0.4);
+    --nebula-glow-1: rgba(26, 39, 68, 0.6);
+    --nebula-glow-2: rgba(60, 20, 80, 0.4);
+  }
+
+  /* ===== THEMES ===== */
+  html[data-theme="dim"] {
+    --space-black: #0d0d12;
+    --deep-space: #161620;
+    --nebula-blue: #20202e;
+    --saber-blue: #8ab0d0;
+    --star-white: #b8c8d8;
+    --muted: #5a6878;
+    --gold: #c8a830;
+    --glow-blue: rgba(138, 176, 208, 0.2);
+    --glow-gold: rgba(200, 168, 48, 0.3);
+    --nebula-glow-1: rgba(30, 30, 50, 0.5);
+    --nebula-glow-2: rgba(40, 20, 60, 0.3);
+  }
+
+  html[data-theme="midnight"] {
+    --space-black: #060210;
+    --deep-space: #0c0820;
+    --nebula-blue: #1a0e35;
+    --saber-blue: #b06aff;
+    --star-white: #e0d8ff;
+    --muted: #6a50a0;
+    --glow-blue: rgba(176, 106, 255, 0.3);
+    --nebula-glow-1: rgba(28, 10, 55, 0.7);
+    --nebula-glow-2: rgba(80, 10, 100, 0.5);
+  }
+
+  html[data-theme="deep-blue"] {
+    --space-black: #010c1e;
+    --deep-space: #041828;
+    --nebula-blue: #082845;
+    --saber-blue: #00aaff;
+    --star-white: #c8e8ff;
+    --muted: #3a6888;
+    --glow-blue: rgba(0, 170, 255, 0.3);
+    --nebula-glow-1: rgba(4, 24, 55, 0.7);
+    --nebula-glow-2: rgba(0, 30, 80, 0.5);
+  }
+
+  html[data-theme="retro"] {
+    --space-black: #000a00;
+    --deep-space: #001400;
+    --nebula-blue: #002800;
+    --saber-blue: #00ff41;
+    --saber-green: #00cc33;
+    --gold: #aaff00;
+    --star-white: #00ee38;
+    --muted: #006818;
+    --glow-blue: rgba(0, 255, 65, 0.25);
+    --glow-green: rgba(0, 204, 51, 0.25);
+    --glow-gold: rgba(170, 255, 0, 0.3);
+    --nebula-glow-1: rgba(0, 40, 0, 0.8);
+    --nebula-glow-2: rgba(0, 50, 10, 0.5);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -59,7 +116,7 @@
     position: fixed;
     top: -20%; left: -20%;
     width: 70%; height: 70%;
-    background: radial-gradient(ellipse, rgba(26, 39, 68, 0.6) 0%, transparent 70%);
+    background: radial-gradient(ellipse, var(--nebula-glow-1) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -69,7 +126,7 @@
     position: fixed;
     bottom: -20%; right: -20%;
     width: 60%; height: 60%;
-    background: radial-gradient(ellipse, rgba(60, 20, 80, 0.4) 0%, transparent 70%);
+    background: radial-gradient(ellipse, var(--nebula-glow-2) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -737,6 +794,31 @@
     color: var(--saber-red);
     filter: drop-shadow(0 0 8px var(--saber-red));
   }
+
+  /* ===== THEME CYCLER BUTTON ===== */
+  .theme-btn {
+    position: fixed;
+    top: 14px;
+    right: 16px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 20px;
+    color: var(--muted);
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+  }
+
+  .theme-btn:hover {
+    border-color: var(--saber-blue);
+    color: var(--saber-blue);
+    box-shadow: 0 0 10px var(--glow-blue);
+  }
 </style>
 </head>
 <body>
@@ -755,6 +837,8 @@
   <div class="congrats-text">HYPERDRIVE JUMP FAILED!</div>
   <div class="congrats-sub">YOU WEREN'T READY IN TIME</div>
 </div>
+
+<button class="theme-btn" id="themeBtn" onclick="cycleTheme()">◑ DARK</button>
 
 <div class="container">
   <div class="title-logo">
@@ -877,6 +961,8 @@
 
 <script>
 // ===== STARS =====
+let currentStarColor = '220, 240, 255';
+
 (function() {
   const canvas = document.getElementById('starfield');
   const ctx = canvas.getContext('2d');
@@ -909,7 +995,7 @@
       const op = 0.15 + 0.85 * (0.5 + 0.5 * Math.sin(t * s.speed * 1000 + s.phase));
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(220, 240, 255, ${op})`;
+      ctx.fillStyle = `rgba(${currentStarColor}, ${op})`;
       ctx.fill();
     });
     requestAnimationFrame(draw);
@@ -1820,6 +1906,24 @@ function retryQuiz() {
 function newMission() {
   stopHyperspaceTimer();
   showScreen('setup');
+}
+
+// ===== THEME CYCLER =====
+const THEMES = [
+  { id: 'dark',      label: '◑ DARK',      starColor: '220, 240, 255' },
+  { id: 'dim',       label: '◑ DIM',       starColor: '180, 200, 220' },
+  { id: 'midnight',  label: '◑ MIDNIGHT',  starColor: '200, 185, 255' },
+  { id: 'deep-blue', label: '◑ DEEP BLUE', starColor: '180, 220, 255' },
+  { id: 'retro',     label: '◑ RETRO',     starColor: '0, 255, 80' },
+];
+let currentThemeIdx = 0;
+
+function cycleTheme() {
+  currentThemeIdx = (currentThemeIdx + 1) % THEMES.length;
+  const theme = THEMES[currentThemeIdx];
+  document.documentElement.setAttribute('data-theme', theme.id);
+  document.getElementById('themeBtn').textContent = theme.label;
+  currentStarColor = theme.starColor;
 }
 
 function showScreen(name) {
