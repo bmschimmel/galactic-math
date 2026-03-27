@@ -91,10 +91,10 @@ Before opening a PR verify:
 
 ## Deployment
 
-GitHub Pages deploys automatically on every merge to `main`. No manual deploy step needed. The live site updates within ~60 seconds at:
+Cloudflare Pages deploys automatically on every merge to `main`. No manual deploy step needed. The live site updates within ~60 seconds at:
 
 ```
-https://bmschimmel.github.io/galactic-math
+https://galactic-math.pages.dev/
 ```
 
 ---
