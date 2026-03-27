@@ -20,7 +20,7 @@ Space themed math trainer for elementary school kids
 
 ## 🚀 Play It Now
 
-👉 **[Launch Galactic Math Academy](https://galactic-math.pages.dev/){:target="_blank"}**
+👉 **[Launch Galactic Math Academy](https://galactic-math.pages.dev/)
 
 Or download `index.html` and open it in any modern browser.
 
