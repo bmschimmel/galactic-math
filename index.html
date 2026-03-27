@@ -561,36 +561,48 @@
     font-size: 10px;
   }
 
+  .answer-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .answer-row .answer-input {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
   .feedback-flash {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     font-family: 'Orbitron', monospace;
-    font-size: 48px;
+    font-size: 26px;
+    font-weight: 900;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.1s;
+    width: 36px;
+    flex-shrink: 0;
+    text-align: center;
   }
 
   .feedback-flash.show-correct {
     opacity: 1;
-    animation: floatUp 0.6s ease forwards;
+    animation: flashPulse 0.6s ease forwards;
     color: var(--saber-green);
-    filter: drop-shadow(0 0 12px var(--saber-green));
+    filter: drop-shadow(0 0 10px var(--saber-green));
   }
 
   .feedback-flash.show-wrong {
     opacity: 1;
-    animation: floatUp 0.6s ease forwards;
+    animation: flashPulse 0.6s ease forwards;
     color: var(--saber-red);
-    filter: drop-shadow(0 0 12px var(--saber-red));
+    filter: drop-shadow(0 0 10px var(--saber-red));
   }
 
-  @keyframes floatUp {
-    0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
-    50% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
-    100% { opacity: 0; transform: translate(-50%, -120%) scale(0.8); }
+  @keyframes flashPulse {
+    0%   { opacity: 0; transform: scale(0.5); }
+    30%  { opacity: 1; transform: scale(1.3); }
+    60%  { opacity: 1; transform: scale(1.0); }
+    100% { opacity: 0; transform: scale(0.8); }
   }
 
   /* ===== RESULTS ===== */
@@ -792,6 +804,13 @@
     text-align: center;
     pointer-events: none;
     animation: none;
+    background: rgba(3, 7, 18, 0.82);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 16px;
+    padding: 24px 40px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 60px rgba(255, 215, 0, 0.15), inset 0 0 40px rgba(0,0,0,0.4);
+    min-width: 280px;
   }
 
   .congrats-banner.show {
@@ -800,7 +819,7 @@
 
   @keyframes bannerPop {
     0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    60%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    60%  { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
   }
 
@@ -1252,14 +1271,16 @@
     </div>
 
     <div class="question-card">
-      <div class="feedback-flash" id="feedbackFlash">✓</div>
       <div class="question-num" id="questionNum">PROBLEM 1 OF 20</div>
       <div class="question-text" id="questionText">? × ? = ?</div>
-      <input type="number" class="answer-input" id="answerInput"
-             placeholder="?" autocomplete="off" inputmode="numeric"
-             onkeydown="handleKey(event)" oninput="clearError()">
+      <div class="answer-row">
+        <input type="number" class="answer-input" id="answerInput"
+               placeholder="?" autocomplete="off" inputmode="numeric"
+               onkeydown="handleKey(event)" oninput="clearError()">
+        <div class="feedback-flash" id="feedbackFlash"></div>
+      </div>
       <div class="error-msg" id="quizError"></div>
-      <div class="hint-text">Press <span>ENTER</span> to confirm · <span>←→</span> skip questions</div>
+      <div class="hint-text">Press <span>ENTER</span> to confirm</div>
     </div>
 
     <div class="nav-dots" id="navDots"></div>
@@ -1537,15 +1558,12 @@ function resizeShipCanvas() {
 resizeShipCanvas();
 window.addEventListener('resize', resizeShipCanvas);
 
-// ===== FIREWORKS CELEBRATION =====
+// ===== COMET CELEBRATION =====
 let celebrationActive = false;
 
 function launchCelebration() {
   if (celebrationActive) return;
   celebrationActive = true;
-
-  const W = shipCanvas.width;
-  const H = shipCanvas.height;
 
   // Palette: gold, cyan, green, white, purple
   const colors = [
@@ -1556,39 +1574,38 @@ function launchCelebration() {
     [185, 79, 255]
   ];
 
-  // Three burst origins spread across the screen
-  const origins = [
-    { x: W * 0.25, y: H * 0.35, delay: 0 },
-    { x: W * 0.75, y: H * 0.28, delay: 300 },
-    { x: W * 0.5,  y: H * 0.42, delay: 600 }
-  ];
+  let comets = [];
 
-  let particles = [];
-
-  function spawnBurst(ox, oy) {
-    const count = 90;
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.3;
-      const spd = 2.5 + Math.random() * 5;
-      const col = colors[Math.floor(Math.random() * colors.length)];
-      particles.push({
-        x: ox, y: oy,
-        vx: Math.cos(angle) * spd,
-        vy: Math.sin(angle) * spd - 1.5, // slight upward bias
-        life: 1,
-        decay: 0.012 + Math.random() * 0.01,
-        size: 2 + Math.random() * 3,
-        r: col[0], g: col[1], b: col[2],
-        trail: []
-      });
-    }
-    sounds.blasterFlyby();
+  function spawnComet() {
+    const W = shipCanvas.width;
+    const H = shipCanvas.height;
+    // Random entry from left or top edges, exit opposite side
+    const fromLeft = Math.random() > 0.4;
+    const col = colors[Math.floor(Math.random() * colors.length)];
+    const angle = fromLeft
+      ? (Math.random() * 0.5 - 0.1)           // mostly rightward, slight diagonal
+      : (Math.PI * 0.4 + Math.random() * 0.5); // downward-right from top
+    const spd = 6 + Math.random() * 8;
+    comets.push({
+      x: fromLeft ? -60 : W * (0.1 + Math.random() * 0.8),
+      y: fromLeft ? H * (0.1 + Math.random() * 0.8) : -60,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd,
+      life: 1,
+      decay: 0.005 + Math.random() * 0.005,
+      tailLen: 80 + Math.random() * 120,
+      width: 2 + Math.random() * 2.5,
+      r: col[0], g: col[1], b: col[2]
+    });
   }
 
-  // Stagger the bursts
-  origins.forEach(o => setTimeout(() => spawnBurst(o.x, o.y), o.delay));
+  // Spawn 8 comets staggered over ~2s
+  for (let i = 0; i < 8; i++) {
+    setTimeout(spawnComet, i * 250);
+  }
+  sounds.blasterFlyby();
 
-  // Show banner after first burst
+  // Show banner early
   setTimeout(() => {
     const banner = document.getElementById('congratsBanner');
     banner.classList.add('show');
@@ -1597,55 +1614,54 @@ function launchCelebration() {
       banner.classList.remove('show');
       banner.style.animation = 'none';
     }, 3500);
-  }, 200);
+  }, 300);
 
   function frame() {
     const W2 = shipCanvas.width;
     const H2 = shipCanvas.height;
     shipCtx.clearRect(0, 0, W2, H2);
 
-    particles = particles.filter(p => p.life > 0.02);
+    comets = comets.filter(c => c.life > 0.02);
 
-    particles.forEach(p => {
-      // Save trail point
-      p.trail.push({ x: p.x, y: p.y, life: p.life });
-      if (p.trail.length > 6) p.trail.shift();
+    comets.forEach(c => {
+      // Draw glowing tail as gradient line
+      const tailX = c.x - c.vx / Math.hypot(c.vx, c.vy) * c.tailLen * c.life;
+      const tailY = c.y - c.vy / Math.hypot(c.vx, c.vy) * c.tailLen * c.life;
 
-      // Draw trail
-      p.trail.forEach((t, i) => {
-        const a = (i / p.trail.length) * p.life * 0.4;
-        shipCtx.beginPath();
-        shipCtx.arc(t.x, t.y, p.size * 0.4 * (i / p.trail.length), 0, Math.PI * 2);
-        shipCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${a})`;
-        shipCtx.fill();
-      });
+      const grad = shipCtx.createLinearGradient(tailX, tailY, c.x, c.y);
+      grad.addColorStop(0, `rgba(${c.r},${c.g},${c.b},0)`);
+      grad.addColorStop(1, `rgba(${c.r},${c.g},${c.b},${c.life * 0.9})`);
 
-      // Draw particle with glow
-      const a = p.life;
       shipCtx.beginPath();
-      shipCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-      shipCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${a})`;
+      shipCtx.moveTo(tailX, tailY);
+      shipCtx.lineTo(c.x, c.y);
+      shipCtx.strokeStyle = grad;
+      shipCtx.lineWidth = c.width * c.life;
+      shipCtx.lineCap = 'round';
+      shipCtx.stroke();
+
+      // Bright head glow
+      const glowGrad = shipCtx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.width * 5 * c.life);
+      glowGrad.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${c.life})`);
+      glowGrad.addColorStop(1, 'transparent');
+      shipCtx.beginPath();
+      shipCtx.arc(c.x, c.y, c.width * 5 * c.life, 0, Math.PI * 2);
+      shipCtx.fillStyle = glowGrad;
       shipCtx.fill();
 
-      // Glow halo
-      const glowSize = p.size * p.life * 3;
-      const grad = shipCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowSize);
-      grad.addColorStop(0, `rgba(${p.r},${p.g},${p.b},${a * 0.4})`);
-      grad.addColorStop(1, 'transparent');
-      shipCtx.beginPath();
-      shipCtx.arc(p.x, p.y, glowSize, 0, Math.PI * 2);
-      shipCtx.fillStyle = grad;
-      shipCtx.fill();
+      // Move
+      c.x += c.vx;
+      c.y += c.vy;
 
-      // Physics
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.06; // gravity
-      p.vx *= 0.98; // drag
-      p.life -= p.decay;
+      // Fade once off-screen
+      if (c.x > W2 + 100 || c.y > H2 + 100 || c.x < -100 || c.y < -100) {
+        c.life -= 0.08;
+      } else {
+        c.life -= c.decay;
+      }
     });
 
-    if (particles.length > 0) {
+    if (comets.length > 0) {
       requestAnimationFrame(frame);
     } else {
       shipCtx.clearRect(0, 0, W2, H2);
@@ -2043,7 +2059,6 @@ function buildNavDots() {
     const dot = document.createElement('div');
     dot.className = 'nav-dot';
     dot.dataset.idx = i;
-    dot.onclick = () => jumpTo(i);
     container.appendChild(dot);
   }
 }
@@ -2095,22 +2110,9 @@ function handleKey(e) {
   if (e.key === 'Enter') {
     sounds.submit();
     submitAnswer();
-  } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-    e.preventDefault();
-    sounds.navigate();
-    if (currentQ < questions.length - 1) jumpTo(currentQ + 1);
-  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-    e.preventDefault();
-    sounds.navigate();
-    if (currentQ > 0) jumpTo(currentQ - 1);
   } else if (e.key.length === 1 && /[0-9]/.test(e.key)) {
     sounds.keypress(e.key);
   }
-}
-
-function jumpTo(idx) {
-  currentQ = idx;
-  loadQuestion(idx);
 }
 
 function clearError() {
