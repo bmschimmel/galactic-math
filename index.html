@@ -902,10 +902,9 @@
       <div id="hyperspaceOptions" style="display:none;">
         <span class="setup-label" style="font-size:10px; margin-bottom:10px; margin-top:4px;">▸ Time limit</span>
         <div class="quick-btns" id="difficultyBtns" style="flex-wrap:wrap;">
-          <button class="quick-btn mode-btn selected-mode" data-diff="wicked-easy" onclick="setDifficulty('wicked-easy')">😌 Wicked Easy (10m)</button>
-          <button class="quick-btn mode-btn" data-diff="kind-of-easy" onclick="setDifficulty('kind-of-easy')">🙂 Kind of Easy (5m)</button>
-          <button class="quick-btn mode-btn" data-diff="hard" onclick="setDifficulty('hard')">😤 Hard (3m)</button>
-          <button class="quick-btn mode-btn" data-diff="falcon" onclick="setDifficulty('falcon')">🦅 Falcon Mode (2m)</button>
+          <button class="quick-btn mode-btn selected-mode" data-diff="wicked-easy" onclick="setDifficulty('wicked-easy')">😌 Wicked Easy (5m)</button>
+          <button class="quick-btn mode-btn" data-diff="harder" onclick="setDifficulty('harder')">😤 Harder (1m)</button>
+          <button class="quick-btn mode-btn" data-diff="hyperdrive" onclick="setDifficulty('hyperdrive')">⚡ Hyperdrive (30s)</button>
         </div>
       </div>
 
@@ -1484,7 +1483,7 @@ let selectedOps = new Set(['multiply']);
 // Hyperspace mode state
 let hyperspaceEnabled = false;
 let hyperspaceDiff = 'wicked-easy';
-const HYPERSPACE_LIMITS = { 'wicked-easy': 600, 'kind-of-easy': 300, 'hard': 180, 'falcon': 120 };
+const HYPERSPACE_LIMITS = { 'wicked-easy': 300, 'harder': 60, 'hyperdrive': 30 };
 let hyperspaceTimer = null;
 let hyperspaceTimeRemaining = 0;
 let hyperspaceHalfwayShown = false;
