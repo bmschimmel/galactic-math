@@ -655,6 +655,88 @@
     margin-top: 6px;
     filter: drop-shadow(0 0 8px var(--saber-blue));
   }
+
+  /* ===== HYPERSPACE MODE ===== */
+  .hyperspace-timer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .hyperspace-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .hyperspace-countdown {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+    filter: drop-shadow(0 0 10px var(--gold));
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .hyperspace-countdown.warning {
+    color: var(--saber-red);
+    filter: drop-shadow(0 0 10px var(--saber-red));
+    animation: timerPulse 0.5s ease-in-out infinite;
+  }
+
+  @keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .hyperspace-bar-outer {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .hyperspace-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--saber-green), var(--gold));
+    border-radius: 3px;
+    transition: width 1s linear;
+    box-shadow: 0 0 8px var(--gold);
+  }
+
+  .hyperspace-bar-fill.warning {
+    background: linear-gradient(90deg, var(--saber-red), #ff8800);
+    box-shadow: 0 0 8px var(--saber-red);
+  }
+
+  .hyperspace-status-msg {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--saber-blue);
+    text-align: center;
+    min-height: 14px;
+    filter: drop-shadow(0 0 6px var(--saber-blue));
+  }
+
+  #hyperFailBanner .congrats-text {
+    background: linear-gradient(180deg, #fff 0%, var(--saber-red) 60%, #660000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px var(--saber-red));
+  }
+
+  #hyperFailBanner .congrats-sub {
+    color: var(--saber-red);
+    filter: drop-shadow(0 0 8px var(--saber-red));
+  }
 </style>
 </head>
 <body>
@@ -664,6 +746,14 @@
 <div class="congrats-banner" id="congratsBanner">
   <div class="congrats-text">YOU PASSED!</div>
   <div class="congrats-sub">THE FORCE IS STRONG WITH YOU</div>
+</div>
+<div class="congrats-banner" id="hyperWinBanner">
+  <div class="congrats-text">LAUNCHING INTO HYPERSPACE!</div>
+  <div class="congrats-sub">SIT BACK — JUMP SEQUENCE COMPLETE</div>
+</div>
+<div class="congrats-banner" id="hyperFailBanner">
+  <div class="congrats-text">HYPERDRIVE JUMP FAILED!</div>
+  <div class="congrats-sub">YOU WEREN'T READY IN TIME</div>
 </div>
 
 <div class="container">
@@ -696,6 +786,21 @@
         <button class="quick-btn mode-btn" data-mode="all" onclick="selectAllOps()">★ All</button>
       </div>
 
+      <div class="saber-divider" style="margin: 20px 0 16px;"></div>
+      <span class="setup-label">▸ Hyperspace Mode <span style="color:var(--muted);font-size:10px;letter-spacing:1px;font-family:'Exo 2',sans-serif;">(optional timed challenge)</span></span>
+      <div class="quick-btns">
+        <button class="quick-btn mode-btn" id="hyperspaceToggle" onclick="toggleHyperspace()">⚡ Off</button>
+      </div>
+      <div id="hyperspaceOptions" style="display:none;">
+        <span class="setup-label" style="font-size:10px; margin-bottom:10px; margin-top:4px;">▸ Time limit</span>
+        <div class="quick-btns" id="difficultyBtns" style="flex-wrap:wrap;">
+          <button class="quick-btn mode-btn selected-mode" data-diff="wicked-easy" onclick="setDifficulty('wicked-easy')">😌 Wicked Easy (10m)</button>
+          <button class="quick-btn mode-btn" data-diff="kind-of-easy" onclick="setDifficulty('kind-of-easy')">🙂 Kind of Easy (5m)</button>
+          <button class="quick-btn mode-btn" data-diff="hard" onclick="setDifficulty('hard')">😤 Hard (3m)</button>
+          <button class="quick-btn mode-btn" data-diff="falcon" onclick="setDifficulty('falcon')">🦅 Falcon Mode (2m)</button>
+        </div>
+      </div>
+
       <div class="error-msg" id="setupError"></div>
       <div class="saber-divider"></div>
       <button class="btn-primary" onclick="startQuiz()" id="startBtn">
@@ -712,6 +817,17 @@
         <div class="progress-bar-fill" id="progressFill" style="width:5%"></div>
       </div>
       <span class="score-live" id="scoreLive">0 ✓</span>
+    </div>
+
+    <div id="hyperspaceContainer" style="display:none; margin-bottom:16px;">
+      <div class="hyperspace-timer-row">
+        <span class="hyperspace-label">🚀 HYPERSPACE LAUNCH IN</span>
+        <span class="hyperspace-countdown" id="hyperspaceCountdown">10:00</span>
+      </div>
+      <div class="hyperspace-bar-outer">
+        <div class="hyperspace-bar-fill" id="hyperspaceBarFill" style="width:100%"></div>
+      </div>
+      <div class="hyperspace-status-msg" id="hyperspaceStatusMsg"></div>
     </div>
 
     <div class="question-card">
@@ -919,6 +1035,19 @@ const sounds = {
     playNoise(0.15, 0.12, 200);
     playFreqSweep(1200, 180, 'sawtooth', 0.4, 0.08);
     setTimeout(() => playFreqSweep(800, 120, 'square', 0.3, 0.06), 80);
+  },
+  hyperspaceJump() {
+    // Rising roar as ship jumps to hyperspace
+    playFreqSweep(80, 3000, 'sawtooth', 2.0, 0.12);
+    setTimeout(() => playFreqSweep(120, 4500, 'sine', 1.8, 0.08), 200);
+    setTimeout(() => playNoise(1.5, 0.1, 50), 400);
+    setTimeout(() => playFreqSweep(300, 8000, 'sine', 1.0, 0.1), 900);
+  },
+  hyperspaceTimeout() {
+    // Failure — hyperdrive not ready
+    playFreqSweep(600, 80, 'sawtooth', 0.5, 0.15);
+    setTimeout(() => playFreqSweep(400, 60, 'square', 0.4, 0.1), 350);
+    setTimeout(() => playTone(120, 'square', 0.4, 0.12), 700);
   }
 };
 
@@ -1167,6 +1296,72 @@ function launchShip() {
   shipAnimFrame = requestAnimationFrame(animateShip);
 }
 
+// ===== HYPERSPACE JUMP ANIMATION =====
+function launchHyperspace(onComplete) {
+  const W = shipCanvas.width;
+  const H = shipCanvas.height;
+  const cx = W / 2;
+  const cy = H / 2;
+
+  const streaks = [];
+  for (let i = 0; i < 200; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    streaks.push({
+      angle,
+      dist: 10 + Math.random() * 60,
+      speed: 1.5 + Math.random() * 2.5,
+      width: 0.5 + Math.random() * 1
+    });
+  }
+
+  let t = 0;
+  const duration = 180; // ~3s at 60fps
+
+  function frame() {
+    const W2 = shipCanvas.width;
+    const H2 = shipCanvas.height;
+    shipCtx.clearRect(0, 0, W2, H2);
+
+    const progress = t / duration;
+    const accel = Math.pow(progress, 1.5);
+
+    // Blue flash at start
+    if (progress < 0.1) {
+      shipCtx.fillStyle = `rgba(100, 180, 255, ${(0.1 - progress) / 0.1 * 0.6})`;
+      shipCtx.fillRect(0, 0, W2, H2);
+    }
+
+    streaks.forEach(s => {
+      s.dist += s.speed * (1 + accel * 25);
+      if (s.dist > Math.max(W2, H2)) s.dist = 5 + Math.random() * 30;
+
+      const x2 = cx + Math.cos(s.angle) * s.dist;
+      const y2 = cy + Math.sin(s.angle) * s.dist;
+      const tailLen = Math.max(2, s.dist * 0.12 * (1 + accel * 6));
+      const x1 = cx + Math.cos(s.angle) * Math.max(0, s.dist - tailLen);
+      const y1 = cy + Math.sin(s.angle) * Math.max(0, s.dist - tailLen);
+
+      const alpha = Math.min(1, 0.4 + accel * 0.6);
+      shipCtx.beginPath();
+      shipCtx.moveTo(x1, y1);
+      shipCtx.lineTo(x2, y2);
+      shipCtx.strokeStyle = `rgba(200, 230, 255, ${alpha})`;
+      shipCtx.lineWidth = s.width + accel * 1.5;
+      shipCtx.stroke();
+    });
+
+    t++;
+    if (t < duration) {
+      requestAnimationFrame(frame);
+    } else {
+      shipCtx.clearRect(0, 0, W2, H2);
+      if (onComplete) onComplete();
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
 // ===== APP STATE =====
 let selectedNums = new Set([0,1,2,3,4,5,6,7,8,9,10,11,12]);
 let questions = [];
@@ -1175,6 +1370,15 @@ let answers = [];
 let currentQ = 0;
 let score = 0;
 let selectedOps = new Set(['multiply']);
+
+// Hyperspace mode state
+let hyperspaceEnabled = false;
+let hyperspaceDiff = 'wicked-easy';
+const HYPERSPACE_LIMITS = { 'wicked-easy': 600, 'kind-of-easy': 300, 'hard': 180, 'falcon': 120 };
+let hyperspaceTimer = null;
+let hyperspaceTimeRemaining = 0;
+let hyperspaceHalfwayShown = false;
+let hyperspaceHandled = false;
 
 // ===== SETUP =====
 const grid = document.getElementById('numGrid');
@@ -1242,6 +1446,96 @@ function selectRange(a, b) {
   });
 }
 
+// ===== HYPERSPACE MODE =====
+function toggleHyperspace() {
+  hyperspaceEnabled = !hyperspaceEnabled;
+  const btn = document.getElementById('hyperspaceToggle');
+  btn.classList.toggle('selected-mode', hyperspaceEnabled);
+  btn.textContent = hyperspaceEnabled ? '🚀 On' : '⚡ Off';
+  document.getElementById('hyperspaceOptions').style.display = hyperspaceEnabled ? 'block' : 'none';
+}
+
+function setDifficulty(diff) {
+  hyperspaceDiff = diff;
+  document.querySelectorAll('#difficultyBtns .mode-btn').forEach(btn => {
+    btn.classList.toggle('selected-mode', btn.dataset.diff === diff);
+  });
+}
+
+function startHyperspaceTimer() {
+  stopHyperspaceTimer();
+  hyperspaceTimeRemaining = HYPERSPACE_LIMITS[hyperspaceDiff];
+  hyperspaceHalfwayShown = false;
+  const total = hyperspaceTimeRemaining;
+
+  function fmt(s) {
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  }
+
+  document.getElementById('hyperspaceCountdown').textContent = fmt(hyperspaceTimeRemaining);
+  document.getElementById('hyperspaceCountdown').classList.remove('warning');
+  document.getElementById('hyperspaceBarFill').style.width = '100%';
+  document.getElementById('hyperspaceBarFill').classList.remove('warning');
+  document.getElementById('hyperspaceStatusMsg').textContent = '';
+
+  hyperspaceTimer = setInterval(() => {
+    hyperspaceTimeRemaining--;
+    const pct = hyperspaceTimeRemaining / total;
+
+    document.getElementById('hyperspaceCountdown').textContent = fmt(hyperspaceTimeRemaining);
+    document.getElementById('hyperspaceBarFill').style.width = `${pct * 100}%`;
+
+    const warn = pct < 0.25;
+    document.getElementById('hyperspaceCountdown').classList.toggle('warning', warn);
+    document.getElementById('hyperspaceBarFill').classList.toggle('warning', warn);
+
+    if (!hyperspaceHalfwayShown && pct <= 0.5) {
+      hyperspaceHalfwayShown = true;
+      document.getElementById('hyperspaceStatusMsg').textContent = '▸ COORDINATES CHECKED, ALMOST READY';
+    }
+
+    if (hyperspaceTimeRemaining <= 0) {
+      stopHyperspaceTimer();
+      hyperspaceFailure();
+    }
+  }, 1000);
+}
+
+function stopHyperspaceTimer() {
+  if (hyperspaceTimer) { clearInterval(hyperspaceTimer); hyperspaceTimer = null; }
+}
+
+function hyperspaceSuccess() {
+  stopHyperspaceTimer();
+  hyperspaceHandled = true;
+  document.getElementById('hyperspaceStatusMsg').textContent = '▸ LAUNCH SEQUENCE COMPLETE!';
+
+  const banner = document.getElementById('hyperWinBanner');
+  banner.classList.add('show');
+  sounds.hyperspaceJump();
+
+  launchHyperspace(() => {
+    setTimeout(() => {
+      banner.classList.remove('show');
+      banner.style.animation = 'none';
+      showResults();
+    }, 800);
+  });
+}
+
+function hyperspaceFailure() {
+  hyperspaceHandled = true;
+  sounds.hyperspaceTimeout();
+
+  const banner = document.getElementById('hyperFailBanner');
+  banner.classList.add('show');
+  setTimeout(() => {
+    banner.classList.remove('show');
+    banner.style.animation = 'none';
+    showResults();
+  }, 2500);
+}
+
 function startQuiz() {
   if (selectedNums.size < 1) {
     document.getElementById('setupError').textContent = '⚠ Select at least one number';
@@ -1293,11 +1587,13 @@ function startQuiz() {
   currentQ = 0;
   score = 0;
 
+  hyperspaceHandled = false;
   buildNavDots();
   showScreen('quiz');
   loadQuestion(0);
   setTimeout(() => document.getElementById('answerInput').focus(), 100);
   sounds.missionStart();
+  if (hyperspaceEnabled) startHyperspaceTimer();
 }
 
 // ===== HELPERS =====
@@ -1426,7 +1722,11 @@ function submitAnswer() {
   // Check if all answered
   const allDone = answers.every(a => a !== null);
   if (allDone) {
-    setTimeout(showResults, 900);
+    if (hyperspaceEnabled) {
+      setTimeout(hyperspaceSuccess, 900);
+    } else {
+      setTimeout(showResults, 900);
+    }
   } else {
     setTimeout(() => {
       // find next unanswered
@@ -1493,13 +1793,15 @@ function showResults() {
 
   showScreen('results');
 
-  // Launch X-Wing if passing (≥ 75%)
-  if (pct >= 0.75) {
+  // Launch X-Wing if passing (≥ 75%) and hyperspace didn't already show an animation
+  if (pct >= 0.75 && !hyperspaceHandled) {
     setTimeout(launchShip, 600);
   }
 }
 
 function retryQuiz() {
+  stopHyperspaceTimer();
+  hyperspaceHandled = false;
   answers = new Array(questions.length).fill(null);
   currentQ = 0;
   score = 0;
@@ -1512,15 +1814,19 @@ function retryQuiz() {
   buildNavDots();
   showScreen('quiz');
   loadQuestion(0);
+  if (hyperspaceEnabled) startHyperspaceTimer();
 }
 
 function newMission() {
+  stopHyperspaceTimer();
   showScreen('setup');
 }
 
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('hyperspaceContainer').style.display =
+    (name === 'quiz' && hyperspaceEnabled) ? 'block' : 'none';
   if (name === 'quiz') {
     setTimeout(() => document.getElementById('answerInput').focus(), 100);
   }
