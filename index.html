@@ -1846,7 +1846,7 @@ function launchHyperspace(onComplete) {
 }
 
 // ===== APP STATE =====
-let selectedNums = new Set([2,3,4,5,6,7,8,9,10,11,12,13]);
+let selectedNums = new Set([2,3,4,5,6,7,8,9,10,11,12]);
 const sessionScores = [];
 let questions = [];
 let questionOps = [];   // 'multiply' | 'divide' per question
@@ -1874,7 +1874,7 @@ let kesselRunPenalties = 0;
 const grid = document.getElementById('numGrid');
 for (let i = 0; i <= 13; i++) {
   const btn = document.createElement('button');
-  btn.className = 'num-btn' + (i >= 2 ? ' selected' : '');
+  btn.className = 'num-btn' + (i >= 2 && i <= 12 ? ' selected' : '');
   btn.textContent = i;
   btn.dataset.num = i;
   if (i === 7) btn.style.gridColumn = '1';
