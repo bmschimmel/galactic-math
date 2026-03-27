@@ -1529,7 +1529,6 @@ const sounds = {
 const shipCanvas = document.getElementById('shipCanvas');
 const shipCtx = shipCanvas.getContext('2d');
 let shipAnimFrame = null;
-let exhaustParticles = [];
 
 function resizeShipCanvas() {
   shipCanvas.width = window.innerWidth;
@@ -1538,236 +1537,123 @@ function resizeShipCanvas() {
 resizeShipCanvas();
 window.addEventListener('resize', resizeShipCanvas);
 
-function drawXWing(ctx, x, y, scale, angle) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(angle);
-  ctx.scale(scale, scale);
+// ===== FIREWORKS CELEBRATION =====
+let celebrationActive = false;
 
-  // Engine glow
-  const glow = ctx.createRadialGradient(-28, 0, 2, -28, 0, 22);
-  glow.addColorStop(0, 'rgba(100, 200, 255, 0.9)');
-  glow.addColorStop(0.4, 'rgba(50, 120, 255, 0.4)');
-  glow.addColorStop(1, 'transparent');
-  ctx.beginPath();
-  ctx.arc(-28, 0, 22, 0, Math.PI * 2);
-  ctx.fillStyle = glow;
-  ctx.fill();
-
-  // Main fuselage
-  ctx.beginPath();
-  ctx.moveTo(40, 0);
-  ctx.lineTo(-30, -5);
-  ctx.lineTo(-40, -4);
-  ctx.lineTo(-40, 4);
-  ctx.lineTo(-30, 5);
-  ctx.closePath();
-  ctx.fillStyle = '#c8d0e0';
-  ctx.fill();
-  ctx.strokeStyle = '#8090a8';
-  ctx.lineWidth = 0.5;
-  ctx.stroke();
-
-  // Cockpit
-  ctx.beginPath();
-  ctx.ellipse(16, 0, 10, 5, 0, 0, Math.PI * 2);
-  ctx.fillStyle = '#88ccff';
-  ctx.fill();
-  ctx.strokeStyle = '#5599cc';
-  ctx.lineWidth = 0.5;
-  ctx.stroke();
-
-  // Nose
-  ctx.beginPath();
-  ctx.moveTo(40, 0);
-  ctx.lineTo(25, -2);
-  ctx.lineTo(25, 2);
-  ctx.closePath();
-  ctx.fillStyle = '#ff4444';
-  ctx.fill();
-
-  // S-foils (X-wings open)
-  // Top-right wing
-  ctx.beginPath();
-  ctx.moveTo(10, -4);
-  ctx.lineTo(-10, -22);
-  ctx.lineTo(-25, -20);
-  ctx.lineTo(-15, -4);
-  ctx.closePath();
-  ctx.fillStyle = '#b0baca';
-  ctx.fill();
-  ctx.strokeStyle = '#7080a0';
-  ctx.lineWidth = 0.5;
-  ctx.stroke();
-
-  // Bottom-right wing
-  ctx.beginPath();
-  ctx.moveTo(10, 4);
-  ctx.lineTo(-10, 22);
-  ctx.lineTo(-25, 20);
-  ctx.lineTo(-15, 4);
-  ctx.closePath();
-  ctx.fillStyle = '#b0baca';
-  ctx.fill();
-  ctx.stroke();
-
-  // Top-left wing
-  ctx.beginPath();
-  ctx.moveTo(-5, -4);
-  ctx.lineTo(-20, -14);
-  ctx.lineTo(-32, -12);
-  ctx.lineTo(-22, -3);
-  ctx.closePath();
-  ctx.fillStyle = '#a8b8c8';
-  ctx.fill();
-  ctx.stroke();
-
-  // Bottom-left wing
-  ctx.beginPath();
-  ctx.moveTo(-5, 4);
-  ctx.lineTo(-20, 14);
-  ctx.lineTo(-32, 12);
-  ctx.lineTo(-22, 3);
-  ctx.closePath();
-  ctx.fillStyle = '#a8b8c8';
-  ctx.fill();
-  ctx.stroke();
-
-  // Red stripe detail
-  ctx.beginPath();
-  ctx.rect(-5, -5.5, 20, 2);
-  ctx.fillStyle = '#cc3333';
-  ctx.fill();
-  ctx.beginPath();
-  ctx.rect(-5, 3.5, 20, 2);
-  ctx.fillStyle = '#cc3333';
-  ctx.fill();
-
-  // Engine nozzle
-  ctx.beginPath();
-  ctx.ellipse(-38, 0, 5, 3.5, 0, 0, Math.PI * 2);
-  ctx.fillStyle = '#334466';
-  ctx.fill();
-
-  // Engine core
-  ctx.beginPath();
-  ctx.ellipse(-37, 0, 3, 2, 0, 0, Math.PI * 2);
-  ctx.fillStyle = '#88ccff';
-  ctx.fill();
-
-  ctx.restore();
-}
-
-function spawnExhaust(x, y, angle) {
-  for (let i = 0; i < 3; i++) {
-    const spread = (Math.random() - 0.5) * 0.4;
-    const spd = 3 + Math.random() * 3;
-    exhaustParticles.push({
-      x, y,
-      vx: Math.cos(angle + Math.PI + spread) * spd,
-      vy: Math.sin(angle + Math.PI + spread) * spd,
-      life: 1,
-      size: 3 + Math.random() * 4
-    });
-  }
-}
-
-let shipX, shipY, shipAngle, shipSpeed, shipScale;
-let shipActive = false;
-let shipTime = 0;
-let victoryBannerShown = false;
-
-function launchShip() {
-  if (shipActive) return;
-  exhaustParticles = [];
-  shipActive = true;
-  shipTime = 0;
-  victoryBannerShown = false;
+function launchCelebration() {
+  if (celebrationActive) return;
+  celebrationActive = true;
 
   const W = shipCanvas.width;
   const H = shipCanvas.height;
 
-  // Fly diagonally from bottom-left to top-right, looping twice
-  shipX = -W * 0.15;
-  shipY = H * 0.75;
-  const targetX = W * 1.15;
-  const targetY = H * 0.1;
-  shipAngle = Math.atan2(targetY - shipY, targetX - shipX);
-  shipSpeed = W / 320; // crosses full width in ~5.3 sec at 60fps
-  shipScale = Math.min(W, H) / 400;
+  // Palette: gold, cyan, green, white, purple
+  const colors = [
+    [255, 215, 0],
+    [0, 212, 255],
+    [57, 255, 20],
+    [232, 244, 255],
+    [185, 79, 255]
+  ];
 
-  sounds.blasterFlyby();
+  // Three burst origins spread across the screen
+  const origins = [
+    { x: W * 0.25, y: H * 0.35, delay: 0 },
+    { x: W * 0.75, y: H * 0.28, delay: 300 },
+    { x: W * 0.5,  y: H * 0.42, delay: 600 }
+  ];
 
-  let pass = 0;
-  const totalPasses = 2;
+  let particles = [];
 
-  function animateShip() {
+  function spawnBurst(ox, oy) {
+    const count = 90;
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.3;
+      const spd = 2.5 + Math.random() * 5;
+      const col = colors[Math.floor(Math.random() * colors.length)];
+      particles.push({
+        x: ox, y: oy,
+        vx: Math.cos(angle) * spd,
+        vy: Math.sin(angle) * spd - 1.5, // slight upward bias
+        life: 1,
+        decay: 0.012 + Math.random() * 0.01,
+        size: 2 + Math.random() * 3,
+        r: col[0], g: col[1], b: col[2],
+        trail: []
+      });
+    }
+    sounds.blasterFlyby();
+  }
+
+  // Stagger the bursts
+  origins.forEach(o => setTimeout(() => spawnBurst(o.x, o.y), o.delay));
+
+  // Show banner after first burst
+  setTimeout(() => {
+    const banner = document.getElementById('congratsBanner');
+    banner.classList.add('show');
+    sounds.victory();
+    setTimeout(() => {
+      banner.classList.remove('show');
+      banner.style.animation = 'none';
+    }, 3500);
+  }, 200);
+
+  function frame() {
     const W2 = shipCanvas.width;
     const H2 = shipCanvas.height;
     shipCtx.clearRect(0, 0, W2, H2);
 
-    // Update particles
-    exhaustParticles = exhaustParticles.filter(p => p.life > 0.02);
-    exhaustParticles.forEach(p => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.life -= 0.04;
-      const alpha = p.life;
-      const r = Math.floor(80 + 175 * alpha);
-      const g = Math.floor(140 + 115 * alpha);
-      const b = 255;
+    particles = particles.filter(p => p.life > 0.02);
+
+    particles.forEach(p => {
+      // Save trail point
+      p.trail.push({ x: p.x, y: p.y, life: p.life });
+      if (p.trail.length > 6) p.trail.shift();
+
+      // Draw trail
+      p.trail.forEach((t, i) => {
+        const a = (i / p.trail.length) * p.life * 0.4;
+        shipCtx.beginPath();
+        shipCtx.arc(t.x, t.y, p.size * 0.4 * (i / p.trail.length), 0, Math.PI * 2);
+        shipCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${a})`;
+        shipCtx.fill();
+      });
+
+      // Draw particle with glow
+      const a = p.life;
       shipCtx.beginPath();
       shipCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-      shipCtx.fillStyle = `rgba(${r},${g},${b},${alpha * 0.8})`;
+      shipCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${a})`;
       shipCtx.fill();
+
+      // Glow halo
+      const glowSize = p.size * p.life * 3;
+      const grad = shipCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowSize);
+      grad.addColorStop(0, `rgba(${p.r},${p.g},${p.b},${a * 0.4})`);
+      grad.addColorStop(1, 'transparent');
+      shipCtx.beginPath();
+      shipCtx.arc(p.x, p.y, glowSize, 0, Math.PI * 2);
+      shipCtx.fillStyle = grad;
+      shipCtx.fill();
+
+      // Physics
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.06; // gravity
+      p.vx *= 0.98; // drag
+      p.life -= p.decay;
     });
 
-    // Move ship
-    shipX += Math.cos(shipAngle) * shipSpeed;
-    shipY += Math.sin(shipAngle) * shipSpeed;
-    shipTime++;
-
-    spawnExhaust(shipX, shipY, shipAngle);
-    drawXWing(shipCtx, shipX, shipY, shipScale, shipAngle);
-
-    // Show banner mid-first-pass
-    if (!victoryBannerShown && shipX > W2 * 0.3) {
-      victoryBannerShown = true;
-      const banner = document.getElementById('congratsBanner');
-      banner.classList.add('show');
-      sounds.victory();
-      setTimeout(() => {
-        banner.classList.remove('show');
-        banner.style.animation = 'none';
-      }, 3500);
-    }
-
-    // Check if off-screen → loop
-    if (shipX > W2 * 1.15 || shipY < -H2 * 0.15) {
-      pass++;
-      if (pass < totalPasses) {
-        // Second pass: bottom-right to top-left, slightly different
-        if (pass === 1) {
-          shipX = W2 * 1.15;
-          shipY = H2 * 0.6;
-          const tx = -W2 * 0.15;
-          const ty = H2 * 0.1;
-          shipAngle = Math.atan2(ty - shipY, tx - shipX);
-          shipSpeed = W2 / 320;
-          setTimeout(() => sounds.blasterFlyby(), 200);
-        }
-        shipAnimFrame = requestAnimationFrame(animateShip);
-      } else {
-        // Done
-        shipCtx.clearRect(0, 0, W2, H2);
-        shipActive = false;
-      }
+    if (particles.length > 0) {
+      requestAnimationFrame(frame);
     } else {
-      shipAnimFrame = requestAnimationFrame(animateShip);
+      shipCtx.clearRect(0, 0, W2, H2);
+      celebrationActive = false;
     }
   }
 
-  shipAnimFrame = requestAnimationFrame(animateShip);
+  requestAnimationFrame(frame);
 }
 
 // ===== HYPERSPACE JUMP ANIMATION =====
@@ -2366,9 +2252,9 @@ function showResults() {
 
   showScreen('results');
 
-  // Launch X-Wing if passing (≥ 75%) and hyperspace didn't already show an animation
+  // Fireworks celebration on passing (≥ 75%) in Standard and Kessel Run modes
   if (pct >= 0.75 && !hyperspaceHandled) {
-    setTimeout(launchShip, 600);
+    setTimeout(launchCelebration, 400);
   }
 }
 
