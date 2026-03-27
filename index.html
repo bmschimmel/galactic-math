@@ -957,26 +957,27 @@
   }
 
   .kessel-penalty-flash {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: absolute;
+    right: -80px;
+    top: 40%;
+    transform: translateY(-50%);
     font-family: 'Orbitron', monospace;
-    font-size: 64px;
+    font-size: 32px;
     font-weight: 900;
     color: var(--saber-red);
-    filter: drop-shadow(0 0 32px var(--saber-red)) drop-shadow(0 0 64px var(--saber-red));
+    filter: drop-shadow(0 0 16px var(--saber-red));
     pointer-events: none;
     opacity: 0;
     z-index: 50;
-    letter-spacing: 4px;
+    letter-spacing: 2px;
+    white-space: nowrap;
   }
 
   @keyframes penaltyPop {
-    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
-    15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
-    40%  { opacity: 1; transform: translate(-50%, -55%) scale(1.0); }
-    100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
+    0%   { opacity: 0; transform: translateY(-50%) scale(0.5) translateX(10px); }
+    20%  { opacity: 1; transform: translateY(-50%) scale(1.2) translateX(0); }
+    50%  { opacity: 1; transform: translateY(-60%) scale(1.0) translateX(0); }
+    100% { opacity: 0; transform: translateY(-90%) scale(0.9) translateX(0); }
   }
 
   .kessel-penalty-flash.show {
@@ -1018,32 +1019,36 @@
 
   .session-score-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 6px 10px;
-    border-radius: 6px;
-    margin-bottom: 4px;
-    background: rgba(57, 255, 20, 0.04);
-    border: 1px solid rgba(57, 255, 20, 0.1);
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(57, 255, 20, 0.15);
+    background: rgba(10, 15, 30, 0.5);
+  }
+
+  .session-score-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    border-radius: 8px;
+    transition: width 0.6s ease;
+    pointer-events: none;
   }
 
   .session-score-row.current-run {
-    background: rgba(57, 255, 20, 0.1);
-    border-color: rgba(57, 255, 20, 0.35);
+    border-color: rgba(57, 255, 20, 0.4);
   }
 
   .session-score-rank {
     font-family: 'Orbitron', monospace;
     font-size: 10px;
     color: var(--muted);
-    width: 20px;
-  }
-
-  .session-score-time {
-    font-family: 'Orbitron', monospace;
-    font-size: 13px;
-    color: var(--saber-green);
-    filter: drop-shadow(0 0 5px var(--saber-green));
+    width: 22px;
+    flex-shrink: 0;
+    position: relative;
   }
 
   .session-score-mode {
@@ -1052,12 +1057,25 @@
     letter-spacing: 1px;
     color: var(--muted);
     flex: 1;
-    padding: 0 8px;
+    position: relative;
+  }
+
+  .session-score-time {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    color: var(--saber-green);
+    filter: drop-shadow(0 0 5px var(--saber-green));
+    position: relative;
+    flex-shrink: 0;
   }
 
   .session-score-detail {
     font-size: 11px;
-    color: var(--muted);
+    color: var(--star-white);
+    opacity: 0.7;
+    position: relative;
+    flex-shrink: 0;
+    margin-left: 6px;
   }
 
   /* ===== THEME CYCLER BUTTON ===== */
@@ -1128,9 +1146,9 @@
 </div>
 
 <button class="theme-btn" id="themeBtn" onclick="cycleTheme()">◑ DARK</button>
-<div class="kessel-penalty-flash" id="kesselPenaltyFlash">+5s</div>
 
 <div class="container">
+<div class="kessel-penalty-flash" id="kesselPenaltyFlash">+5s</div>
   <div class="title-logo">
     <div class="title-main">GALACTIC MATH</div>
     <div class="title-sub">Space based math trainer</div>
@@ -2335,7 +2353,10 @@ function showResults() {
     const detailStr = s.time != null
       ? `${Math.round(s.pct * 100)}% · ${fmt(s.elapsed)}${s.penalties > 0 ? ` +${s.penalties}s` : ''}`
       : `${Math.round(s.pct * 100)}%`;
+    const barPct = Math.round(s.pct * 100);
+    const barColor = s.pct >= 0.75 ? 'rgba(57,255,20,0.15)' : s.pct >= 0.5 ? 'rgba(255,215,0,0.15)' : 'rgba(255,45,85,0.15)';
     return `<div class="session-score-row${isCurrent ? ' current-run' : ''}">
+      <div class="session-score-bar" style="width:${barPct}%;background:${barColor};"></div>
       <span class="session-score-rank">#${i + 1}</span>
       <span class="session-score-mode">${s.mode}</span>
       <span class="session-score-time">${scoreStr}</span>
