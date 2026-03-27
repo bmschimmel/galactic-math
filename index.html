@@ -795,6 +795,145 @@
     filter: drop-shadow(0 0 8px var(--saber-red));
   }
 
+  /* ===== KESSEL RUN MODE ===== */
+  .kessel-timer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .kessel-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--saber-green);
+    text-transform: uppercase;
+  }
+
+  .kessel-elapsed {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--saber-green);
+    filter: drop-shadow(0 0 10px var(--saber-green));
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .kessel-penalty-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .kessel-penalty-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+  }
+
+  .kessel-penalty-count {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    color: var(--saber-red);
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .kessel-penalty-flash {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    color: var(--saber-red);
+    filter: drop-shadow(0 0 16px var(--saber-red));
+    pointer-events: none;
+    opacity: 0;
+    z-index: 50;
+  }
+
+  @keyframes penaltyPop {
+    0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.6); }
+    30%  { opacity: 1; transform: translate(-50%, -65%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -90%) scale(0.9); }
+  }
+
+  .kessel-penalty-flash.show {
+    animation: penaltyPop 0.9s ease forwards;
+  }
+
+  .kessel-result {
+    margin: 12px 0 20px;
+    padding: 14px;
+    background: rgba(57, 255, 20, 0.06);
+    border: 1px solid rgba(57, 255, 20, 0.2);
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  .kessel-result-time {
+    font-family: 'Orbitron', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--saber-green);
+    filter: drop-shadow(0 0 12px var(--saber-green));
+  }
+
+  .kessel-result-breakdown {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  .session-scores-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--saber-green);
+    margin-bottom: 10px;
+    text-align: left;
+  }
+
+  .session-score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    background: rgba(57, 255, 20, 0.04);
+    border: 1px solid rgba(57, 255, 20, 0.1);
+  }
+
+  .session-score-row.current-run {
+    background: rgba(57, 255, 20, 0.1);
+    border-color: rgba(57, 255, 20, 0.35);
+  }
+
+  .session-score-rank {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    width: 20px;
+  }
+
+  .session-score-time {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    color: var(--saber-green);
+    filter: drop-shadow(0 0 5px var(--saber-green));
+  }
+
+  .session-score-detail {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
   /* ===== THEME CYCLER BUTTON ===== */
   .theme-btn {
     position: fixed;
@@ -863,6 +1002,7 @@
 </div>
 
 <button class="theme-btn" id="themeBtn" onclick="cycleTheme()">◑ DARK</button>
+<div class="kessel-penalty-flash" id="kesselPenaltyFlash">+5s</div>
 
 <div class="container">
   <div class="title-logo">
@@ -908,6 +1048,12 @@
         </div>
       </div>
 
+      <div class="saber-divider" style="margin: 20px 0 16px;"></div>
+      <span class="setup-label">▸ Kessel Run Mode <span style="color:var(--muted);font-size:10px;letter-spacing:1px;font-family:'Exo 2',sans-serif;">(race the clock — wrong answers add +5s)</span></span>
+      <div class="quick-btns">
+        <button class="quick-btn mode-btn" id="kesselToggle" onclick="toggleKesselRun()">🏎️ Off</button>
+      </div>
+
       <div class="error-msg" id="setupError"></div>
       <div class="saber-divider"></div>
       <button class="btn-primary" onclick="startQuiz()" id="startBtn">
@@ -924,6 +1070,17 @@
         <div class="progress-bar-fill" id="progressFill" style="width:5%"></div>
       </div>
       <span class="score-live" id="scoreLive">0 ✓</span>
+    </div>
+
+    <div id="kesselContainer" style="display:none; margin-bottom:16px;">
+      <div class="kessel-timer-row">
+        <span class="kessel-label">🏎️ KESSEL RUN</span>
+        <span class="kessel-elapsed" id="kesselElapsed">0:00</span>
+      </div>
+      <div class="kessel-penalty-row">
+        <span class="kessel-penalty-label">PENALTIES</span>
+        <span class="kessel-penalty-count" id="kesselPenalties">+0s</span>
+      </div>
     </div>
 
     <div id="hyperspaceContainer" style="display:none; margin-bottom:16px;">
@@ -970,9 +1127,19 @@
         </div>
       </div>
 
+      <div id="kesselResult" style="display:none;" class="kessel-result">
+        <div class="kessel-result-time" id="kesselResultTime">0:00</div>
+        <div class="kessel-result-breakdown" id="kesselResultBreakdown"></div>
+      </div>
+
       <div id="missedSection" style="display:none;">
         <div class="missed-section-label">▸ REVIEW MISSED PROBLEMS</div>
         <div class="missed-list" id="missedList"></div>
+      </div>
+
+      <div id="kesselSessionSection" style="display:none; margin-bottom:20px;">
+        <div class="session-scores-label">▸ SESSION TIMES</div>
+        <div id="kesselSessionList"></div>
       </div>
 
       <button class="btn-primary" onclick="retryQuiz()">↺ RETRY SAME NUMBERS</button>
@@ -1489,6 +1656,13 @@ let hyperspaceTimeRemaining = 0;
 let hyperspaceHalfwayShown = false;
 let hyperspaceHandled = false;
 
+// Kessel Run mode state
+let kesselRunEnabled = false;
+let kesselRunTimer = null;
+let kesselRunElapsed = 0;
+let kesselRunPenalties = 0;
+const kesselRunSessionScores = [];
+
 // ===== SETUP =====
 const grid = document.getElementById('numGrid');
 for (let i = 0; i <= 12; i++) {
@@ -1562,6 +1736,12 @@ function toggleHyperspace() {
   btn.classList.toggle('selected-mode', hyperspaceEnabled);
   btn.textContent = hyperspaceEnabled ? '🚀 On' : '⚡ Off';
   document.getElementById('hyperspaceOptions').style.display = hyperspaceEnabled ? 'block' : 'none';
+  if (hyperspaceEnabled && kesselRunEnabled) {
+    kesselRunEnabled = false;
+    const kBtn = document.getElementById('kesselToggle');
+    kBtn.classList.remove('selected-mode');
+    kBtn.textContent = '🏎️ Off';
+  }
 }
 
 function setDifficulty(diff) {
@@ -1645,6 +1825,49 @@ function hyperspaceFailure() {
   }, 2500);
 }
 
+// ===== KESSEL RUN MODE =====
+function toggleKesselRun() {
+  kesselRunEnabled = !kesselRunEnabled;
+  const btn = document.getElementById('kesselToggle');
+  btn.classList.toggle('selected-mode', kesselRunEnabled);
+  btn.textContent = kesselRunEnabled ? '🏎️ On' : '🏎️ Off';
+  if (kesselRunEnabled && hyperspaceEnabled) {
+    hyperspaceEnabled = false;
+    const hBtn = document.getElementById('hyperspaceToggle');
+    hBtn.classList.remove('selected-mode');
+    hBtn.textContent = '⚡ Off';
+    document.getElementById('hyperspaceOptions').style.display = 'none';
+  }
+}
+
+function startKesselTimer() {
+  stopKesselTimer();
+  kesselRunElapsed = 0;
+  kesselRunPenalties = 0;
+  document.getElementById('kesselElapsed').textContent = '0:00';
+  document.getElementById('kesselPenalties').textContent = '+0s';
+  kesselRunTimer = setInterval(() => {
+    kesselRunElapsed++;
+    const m = Math.floor(kesselRunElapsed / 60);
+    const s = String(kesselRunElapsed % 60).padStart(2, '0');
+    document.getElementById('kesselElapsed').textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function stopKesselTimer() {
+  if (kesselRunTimer) { clearInterval(kesselRunTimer); kesselRunTimer = null; }
+}
+
+function addKesselPenalty() {
+  kesselRunPenalties += 5;
+  document.getElementById('kesselPenalties').textContent = `+${kesselRunPenalties}s`;
+  const flash = document.getElementById('kesselPenaltyFlash');
+  flash.classList.remove('show');
+  void flash.offsetWidth;
+  flash.classList.add('show');
+  setTimeout(() => flash.classList.remove('show'), 900);
+}
+
 function startQuiz() {
   if (selectedNums.size < 1) {
     document.getElementById('setupError').textContent = '⚠ Select at least one number';
@@ -1703,6 +1926,7 @@ function startQuiz() {
   setTimeout(() => document.getElementById('answerInput').focus(), 100);
   sounds.missionStart();
   if (hyperspaceEnabled) startHyperspaceTimer();
+  if (kesselRunEnabled) startKesselTimer();
 }
 
 // ===== HELPERS =====
@@ -1825,6 +2049,7 @@ function submitAnswer() {
   input.setAttribute('disabled', '');
 
   showFeedback(isCorrect);
+  if (!isCorrect && kesselRunEnabled) addKesselPenalty();
   updateScoreLive();
   updateNavDots();
 
@@ -1900,6 +2125,32 @@ function showResults() {
     missedSec.style.display = 'none';
   }
 
+  if (kesselRunEnabled) {
+    stopKesselTimer();
+    const total = kesselRunElapsed + kesselRunPenalties;
+    const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    const thisRun = { elapsed: kesselRunElapsed, penalties: kesselRunPenalties, total };
+    kesselRunSessionScores.push(thisRun);
+    const sorted = [...kesselRunSessionScores].sort((a, b) => a.total - b.total);
+
+    document.getElementById('kesselResult').style.display = 'block';
+    document.getElementById('kesselResultTime').textContent = fmt(total);
+    document.getElementById('kesselResultBreakdown').textContent =
+      `${fmt(kesselRunElapsed)} elapsed${kesselRunPenalties > 0 ? ` + ${kesselRunPenalties}s penalties` : ''}`;
+
+    document.getElementById('kesselSessionSection').style.display = 'block';
+    document.getElementById('kesselSessionList').innerHTML = sorted.map((s, i) =>
+      `<div class="session-score-row${s === thisRun ? ' current-run' : ''}">
+        <span class="session-score-rank">#${i + 1}</span>
+        <span class="session-score-time">${fmt(s.total)}</span>
+        <span class="session-score-detail">${fmt(s.elapsed)}${s.penalties > 0 ? ` +${s.penalties}s` : ''}</span>
+      </div>`
+    ).join('');
+  } else {
+    document.getElementById('kesselResult').style.display = 'none';
+    document.getElementById('kesselSessionSection').style.display = 'none';
+  }
+
   showScreen('results');
 
   // Launch X-Wing if passing (≥ 75%) and hyperspace didn't already show an animation
@@ -1910,6 +2161,7 @@ function showResults() {
 
 function retryQuiz() {
   stopHyperspaceTimer();
+  stopKesselTimer();
   hyperspaceHandled = false;
   answers = new Array(questions.length).fill(null);
   currentQ = 0;
@@ -1924,10 +2176,12 @@ function retryQuiz() {
   showScreen('quiz');
   loadQuestion(0);
   if (hyperspaceEnabled) startHyperspaceTimer();
+  if (kesselRunEnabled) startKesselTimer();
 }
 
 function newMission() {
   stopHyperspaceTimer();
+  stopKesselTimer();
   showScreen('setup');
 }
 
@@ -1954,6 +2208,8 @@ function showScreen(name) {
   document.getElementById('screen-' + name).classList.add('active');
   document.getElementById('hyperspaceContainer').style.display =
     (name === 'quiz' && hyperspaceEnabled) ? 'block' : 'none';
+  document.getElementById('kesselContainer').style.display =
+    (name === 'quiz' && kesselRunEnabled) ? 'block' : 'none';
   if (name === 'quiz') {
     setTimeout(() => document.getElementById('answerInput').focus(), 100);
   }
