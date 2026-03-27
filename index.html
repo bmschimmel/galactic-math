@@ -1796,9 +1796,14 @@ function launchHyperspace(onComplete) {
     const progress = t / duration;
     const accel = Math.pow(progress, 1.5);
 
-    // Blue flash at start
-    if (progress < 0.1) {
-      shipCtx.fillStyle = `rgba(100, 180, 255, ${(0.1 - progress) / 0.1 * 0.6})`;
+    // Deep blue ambient glow that builds as speed increases
+    const glowAlpha = 0.15 + accel * 0.45;
+    shipCtx.fillStyle = `rgba(0, 40, 120, ${glowAlpha})`;
+    shipCtx.fillRect(0, 0, W2, H2);
+
+    // Bright blue flash at start
+    if (progress < 0.12) {
+      shipCtx.fillStyle = `rgba(0, 120, 255, ${(0.12 - progress) / 0.12 * 0.7})`;
       shipCtx.fillRect(0, 0, W2, H2);
     }
 
@@ -1813,10 +1818,17 @@ function launchHyperspace(onComplete) {
       const y1 = cy + Math.sin(s.angle) * Math.max(0, s.dist - tailLen);
 
       const alpha = Math.min(1, 0.4 + accel * 0.6);
+
+      // Gradient streak: deep blue tail → bright cyan-white head
+      const streakGrad = shipCtx.createLinearGradient(x1, y1, x2, y2);
+      streakGrad.addColorStop(0, `rgba(0, 60, 180, ${alpha * 0.5})`);
+      streakGrad.addColorStop(0.6, `rgba(30, 140, 255, ${alpha})`);
+      streakGrad.addColorStop(1, `rgba(140, 210, 255, ${alpha})`);
+
       shipCtx.beginPath();
       shipCtx.moveTo(x1, y1);
       shipCtx.lineTo(x2, y2);
-      shipCtx.strokeStyle = `rgba(200, 230, 255, ${alpha})`;
+      shipCtx.strokeStyle = streakGrad;
       shipCtx.lineWidth = s.width + accel * 1.5;
       shipCtx.stroke();
     });
