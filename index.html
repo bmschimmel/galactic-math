@@ -332,10 +332,6 @@
   .tile-icon {
     font-size: 24px;
     flex-shrink: 0;
-    transition: filter 0.3s;
-  }
-  .game-mode-tile-btn.selected-mode .tile-icon {
-    filter: drop-shadow(0 0 8px var(--saber-green)) drop-shadow(0 0 16px var(--saber-green));
   }
   .tile-body {
     flex: 1;
@@ -378,17 +374,17 @@
     transition: all 0.3s;
   }
   .game-mode-tile-btn.selected-mode .tile-badge {
-    color: var(--saber-blue);
-    border-color: var(--saber-blue);
-    background: rgba(0, 212, 255, 0.12);
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.25), inset 0 0 8px rgba(0, 212, 255, 0.08);
-    text-shadow: 0 0 8px var(--saber-blue);
+    color: var(--saber-green);
+    border-color: var(--saber-green);
+    background: rgba(57, 255, 20, 0.1);
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3), inset 0 0 8px rgba(57, 255, 20, 0.08);
+    text-shadow: 0 0 8px var(--saber-green);
   }
   .game-mode-tile-btn.selected-mode .tile-badge::before {
     content: '◉';
     opacity: 1;
-    color: var(--saber-blue);
-    filter: drop-shadow(0 0 4px var(--saber-blue));
+    color: var(--saber-green);
+    filter: drop-shadow(0 0 4px var(--saber-green));
   }
   @media (max-width: 480px) {
     .game-mode-tiles { flex-direction: column; }
