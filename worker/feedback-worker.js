@@ -28,6 +28,7 @@ function corsHeaders(origin) {
 
 export default {
   async fetch(request, env) {
+    const startTime = Date.now();
     const origin = request.headers.get('Origin') || '*';
 
     // Handle CORS preflight
@@ -100,7 +101,7 @@ export default {
     }
 
     const issue = await response.json();
-    console.log(`Issue created: ${issue.html_url} from ${ip}`);
+    console.log(`Issue created: ${issue.html_url} from ${ip} in ${Date.now() - startTime}ms`);
     return new Response(JSON.stringify({ ok: true, url: issue.html_url }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
