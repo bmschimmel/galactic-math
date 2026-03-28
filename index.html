@@ -228,6 +228,7 @@
 
   .num-btn {
     aspect-ratio: 1;
+    min-height: 44px;
     background: rgba(0, 212, 255, 0.05);
     border: 1px solid rgba(0, 212, 255, 0.2);
     border-radius: 8px;
@@ -1430,7 +1431,7 @@
   <div class="congrats-sub">YOU WEREN'T READY IN TIME</div>
 </div>
 
-<button class="history-btn" id="historyBtn" onclick="openHistoryModal()">⏱ HISTORY</button>
+<button class="history-btn" id="historyBtn" onclick="openHistoryModal()" aria-label="Open session history">⏱ HISTORY</button>
 
 <div class="history-modal" id="historyModal" onclick="closeHistoryOnBackdrop(event)">
   <div class="history-panel">
@@ -1442,7 +1443,7 @@
   </div>
 </div>
 
-<button class="theme-btn" id="themeBtn" onclick="cycleTheme()">◑ DARK</button>
+<button class="theme-btn" id="themeBtn" onclick="cycleTheme()" aria-label="Cycle colour theme">◑ DARK</button>
 
 <div class="container">
 <div class="kessel-penalty-flash" id="kesselPenaltyFlash">+5s</div>
@@ -1728,7 +1729,7 @@ function playTone(freq, type, duration, vol = 0.18, attack = 0.005, decay = 0.1)
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + duration + 0.05);
-  } catch(e) {}
+  } catch(e) { console.warn('Audio error (playTone):', e); }
 }
 
 function playFreqSweep(startFreq, endFreq, type, duration, vol = 0.15) {
@@ -1745,7 +1746,7 @@ function playFreqSweep(startFreq, endFreq, type, duration, vol = 0.15) {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + duration + 0.05);
-  } catch(e) {}
+  } catch(e) { console.warn('Audio error (playFreqSweep):', e); }
 }
 
 function playNoise(duration, vol = 0.06, highpass = 800) {
@@ -1768,7 +1769,7 @@ function playNoise(duration, vol = 0.06, highpass = 800) {
     gain.connect(ctx.destination);
     src.start();
     src.stop(ctx.currentTime + duration + 0.05);
-  } catch(e) {}
+  } catch(e) { console.warn('Audio error (playNoise):', e); }
 }
 
 // Sound library
@@ -2370,7 +2371,7 @@ function startQuiz() {
   buildNavDots();
   showScreen('quiz');
   loadQuestion(0);
-  setTimeout(() => document.getElementById('answerInput').focus(), 100);
+  setTimeout(() => document.getElementById('answerInput').focus(), 200);
   sounds.missionStart();
   if (hyperspaceEnabled) startHyperspaceTimer();
   if (kesselRunEnabled) startKesselTimer();
@@ -2410,7 +2411,7 @@ function updateNavDots() {
   dots.forEach((dot, i) => {
     dot.className = 'nav-dot';
     if (answers[i] !== null) {
-      dot.classList.add(answers[i] == getCorrectAnswer(i) ? 'answered-correct' : 'answered-wrong');
+      dot.classList.add(answers[i] === getCorrectAnswer(i) ? 'answered-correct' : 'answered-wrong');
     }
     if (i === currentQ) dot.classList.add('current');
   });
@@ -2433,7 +2434,7 @@ function loadQuestion(idx) {
 
   // recolor if already answered
   if (answers[idx] !== null) {
-    input.classList.add(answers[idx] == getCorrectAnswer(idx) ? 'correct' : 'wrong');
+    input.classList.add(answers[idx] === getCorrectAnswer(idx) ? 'correct' : 'wrong');
   }
 
   updateNavDots();
@@ -2444,7 +2445,7 @@ function loadQuestion(idx) {
 function updateScoreLive() {
   let s = 0;
   answers.forEach((ans, i) => {
-    if (ans !== null && ans == getCorrectAnswer(i)) s++;
+    if (ans !== null && ans === getCorrectAnswer(i)) s++;
   });
   score = s;
   document.getElementById('scoreLive').textContent = `${s} ✓`;
@@ -2530,12 +2531,32 @@ function showFeedback(isCorrect) {
 }
 
 // ===== RESULTS =====
+function fmt(s) {
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function renderSessionRow(s, i, isCurrent) {
+  const scoreStr = s.time != null ? fmt(s.time) : `${s.correct}/${s.total}`;
+  const detailStr = s.time != null
+    ? `${Math.round(s.pct * 100)}% · ${fmt(s.elapsed)}${s.penalties > 0 ? ` +${s.penalties}s` : ''}`
+    : `${Math.round(s.pct * 100)}%`;
+  const barPct = Math.round(s.pct * 100);
+  const barColor = s.pct >= 0.75 ? 'rgba(57,255,20,0.15)' : s.pct >= 0.5 ? 'rgba(255,215,0,0.15)' : 'rgba(255,45,85,0.15)';
+  return `<div class="session-score-row${isCurrent ? ' current-run' : ''}">
+    <div class="session-score-bar" style="width:${barPct}%;background:${barColor};"></div>
+    <span class="session-score-rank">#${i + 1}</span>
+    <span class="session-score-mode">${s.mode}</span>
+    <span class="session-score-time">${scoreStr}</span>
+    <span class="session-score-detail">${detailStr}</span>
+  </div>`;
+}
+
 function showResults() {
   let correct = 0;
   const missed = [];
   answers.forEach((ans, i) => {
     const correctAns = getCorrectAnswer(i);
-    if (ans == correctAns) correct++;
+    if (ans === correctAns) correct++;
     else missed.push({ q: getQuestionText(i).replace(' = ?', ''), yours: ans, correct: correctAns });
   });
 
@@ -2568,8 +2589,6 @@ function showResults() {
     missedSec.style.display = 'none';
   }
 
-  const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-
   if (kesselRunEnabled) {
     stopKesselTimer();
     const total = kesselRunElapsed + kesselRunPenalties;
@@ -2586,22 +2605,9 @@ function showResults() {
   // Always show unified session history
   document.getElementById('kesselSessionSection').style.display = 'none';
   document.getElementById('sessionSection').style.display = 'block';
-  document.getElementById('sessionList').innerHTML = sessionScores.map((s, i) => {
-    const isCurrent = i === sessionScores.length - 1;
-    const scoreStr = s.time != null ? fmt(s.time) : `${s.correct}/${s.total}`;
-    const detailStr = s.time != null
-      ? `${Math.round(s.pct * 100)}% · ${fmt(s.elapsed)}${s.penalties > 0 ? ` +${s.penalties}s` : ''}`
-      : `${Math.round(s.pct * 100)}%`;
-    const barPct = Math.round(s.pct * 100);
-    const barColor = s.pct >= 0.75 ? 'rgba(57,255,20,0.15)' : s.pct >= 0.5 ? 'rgba(255,215,0,0.15)' : 'rgba(255,45,85,0.15)';
-    return `<div class="session-score-row${isCurrent ? ' current-run' : ''}">
-      <div class="session-score-bar" style="width:${barPct}%;background:${barColor};"></div>
-      <span class="session-score-rank">#${i + 1}</span>
-      <span class="session-score-mode">${s.mode}</span>
-      <span class="session-score-time">${scoreStr}</span>
-      <span class="session-score-detail">${detailStr}</span>
-    </div>`;
-  }).join('');
+  document.getElementById('sessionList').innerHTML = sessionScores.map((s, i) =>
+    renderSessionRow(s, i, i === sessionScores.length - 1)
+  ).join('');
 
   showScreen('results');
 
@@ -2675,21 +2681,9 @@ function openHistoryModal() {
   if (sessionScores.length === 0) {
     listEl.innerHTML = '<div class="history-empty">NO SESSIONS YET</div>';
   } else {
-    listEl.innerHTML = sessionScores.map((s, i) => {
-      const scoreStr = s.time != null ? fmt(s.time) : `${s.correct}/${s.total}`;
-      const detailStr = s.time != null
-        ? `${Math.round(s.pct * 100)}% · ${fmt(s.elapsed)}${s.penalties > 0 ? ` +${s.penalties}s` : ''}`
-        : `${Math.round(s.pct * 100)}%`;
-      const barPct = Math.round(s.pct * 100);
-      const barColor = s.pct >= 0.75 ? 'rgba(57,255,20,0.15)' : s.pct >= 0.5 ? 'rgba(255,215,0,0.15)' : 'rgba(255,45,85,0.15)';
-      return `<div class="session-score-row">
-        <div class="session-score-bar" style="width:${barPct}%;background:${barColor};"></div>
-        <span class="session-score-rank">#${i + 1}</span>
-        <span class="session-score-mode">${s.mode}</span>
-        <span class="session-score-time">${scoreStr}</span>
-        <span class="session-score-detail">${detailStr}</span>
-      </div>`;
-    }).join('');
+    listEl.innerHTML = sessionScores.map((s, i) =>
+      renderSessionRow(s, i, false)
+    ).join('');
   }
   document.getElementById('historyModal').classList.add('open');
 }
@@ -2702,6 +2696,10 @@ function closeHistoryOnBackdrop(e) {
   if (e.target === document.getElementById('historyModal')) closeHistoryModal();
 }
 
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeHistoryModal();
+});
+
 
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -2711,7 +2709,7 @@ function showScreen(name) {
   document.getElementById('kesselContainer').style.display =
     (name === 'quiz' && kesselRunEnabled) ? 'block' : 'none';
   if (name === 'quiz') {
-    setTimeout(() => document.getElementById('answerInput').focus(), 100);
+    setTimeout(() => document.getElementById('answerInput').focus(), 200);
   }
 }
 </script>
