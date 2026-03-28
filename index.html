@@ -1127,10 +1127,10 @@
   }
 
   .kessel-penalty-flash {
-    position: absolute;
-    right: -80px;
-    top: 40%;
-    transform: translateY(-50%);
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     font-family: 'Orbitron', monospace;
     font-size: 32px;
     font-weight: 900;
@@ -1144,10 +1144,10 @@
   }
 
   @keyframes penaltyPop {
-    0%   { opacity: 0; transform: translateY(-50%) scale(0.5) translateX(10px); }
-    20%  { opacity: 1; transform: translateY(-50%) scale(1.2) translateX(0); }
-    50%  { opacity: 1; transform: translateY(-60%) scale(1.0) translateX(0); }
-    100% { opacity: 0; transform: translateY(-90%) scale(0.9) translateX(0); }
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    50%  { opacity: 1; transform: translate(-50%, -60%) scale(1.0); }
+    100% { opacity: 0; transform: translate(-50%, -90%) scale(0.9); }
   }
 
   .kessel-penalty-flash.show {
