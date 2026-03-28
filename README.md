@@ -8,10 +8,14 @@ Space themed math trainer for elementary school kids
 ## ✨ Features
 
 - **20-question quizzes** — multiplication, division, addition, subtraction, or any combo — randomized every time
-- **Pick your numbers** — select any combination of 0–12
-- **Keyboard-first navigation** — Enter to submit, ← → to move between questions, no mouse needed
-- **Space sound effects** — lightsaber hums, drioid beeps, and blaster buzzes (Web Audio API, no files needed)
-- **Spaceship flyby celebration** — passing scores (75%+) trigger a fly-by with exhaust trails
+- **Pick your numbers** — select any combination of 0–13
+- **Keyboard-first navigation** — Enter to submit, no mouse needed
+- **Space sound effects** — lightsaber hums, droid beeps, and blaster buzzes (Web Audio API, no files needed)
+- **Comet celebration** — passing scores (75%+) trigger streaking comets across the screen
+- **Hyperspace mode** — optional timed challenge: complete all 20 before the countdown hits zero (Wicked Easy / Harder / Hyperdrive)
+- **Kessel Run mode** — race against the clock; wrong answers add a 5-second penalty
+- **Theme cycler** — switch between Dark, Dim, Midnight, Deep Blue, and Retro color themes
+- **Session history** — track your scores across all rounds without any persistent storage
 - **Live grading** — see your score as you go, full breakdown at the end with missed problems reviewed
 - **Rank system** — Youngling → Rebel Recruit → Padawan → Jedi Knight → Jedi Master ⭐
 - **Zero dependencies** — one HTML file, works offline, no internet required after first load
@@ -28,11 +32,10 @@ Or download `index.html` and open it in any modern browser.
 
 ## 🎮 How to Play
 
-1. Select which numbers you want to practice (e.g. just the 6s and 7s, or all 0–12)
+1. Select which numbers you want to practice (e.g. just the 6s and 7s, or all 0–13)
 2. Select an operation mode (multiply, divide, add, subtract, or a combo) and hit **Begin Training Mission**
 3. Type your answer and press **Enter**
-4. Use **← →** arrow keys to skip around questions
-5. Finish all 20 to see your rank and review any missed problems
+4. Finish all 20 to see your rank and review any missed problems
 
 ---
 

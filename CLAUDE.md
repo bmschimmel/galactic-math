@@ -2,8 +2,8 @@
 
 ## Project Overview
 
-A single-file space-themed multiplication trainer for elementary school kids (K-6).
-The entire app lives in `index.html`. No build system, no dependencies, no frameworks.
+A space-themed math trainer for elementary school kids (K-6) covering all four operations.
+The main app lives in `index.html`. Auxiliary pages (e.g. feedback form) live under `pages/`. No build system, no dependencies, no frameworks.
 
 ## Audience
 
@@ -13,7 +13,7 @@ The entire app lives in `index.html`. No build system, no dependencies, no frame
 
 ## Tech Constraints
 
-- **One file only:** Everything stays in `index.html` — HTML, CSS, and JS together. Do not split into separate files.
+- **One file for the app:** The game itself stays in `index.html` — HTML, CSS, and JS together. Auxiliary pages (feedback form, etc.) go in `pages/` only when an issue explicitly requires it.
 - **No external dependencies:** No npm, no frameworks, no CDN libraries except Google Fonts. The game must work offline after first load.
 - **No localStorage or cookies:** Don't persist data between sessions.
 - **Web Audio API only:** All sound effects are synthesized via Web Audio API. Do not add audio files.
@@ -34,6 +34,7 @@ The entire app lives in `index.html`. No build system, no dependencies, no frame
   - `--saber-blue` #00d4ff — primary interactive
   - `--saber-green` #39ff14 — correct/success
   - `--saber-red` #ff2d55 — wrong/error
+  - `--saber-purple` #b94fff — multiply/divide operations
   - `--gold` #ffd700 — achievements/rank
   - `--star-white` #e8f4ff — body text
   - `--muted` #6b7fa3 — secondary text
@@ -41,15 +42,21 @@ The entire app lives in `index.html`. No build system, no dependencies, no frame
 
 ## Key Features (do not break these)
 
-- Number selector (0–12) with quick-select buttons
+- Number selector (0–13) with quick-select presets (Basic 2–12, All 0–13, etc.)
+- Operation mode selector: Multiply, Divide, Add, Subtract, or All
 - 20 randomized questions per session
-- Keyboard-only navigation: Enter to submit, ←→ to move between questions
+- Keyboard-only navigation: Enter to submit answer
 - Nav dots showing answered/unanswered/current state
 - Correct/wrong sound effects on answer submission
 - Keypress sounds on number input
-- Rocket ship flyby animation + victory fanfare on passing (≥75%)
+- Comet streaks celebration on passing (≥75%) in Standard and Kessel Run modes
+- Hyperspace mode: timed challenge tile with difficulty cards (Wicked Easy 5m / Harder 3m / Hyperdrive 1m) and a countdown bar; blue jump animation on completion
+- Kessel Run mode: time how fast you finish; wrong answers add a 5s penalty
+- Theme cycler: Dark, Dim, Midnight, Deep Blue, Retro — fixed button top-right corner
+- Session history panel showing scores and mode labels for all rounds played
 - Results screen with rank, score breakdown, and missed problem review
 - Retry (same numbers) and New Mission (back to setup) options
+- Feedback page at `pages/feedback.html` — linked from footer, pre-fills a GitHub issue on submit
 
 ## Passing Threshold
 

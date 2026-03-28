@@ -82,9 +82,14 @@ xdg-open index.html    # Linux/WSL
 Before opening a PR verify:
 - [ ] Quiz runs start to finish without errors
 - [ ] Correct/wrong sounds play on answer submission
-- [ ] Keyboard navigation works (Enter, ←→ arrows)
-- [ ] X-Wing flyby triggers on a passing score (≥75%)
+- [ ] Keyboard navigation works (Enter to submit)
+- [ ] Comet celebration triggers on a passing score (≥75%) in Standard/Kessel Run modes
 - [ ] Results screen shows correct score and missed problems
+- [ ] Hyperspace mode difficulty cards appear, countdown works, and quiz ends on timeout with blue jump animation
+- [ ] Kessel Run mode timer runs, wrong answers add 5s penalty shown beside input
+- [ ] Theme cycler button cycles through all 5 themes without visual breakage
+- [ ] Session history shows scores with correct mode labels
+- [ ] Footer link opens `pages/feedback.html` and feedback form submits correctly
 - [ ] Page is usable on mobile (resize browser to ~375px wide)
 
 ---
