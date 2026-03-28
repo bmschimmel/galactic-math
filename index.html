@@ -2104,12 +2104,12 @@ function selectNone() {
 }
 
 function toggleOp(op) {
-  if (selectedOps.has(op) && selectedOps.size === 1) return; // keep at least one
   if (selectedOps.has(op)) selectedOps.delete(op);
   else selectedOps.add(op);
   updateOpButtons();
   sounds.navigate();
-  document.getElementById('setupError').textContent = '';
+  document.getElementById('setupError').textContent =
+    selectedOps.size === 0 ? '⚠ Select at least one operation to begin' : '';
 }
 
 function selectAllOps() {
@@ -2290,6 +2290,10 @@ function addKesselPenalty() {
 }
 
 function startQuiz() {
+  if (selectedOps.size === 0) {
+    document.getElementById('setupError').textContent = '⚠ Select at least one operation to begin';
+    return;
+  }
   if (selectedNums.size < 3) {
     document.getElementById('setupError').textContent = '⚠ Select at least 3 numbers';
     return;
