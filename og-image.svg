@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#030712"/>
+  <!-- Nebula blobs -->
+  <ellipse cx="200" cy="150" rx="300" ry="200" fill="rgba(26,39,68,0.6)"/>
+  <ellipse cx="1050" cy="500" rx="280" ry="180" fill="rgba(60,20,80,0.4)"/>
+  <!-- Stars -->
+  <circle cx="80" cy="60" r="1.5" fill="#e8f4ff" opacity="0.7"/>
+  <circle cx="220" cy="30" r="1" fill="#e8f4ff" opacity="0.5"/>
+  <circle cx="450" cy="80" r="1.5" fill="#e8f4ff" opacity="0.6"/>
+  <circle cx="700" cy="20" r="1" fill="#e8f4ff" opacity="0.8"/>
+  <circle cx="950" cy="55" r="1.5" fill="#e8f4ff" opacity="0.5"/>
+  <circle cx="1100" cy="90" r="1" fill="#e8f4ff" opacity="0.7"/>
+  <circle cx="1180" cy="35" r="1.5" fill="#e8f4ff" opacity="0.4"/>
+  <circle cx="60" cy="400" r="1" fill="#e8f4ff" opacity="0.6"/>
+  <circle cx="340" cy="560" r="1.5" fill="#e8f4ff" opacity="0.5"/>
+  <circle cx="580" cy="590" r="1" fill="#e8f4ff" opacity="0.7"/>
+  <circle cx="870" cy="610" r="1.5" fill="#e8f4ff" opacity="0.4"/>
+  <circle cx="1150" cy="580" r="1" fill="#e8f4ff" opacity="0.6"/>
+  <!-- Planet / logo mark -->
+  <circle cx="600" cy="210" r="72" fill="#1a2744" stroke="#00d4ff" stroke-width="2.5"/>
+  <ellipse cx="600" cy="210" rx="115" ry="42" fill="none" stroke="#ffd700" stroke-width="2.5" opacity="0.9"/>
+  <circle cx="520" cy="160" r="8" fill="#e8f4ff" opacity="0.5"/>
+  <circle cx="690" cy="175" r="6" fill="#e8f4ff" opacity="0.4"/>
+  <circle cx="660" cy="250" r="7" fill="#e8f4ff" opacity="0.45"/>
+  <!-- Title -->
+  <text x="600" y="345" font-family="Arial Black, sans-serif" font-size="72" font-weight="900" fill="url(#titleGrad)" text-anchor="middle" letter-spacing="6">GALACTIC MATH</text>
+  <!-- Subtitle -->
+  <text x="600" y="400" font-family="Arial, sans-serif" font-size="28" fill="#00d4ff" text-anchor="middle" letter-spacing="10" opacity="0.9">ACADEMY</text>
+  <!-- Tagline -->
+  <text x="600" y="470" font-family="Arial, sans-serif" font-size="22" fill="#6b7fa3" text-anchor="middle" letter-spacing="3">Space-themed math training for kids</text>
+  <!-- URL -->
+  <text x="600" y="560" font-family="Arial, sans-serif" font-size="18" fill="#6b7fa3" text-anchor="middle" letter-spacing="2" opacity="0.7">galactic-math.pages.dev</text>
+  <!-- Gradient def -->
+  <defs>
+    <linearGradient id="titleGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#ffd700"/>
+      <stop offset="100%" stop-color="#c8860a"/>
+    </linearGradient>
+  </defs>
+</svg>
