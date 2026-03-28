@@ -1181,6 +1181,108 @@
     margin-left: 6px;
   }
 
+  /* ===== HISTORY BUTTON ===== */
+  .history-btn {
+    position: fixed;
+    top: 14px;
+    left: 16px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 20px;
+    color: var(--star-white);
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+    display: none;
+  }
+
+  .history-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 10px var(--glow-gold);
+  }
+
+  /* ===== HISTORY MODAL ===== */
+  .history-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(3, 7, 18, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .history-modal.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .history-panel {
+    width: min(520px, 90vw);
+    max-height: 80vh;
+    overflow-y: auto;
+    background: rgba(10, 15, 30, 0.95);
+    border: 1px solid rgba(0, 212, 255, 0.25);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 0 60px rgba(0, 212, 255, 0.1);
+  }
+
+  .history-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .history-panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    letter-spacing: 4px;
+    color: var(--saber-blue);
+    filter: drop-shadow(0 0 6px var(--saber-blue));
+  }
+
+  .history-close-btn {
+    background: transparent;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 50%;
+    color: var(--muted);
+    font-size: 13px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .history-close-btn:hover {
+    border-color: var(--saber-red);
+    color: var(--saber-red);
+    box-shadow: 0 0 8px rgba(255, 45, 85, 0.3);
+  }
+
+  .history-empty {
+    text-align: center;
+    color: var(--muted);
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 20px 0;
+  }
+
   /* ===== THEME CYCLER BUTTON ===== */
   .theme-btn {
     position: fixed;
@@ -1246,6 +1348,18 @@
 <div class="congrats-banner" id="hyperFailBanner">
   <div class="congrats-text">HYPERDRIVE JUMP FAILED!</div>
   <div class="congrats-sub">YOU WEREN'T READY IN TIME</div>
+</div>
+
+<button class="history-btn" id="historyBtn" onclick="openHistoryModal()">📊 HISTORY</button>
+
+<div class="history-modal" id="historyModal" onclick="closeHistoryOnBackdrop(event)">
+  <div class="history-panel">
+    <div class="history-panel-header">
+      <span class="history-panel-title">▸ SESSION HISTORY</span>
+      <button class="history-close-btn" onclick="closeHistoryModal()">✕</button>
+    </div>
+    <div id="historyModalList"></div>
+  </div>
 </div>
 
 <button class="theme-btn" id="themeBtn" onclick="cycleTheme()">◑ DARK</button>
@@ -2365,6 +2479,7 @@ function showResults() {
     document.getElementById('kesselResult').style.display = 'none';
     sessionScores.push({ mode: hyperspaceEnabled ? 'Hyperspace' : 'Standard', correct, total: questions.length, pct });
   }
+  updateHistoryBtn();
 
   // Always show unified session history
   document.getElementById('kesselSessionSection').style.display = 'none';
@@ -2450,6 +2565,43 @@ function cycleTheme() {
   document.documentElement.setAttribute('data-theme', theme.id);
   document.getElementById('themeBtn').textContent = theme.label;
   currentStarColor = theme.starColor;
+}
+
+// ===== SESSION HISTORY MODAL =====
+function openHistoryModal() {
+  const listEl = document.getElementById('historyModalList');
+  if (sessionScores.length === 0) {
+    listEl.innerHTML = '<div class="history-empty">NO SESSIONS YET</div>';
+  } else {
+    listEl.innerHTML = sessionScores.map((s, i) => {
+      const scoreStr = s.time != null ? fmt(s.time) : `${s.correct}/${s.total}`;
+      const detailStr = s.time != null
+        ? `${Math.round(s.pct * 100)}% · ${fmt(s.elapsed)}${s.penalties > 0 ? ` +${s.penalties}s` : ''}`
+        : `${Math.round(s.pct * 100)}%`;
+      const barPct = Math.round(s.pct * 100);
+      const barColor = s.pct >= 0.75 ? 'rgba(57,255,20,0.15)' : s.pct >= 0.5 ? 'rgba(255,215,0,0.15)' : 'rgba(255,45,85,0.15)';
+      return `<div class="session-score-row">
+        <div class="session-score-bar" style="width:${barPct}%;background:${barColor};"></div>
+        <span class="session-score-rank">#${i + 1}</span>
+        <span class="session-score-mode">${s.mode}</span>
+        <span class="session-score-time">${scoreStr}</span>
+        <span class="session-score-detail">${detailStr}</span>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('historyModal').classList.add('open');
+}
+
+function closeHistoryModal() {
+  document.getElementById('historyModal').classList.remove('open');
+}
+
+function closeHistoryOnBackdrop(e) {
+  if (e.target === document.getElementById('historyModal')) closeHistoryModal();
+}
+
+function updateHistoryBtn() {
+  document.getElementById('historyBtn').style.display = sessionScores.length > 0 ? '' : 'none';
 }
 
 function showScreen(name) {
