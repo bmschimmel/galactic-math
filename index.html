@@ -263,6 +263,12 @@
     box-shadow: 0 0 10px var(--glow-gold);
   }
 
+  .quick-btn.active-preset {
+    background: rgba(255, 215, 0, 0.12);
+    border-color: var(--gold);
+    box-shadow: 0 0 14px var(--glow-gold), 0 0 4px var(--glow-gold) inset;
+  }
+
   .mode-btn.selected-mode {
     background: rgba(0, 212, 255, 0.15);
     border-color: var(--saber-blue);
@@ -1259,9 +1265,9 @@
       <span class="setup-label">▸ Confirm your training numbers</span>
 
       <div class="quick-btns">
-        <button class="quick-btn" onclick="selectRange(2,12)">Basic (2–12)</button>
-        <button class="quick-btn" onclick="selectAll()">All (0–13)</button>
-        <button class="quick-btn" onclick="selectNone()">Clear</button>
+        <button class="quick-btn active-preset" id="presetBasic" onclick="selectRange(2,12,'presetBasic')">Basic (2–12)</button>
+        <button class="quick-btn" id="presetAll" onclick="selectAll()">All (0–13)</button>
+        <button class="quick-btn" id="presetClear" onclick="selectNone()">Clear</button>
       </div>
 
       <div class="number-grid" id="numGrid"></div>
@@ -1890,19 +1896,28 @@ function toggleNum(n, btn) {
     selectedNums.add(n);
     btn.classList.add('selected');
   }
+  setActivePreset(null);
   sounds.navigate();
   document.getElementById('setupError').textContent = '';
+}
+
+function setActivePreset(id) {
+  ['presetBasic', 'presetAll', 'presetClear'].forEach(pid => {
+    document.getElementById(pid).classList.toggle('active-preset', pid === id);
+  });
 }
 
 function selectAll() {
   selectedNums = new Set([...Array(14).keys()]);
   document.querySelectorAll('.num-btn').forEach(b => b.classList.add('selected'));
+  setActivePreset('presetAll');
   sounds.navigate();
 }
 
 function selectNone() {
   selectedNums.clear();
   document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
+  setActivePreset(null);
   sounds.navigate();
 }
 
@@ -1933,13 +1948,14 @@ function updateOpButtons() {
   });
 }
 
-function selectRange(a, b) {
+function selectRange(a, b, presetId) {
   selectedNums.clear();
   document.querySelectorAll('.num-btn').forEach(btn => {
     const n = parseInt(btn.dataset.num);
     if (n >= a && n <= b) { selectedNums.add(n); btn.classList.add('selected'); }
     else btn.classList.remove('selected');
   });
+  setActivePreset(presetId || null);
   sounds.navigate();
 }
 
