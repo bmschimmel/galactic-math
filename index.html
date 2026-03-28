@@ -1459,6 +1459,7 @@
         <button class="quick-btn mode-btn op-add-sub" data-mode="add" onclick="toggleOp('add')">+ Add</button>
         <button class="quick-btn mode-btn op-add-sub" data-mode="subtract" onclick="toggleOp('subtract')">− Subtract</button>
         <button class="quick-btn mode-btn" data-mode="all" onclick="selectAllOps()">★ All</button>
+        <button class="quick-btn" onclick="resetOps()" style="border-color:rgba(107,127,163,0.3);color:var(--muted);">↺ Reset</button>
       </div>
 
       <div class="saber-divider" style="margin: 20px 0 16px;"></div>
@@ -2114,6 +2115,13 @@ function toggleOp(op) {
 
 function selectAllOps() {
   selectedOps = new Set(['multiply', 'divide', 'add', 'subtract']);
+  updateOpButtons();
+  sounds.navigate();
+  document.getElementById('setupError').textContent = '';
+}
+
+function resetOps() {
+  selectedOps = new Set(['multiply']);
   updateOpButtons();
   sounds.navigate();
   document.getElementById('setupError').textContent = '';
