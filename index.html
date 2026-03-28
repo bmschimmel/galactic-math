@@ -298,23 +298,37 @@
     border-color: rgba(185, 79, 255, 0.3);
     color: var(--saber-purple);
   }
-  .quick-btn.op-mul-div:hover,
   .quick-btn.op-mul-div.selected-mode {
     background: rgba(185, 79, 255, 0.12);
     border-color: var(--saber-purple);
     color: var(--saber-purple);
     box-shadow: 0 0 12px var(--glow-purple);
   }
+  @media (hover: hover) {
+    .quick-btn.op-mul-div:hover {
+      background: rgba(185, 79, 255, 0.12);
+      border-color: var(--saber-purple);
+      color: var(--saber-purple);
+      box-shadow: 0 0 12px var(--glow-purple);
+    }
+  }
   .quick-btn.op-add-sub {
     border-color: rgba(57, 255, 20, 0.3);
     color: var(--saber-green);
   }
-  .quick-btn.op-add-sub:hover,
   .quick-btn.op-add-sub.selected-mode {
     background: rgba(57, 255, 20, 0.1);
     border-color: var(--saber-green);
     color: var(--saber-green);
     box-shadow: 0 0 12px var(--glow-green);
+  }
+  @media (hover: hover) {
+    .quick-btn.op-add-sub:hover {
+      background: rgba(57, 255, 20, 0.1);
+      border-color: var(--saber-green);
+      color: var(--saber-green);
+      box-shadow: 0 0 12px var(--glow-green);
+    }
   }
 
   /* Game mode tiles */
@@ -2105,12 +2119,12 @@ function selectNone() {
 }
 
 function toggleOp(op) {
-  if (selectedOps.has(op) && selectedOps.size === 1) return; // keep at least one
   if (selectedOps.has(op)) selectedOps.delete(op);
   else selectedOps.add(op);
   updateOpButtons();
   sounds.navigate();
-  document.getElementById('setupError').textContent = '';
+  document.getElementById('setupError').textContent =
+    selectedOps.size === 0 ? '⚠ Select at least one operation to begin' : '';
 }
 
 function selectAllOps() {
@@ -2298,6 +2312,10 @@ function addKesselPenalty() {
 }
 
 function startQuiz() {
+  if (selectedOps.size === 0) {
+    document.getElementById('setupError').textContent = '⚠ Select at least one operation to begin';
+    return;
+  }
   if (selectedNums.size < 3) {
     document.getElementById('setupError').textContent = '⚠ Select at least 3 numbers';
     return;
