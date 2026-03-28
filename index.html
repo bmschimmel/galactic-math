@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Galactic Math Academy</title>
 <meta name="description" content="Space-themed math training for kids. Practice multiplication, division, addition, and subtraction with lightsabers, droids, and starships. Free, no login required.">
 
@@ -413,6 +413,26 @@
     .game-mode-tiles { flex-direction: column; }
   }
 
+  /* ===== MOBILE LAYOUT ===== */
+  @media (max-width: 600px) {
+    /* Push content below the fixed history/theme buttons */
+    .container {
+      justify-content: flex-start;
+      padding-top: 56px;
+    }
+
+    /* Ensure fixed nav buttons respect safe area insets (iOS notch) */
+    .history-btn, .theme-btn {
+      top: max(14px, env(safe-area-inset-top, 14px));
+    }
+    .theme-btn {
+      right: max(16px, env(safe-area-inset-right, 16px));
+    }
+    .history-btn {
+      left: max(16px, env(safe-area-inset-left, 16px));
+    }
+  }
+
   /* Restart button */
   .restart-btn {
     background: transparent;
@@ -599,6 +619,35 @@
     color: var(--saber-blue);
     font-family: 'Orbitron', monospace;
     font-size: 10px;
+  }
+
+  /* ===== MOBILE SUBMIT BUTTON ===== */
+  .submit-btn {
+    display: none;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 100, 200, 0.15));
+    border: 2px solid var(--saber-blue);
+    border-radius: 12px;
+    color: var(--saber-blue);
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 15px var(--glow-blue);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .submit-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 25px var(--glow-blue);
+  }
+
+  /* Show submit button on touch devices (iOS/Android) */
+  @media (hover: none) and (pointer: coarse) {
+    .submit-btn { display: block; }
+    .hint-text { display: none; }
   }
 
   .answer-row {
@@ -1330,9 +1379,9 @@
     position: relative;
     z-index: 10;
     text-align: center;
-    white-space: nowrap;
     padding: 20px 20px 28px;
     width: 100%;
+    line-height: 2;
   }
 
   .page-footer,
@@ -1503,6 +1552,7 @@
         <input type="number" class="answer-input" id="answerInput"
                placeholder="?" autocomplete="off" inputmode="numeric"
                onkeydown="handleKey(event)" oninput="clearError()">
+        <button class="submit-btn" id="submitBtn" onclick="submitAnswerTouch()">OK</button>
         <div class="feedback-flash" id="feedbackFlash"></div>
       </div>
       <div class="error-msg" id="quizError"></div>
@@ -2352,6 +2402,8 @@ function loadQuestion(idx) {
   input.className = 'answer-input';
   input.removeAttribute('disabled');
   document.getElementById('quizError').textContent = '';
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) submitBtn.disabled = false;
 
   // recolor if already answered
   if (answers[idx] !== null) {
@@ -2381,12 +2433,18 @@ function handleKey(e) {
   }
 }
 
+function submitAnswerTouch() {
+  sounds.submit();
+  submitAnswer();
+}
+
 function clearError() {
   document.getElementById('quizError').textContent = '';
 }
 
 function submitAnswer() {
   const input = document.getElementById('answerInput');
+  if (input.disabled) return;
   const val = input.value.trim();
   if (val === '') {
     document.getElementById('quizError').textContent = 'Enter a number!';
@@ -2404,6 +2462,8 @@ function submitAnswer() {
 
   input.className = 'answer-input ' + (isCorrect ? 'correct' : 'wrong');
   input.setAttribute('disabled', '');
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) submitBtn.disabled = true;
 
   showFeedback(isCorrect);
   if (!isCorrect && kesselRunEnabled) addKesselPenalty();
