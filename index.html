@@ -446,6 +446,21 @@
     .history-btn {
       left: max(16px, env(safe-area-inset-left, 16px));
     }
+
+    /* Reduce card padding so the 7-column number grid fits without overflow */
+    .setup-card {
+      padding: 16px;
+    }
+
+    /* Tighter gap and smaller touch targets to fit 7 buttons across ~303px */
+    .number-grid {
+      gap: 6px;
+    }
+
+    .num-btn {
+      min-height: 36px;
+      font-size: 12px;
+    }
   }
 
   /* Restart / quit button row */
