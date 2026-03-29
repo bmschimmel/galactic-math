@@ -1913,6 +1913,13 @@ const sounds = {
     playNoise(0.15, 0.1, 50);
     setTimeout(() => playTone(110, 'sine', 0.2, 0.2), 200);
   },
+  burstPop() {
+    // Sharp crack + sparkle for particle explosion
+    playNoise(0.06, 0.28, 350);
+    playFreqSweep(900, 180, 'sine', 0.3, 0.1);
+    setTimeout(() => playTone(1200, 'sine', 0.1, 0.08), 60);
+    setTimeout(() => playTone(1600, 'sine', 0.07, 0.06), 130);
+  },
   hyperspaceJump() {
     // Rising roar as ship jumps to hyperspace
     playFreqSweep(80, 3000, 'sawtooth', 2.0, 0.12);
@@ -2041,6 +2048,102 @@ function launchCelebration() {
     });
 
     if (Date.now() < loopUntil || rings.length > 0) {
+      requestAnimationFrame(frame);
+    } else {
+      shipCtx.clearRect(0, 0, W, H);
+      celebrationActive = false;
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+// ===== KESSEL RUN PARTICLE BURST CELEBRATION =====
+function launchKesselCelebration() {
+  if (celebrationActive) return;
+  celebrationActive = true;
+
+  const palette = [
+    [0, 212, 255],    // saber-blue
+    [57, 255, 20],    // saber-green
+    [185, 79, 255],   // saber-purple
+    [255, 215, 0],    // gold
+    [232, 244, 255],  // star-white
+    [255, 45, 85],    // saber-red
+  ];
+
+  const cx = shipCanvas.width / 2;
+  const cy = shipCanvas.height / 2;
+  let particles = [];
+
+  function spawnBurst(count, speedScale) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (2 + Math.random() * 9) * speedScale;
+      const col = palette[Math.floor(Math.random() * palette.length)];
+      particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1,
+        decay: 0.007 + Math.random() * 0.011,
+        size: 2 + Math.random() * 4,
+        r: col[0], g: col[1], b: col[2]
+      });
+    }
+  }
+
+  spawnBurst(85, 1);
+  sounds.burstPop();
+  setTimeout(() => { spawnBurst(45, 0.8); sounds.burstPop(); }, 320);
+  setTimeout(() => { spawnBurst(30, 0.6); }, 640);
+
+  setTimeout(() => {
+    const banner = document.getElementById('congratsBanner');
+    banner.classList.add('show');
+    sounds.victory();
+    setTimeout(() => {
+      banner.classList.remove('show');
+      banner.style.animation = 'none';
+    }, 3500);
+  }, 200);
+
+  const loopUntil = Date.now() + 4000;
+
+  function frame() {
+    const W = shipCanvas.width;
+    const H = shipCanvas.height;
+    shipCtx.clearRect(0, 0, W, H);
+
+    particles = particles.filter(p => p.life > 0.01);
+
+    particles.forEach(p => {
+      p.vy += 0.12;  // gravity
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= p.decay;
+      if (p.x < -20 || p.x > W + 20 || p.y > H + 20) p.life -= 0.06;
+
+      const alpha = p.life;
+      const r = p.size * Math.max(0.3, p.life);
+
+      // Glow halo
+      const glow = shipCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3.5);
+      glow.addColorStop(0, `rgba(${p.r},${p.g},${p.b},${alpha * 0.35})`);
+      glow.addColorStop(1, 'transparent');
+      shipCtx.beginPath();
+      shipCtx.arc(p.x, p.y, r * 3.5, 0, Math.PI * 2);
+      shipCtx.fillStyle = glow;
+      shipCtx.fill();
+
+      // Solid core dot
+      shipCtx.beginPath();
+      shipCtx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      shipCtx.fillStyle = `rgba(${p.r},${p.g},${p.b},${alpha})`;
+      shipCtx.fill();
+    });
+
+    if (Date.now() < loopUntil || particles.length > 0) {
       requestAnimationFrame(frame);
     } else {
       shipCtx.clearRect(0, 0, W, H);
@@ -2704,9 +2807,9 @@ function showResults() {
 
   showScreen('results');
 
-  // Fireworks celebration on passing (≥ 75%) in Standard and Kessel Run modes
+  // Mode-specific celebrations on passing (≥ 75%)
   if (pct >= 0.75 && !hyperspaceHandled) {
-    setTimeout(launchCelebration, 400);
+    setTimeout(kesselRunEnabled ? launchKesselCelebration : launchCelebration, 400);
   }
 }
 
