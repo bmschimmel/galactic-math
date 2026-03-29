@@ -1,6 +1,7 @@
 // Secrets required in Cloudflare Worker settings:
-//   GITHUB_TOKEN     — GitHub personal access token with issues:write
-//   ANTHROPIC_API_KEY — Anthropic API key for title generation
+//   GITHUB_TOKEN — GitHub personal access token with issues:write
+// Bindings required in wrangler.toml:
+//   [ai] binding = "AI" — Cloudflare Workers AI for title generation
 
 const GITHUB_REPO = 'bmschimmel/galactic-math';
 const RATE_LIMIT_MAX = 3;
@@ -35,29 +36,18 @@ const CATEGORY_LABELS = {
 };
 
 // ===== TITLE GENERATION =====
-async function generateTitle(message, apiKey) {
+async function generateTitle(message, ai) {
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 30,
-        messages: [{
-          role: 'user',
-          content: `Write a short GitHub issue title (5–8 words, no quotes, no trailing punctuation) that summarizes this feedback from a child using an educational math game.\n\nFeedback: ${message}`,
-        }],
-      }),
+    const result = await ai.run('@cf/meta/llama-3.1-8b-instruct', {
+      messages: [{
+        role: 'user',
+        content: `Write a short GitHub issue title (5–8 words, no quotes, no trailing punctuation) that summarizes this feedback from a child using an educational math game. Reply with only the title.\n\nFeedback: ${message}`,
+      }],
+      max_tokens: 30,
     });
-
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.content?.[0]?.text?.trim() || null;
-  } catch {
+    return result?.response?.trim() || null;
+  } catch (e) {
+    console.error('generateTitle exception:', e.message);
     return null;
   }
 }
@@ -116,7 +106,7 @@ export default {
     }
 
     // Generate title via Claude, fall back to first 50 chars of message
-    const generatedTitle = await generateTitle(message, env.ANTHROPIC_API_KEY);
+    const generatedTitle = await generateTitle(message, env.AI);
     const title = generatedTitle || `${message.slice(0, 50)}${message.length > 50 ? '…' : ''}`;
 
     const label = CATEGORY_LABELS[category] || 'feedback';

@@ -195,13 +195,16 @@
       max-height: 0;
       opacity: 0;
       margin-top: 0;
-      transition: max-height 0.3s ease, opacity 0.2s ease, margin-top 0.2s ease;
+      /* Closing: fast, no delay */
+      transition: max-height 0.2s ease, opacity 0.15s ease, margin-top 0.15s ease;
     }
     .node:hover .explainer,
     .node.active .explainer {
       max-height: 300px;
       opacity: 1;
       margin-top: 10px;
+      /* Opening: slow with 500ms hover delay */
+      transition: max-height 0.5s ease 0.5s, opacity 0.4s ease 0.5s, margin-top 0.4s ease 0.5s;
     }
     .explainer-inner {
       border-top: 1px solid var(--border);
@@ -660,9 +663,9 @@
             <div class="label">pages/feedback.html</div>
             <span class="toggle-hint">info</span>
           </div>
-          <div class="detail">Feedback form linked from the footer of the main app.</div>
+          <div class="detail">Kid picks a category — <strong style="color:var(--saber-red)">Bug</strong>, <strong style="color:var(--saber-purple)">Feature Request</strong>, or <strong style="color:var(--saber-blue)">Other</strong> — then writes their message.</div>
           <div class="explainer"><div class="explainer-inner">
-            A static page — no server logic here. On submit it POSTs to the Cloudflare Worker, which holds the GitHub API token server-side so it's never exposed in client code.
+            Form label and placeholder update to match the chosen category. Sends <code>{ name, message, category }</code> to the Worker — GitHub token never touches the browser.
           </div></div>
         </div>
 
@@ -673,9 +676,22 @@
             <div class="label">Cloudflare Worker</div>
             <span class="toggle-hint">info</span>
           </div>
-          <div class="detail"><strong>worker/feedback-worker.js</strong> — receives the form, calls GitHub API to create an issue.</div>
+          <div class="detail"><strong>worker/feedback-worker.js</strong> — rate-limits, checks honeypot, calls Workers AI for a title, then creates the GitHub issue.</div>
           <div class="explainer"><div class="explainer-inner">
-            Deployed separately via <code>wrangler deploy</code> — not auto-deployed on git push. Observability and invocation logs are on in <code>wrangler.toml</code> for debugging.
+            Honeypot: bots fill a hidden field humans never see. Rate limit: 3 submissions per IP per 10 min. Deployed separately via <code>wrangler deploy</code> — not auto-deployed on git push.
+          </div></div>
+        </div>
+
+        <div class="arrow blue"><div class="arrow-line"></div><div class="arrow-label">generate title</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node cf">
+          <div class="node-header">
+            <div class="label">Cloudflare Workers AI</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail">Runs <strong>Llama 3.1 8B</strong> to write a clean 5–8 word issue title from the raw message. Free tier, no extra API key.</div>
+          <div class="explainer"><div class="explainer-inner">
+            Uses <code>env.AI.run('@cf/meta/llama-3.1-8b-instruct')</code>. Falls back to the first 50 chars of the message if the model fails — a kid's submission always gets through. Category maps to label: Bug → <code>bug</code>, Feature Request → <code>enhancement</code>, Other → <code>feedback</code>.
           </div></div>
         </div>
 
