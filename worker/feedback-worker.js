@@ -1,5 +1,6 @@
-// TODO: Set GITHUB_TOKEN as a secret in Cloudflare Worker settings before deploying
-//   Cloudflare dashboard → Workers → feedback-worker → Settings → Variables → Add secret
+// Secrets required in Cloudflare Worker settings:
+//   GITHUB_TOKEN     — GitHub personal access token with issues:write
+//   ANTHROPIC_API_KEY — Anthropic API key for title generation
 
 const GITHUB_REPO = 'bmschimmel/galactic-math';
 const RATE_LIMIT_MAX = 3;
@@ -24,6 +25,41 @@ function corsHeaders(origin) {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
+}
+
+// ===== CATEGORY → GITHUB LABEL =====
+const CATEGORY_LABELS = {
+  bug:     'bug',
+  feature: 'enhancement',
+  other:   'feedback',
+};
+
+// ===== TITLE GENERATION =====
+async function generateTitle(message, apiKey) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 30,
+        messages: [{
+          role: 'user',
+          content: `Write a short GitHub issue title (5–8 words, no quotes, no trailing punctuation) that summarizes this feedback from a child using an educational math game.\n\nFeedback: ${message}`,
+        }],
+      }),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.content?.[0]?.text?.trim() || null;
+  } catch {
+    return null;
+  }
 }
 
 export default {
@@ -71,13 +107,20 @@ export default {
       });
     }
 
-    const { title, body: issueBody } = body;
-    if (!title || !issueBody) {
-      return new Response(JSON.stringify({ error: 'Missing title or body' }), {
+    const { name, message, category } = body;
+    if (!name || !message) {
+      return new Response(JSON.stringify({ error: 'Missing name or message' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
       });
     }
+
+    // Generate title via Claude, fall back to first 50 chars of message
+    const generatedTitle = await generateTitle(message, env.ANTHROPIC_API_KEY);
+    const title = generatedTitle || `${message.slice(0, 50)}${message.length > 50 ? '…' : ''}`;
+
+    const label = CATEGORY_LABELS[category] || 'feedback';
+    const issueBody = `${message}\n\n--\n\n**Submitter**: ${name}`;
 
     const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/issues`, {
       method: 'POST',
@@ -87,7 +130,7 @@ export default {
         'Accept': 'application/vnd.github+json',
         'User-Agent': 'galactic-math-feedback-worker',
       },
-      body: JSON.stringify({ title, body: issueBody, labels: ['feedback'] }),
+      body: JSON.stringify({ title, body: issueBody, labels: [label] }),
     });
 
     if (!response.ok) {
@@ -100,7 +143,7 @@ export default {
     }
 
     const issue = await response.json();
-    console.log(`Issue created: ${issue.html_url} from ${ip}`);
+    console.log(`Issue created: ${issue.html_url} from ${ip} (category: ${category}, title: ${title})`);
     return new Response(JSON.stringify({ ok: true, url: issue.html_url }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },

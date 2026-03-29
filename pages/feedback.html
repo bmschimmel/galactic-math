@@ -13,6 +13,7 @@
     --saber-blue: #00d4ff;
     --saber-green: #39ff14;
     --saber-red: #ff2d55;
+    --saber-purple: #b94fff;
     --gold: #ffd700;
     --star-white: #e8f4ff;
     --muted: #6b7fa3;
@@ -197,6 +198,110 @@
     box-shadow: 0 0 6px var(--saber-blue);
   }
 
+  /* ===== CATEGORY PICKER ===== */
+  .category-prompt {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .category-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 22px;
+    border-radius: 12px;
+    border: 1px solid;
+    cursor: pointer;
+    margin-bottom: 14px;
+    transition: all 0.2s;
+    text-align: left;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .category-btn:last-child { margin-bottom: 0; }
+
+  .category-icon {
+    font-size: 32px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .category-text { display: flex; flex-direction: column; gap: 3px; }
+
+  .category-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .category-desc {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .category-bug {
+    border-color: rgba(255, 45, 85, 0.4);
+    box-shadow: 0 0 16px rgba(255, 45, 85, 0.06);
+  }
+  .category-bug .category-name { color: var(--saber-red); }
+  .category-bug:hover {
+    border-color: var(--saber-red);
+    box-shadow: 0 0 28px rgba(255, 45, 85, 0.25);
+    transform: translateY(-2px);
+  }
+
+  .category-feature {
+    border-color: rgba(185, 79, 255, 0.4);
+    box-shadow: 0 0 16px rgba(185, 79, 255, 0.06);
+  }
+  .category-feature .category-name { color: var(--saber-purple); }
+  .category-feature:hover {
+    border-color: var(--saber-purple);
+    box-shadow: 0 0 28px rgba(185, 79, 255, 0.25);
+    transform: translateY(-2px);
+  }
+
+  .category-other {
+    border-color: rgba(0, 212, 255, 0.4);
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.06);
+  }
+  .category-other .category-name { color: var(--saber-blue); }
+  .category-other:hover {
+    border-color: var(--saber-blue);
+    box-shadow: 0 0 28px rgba(0, 212, 255, 0.25);
+    transform: translateY(-2px);
+  }
+
+  /* ===== SELECTED CATEGORY BADGE ===== */
+  .category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+    margin-bottom: 22px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .category-badge:hover { opacity: 0.7; }
+  .badge-bug     { color: var(--saber-red);    border-color: rgba(255, 45, 85, 0.4); }
+  .badge-feature { color: var(--saber-purple); border-color: rgba(185, 79, 255, 0.4); }
+  .badge-other   { color: var(--saber-blue);   border-color: rgba(0, 212, 255, 0.4); }
+
   /* ===== CONFIRMATION ===== */
   .confirm-state {
     display: none;
@@ -251,8 +356,39 @@
 
   <div class="feedback-card">
 
-    <!-- FORM STATE -->
-    <div id="formState">
+    <!-- STEP 1: CATEGORY PICKER -->
+    <div id="categoryState">
+      <p class="category-prompt">What kind of transmission is this?</p>
+
+      <button class="category-btn category-bug" onclick="selectCategory('bug')">
+        <span class="category-icon">🐛</span>
+        <span class="category-text">
+          <span class="category-name">Bug</span>
+          <span class="category-desc">Something is broken</span>
+        </span>
+      </button>
+
+      <button class="category-btn category-feature" onclick="selectCategory('feature')">
+        <span class="category-icon">💡</span>
+        <span class="category-text">
+          <span class="category-name">Feature Request</span>
+          <span class="category-desc">I have an idea!</span>
+        </span>
+      </button>
+
+      <button class="category-btn category-other" onclick="selectCategory('other')">
+        <span class="category-icon">🌌</span>
+        <span class="category-text">
+          <span class="category-name">Other</span>
+          <span class="category-desc">It's something else</span>
+        </span>
+      </button>
+    </div>
+
+    <!-- STEP 2: FORM STATE -->
+    <div id="formState" style="display:none">
+      <div id="categoryBadge"></div>
+
       <span class="field-label">▸ Your name</span>
       <input type="text" class="field-input" id="inputName"
              placeholder="Han Solo" maxlength="80"
@@ -307,7 +443,7 @@
           github.com/bmschimmel/galactic-math/issues/new
         </a>
       </div>
-      <button class="btn-primary" onclick="showForm()">
+      <button class="btn-primary" onclick="showCategory()">
         ↺ TRY AGAIN
       </button>
     </div>
@@ -355,19 +491,42 @@
   requestAnimationFrame(draw);
 })();
 
-// TODO: Replace with your deployed Cloudflare Worker URL
 const WORKER_URL = 'https://galactic-math-feedback.bmschimmel.workers.dev';
 
-// ===== FEEDBACK =====
+// ===== CATEGORY SELECTION =====
+let selectedCategory = null;
+
+const CATEGORY_META = {
+  bug:     { label: '🐛 Bug',             cssClass: 'badge-bug' },
+  feature: { label: '💡 Feature Request', cssClass: 'badge-feature' },
+  other:   { label: '🌌 Other',           cssClass: 'badge-other' },
+};
+
+function selectCategory(category) {
+  selectedCategory = category;
+  const meta = CATEGORY_META[category];
+
+  // Render the badge (clicking it returns to category picker)
+  const badge = document.getElementById('categoryBadge');
+  badge.innerHTML = `<button class="category-badge ${meta.cssClass}" onclick="showCategory()" title="Change category">${meta.label} ✕</button>`;
+
+  document.getElementById('categoryState').style.display = 'none';
+  document.getElementById('formState').style.display = 'block';
+  document.getElementById('inputName').focus();
+}
+
+function showCategory() {
+  document.getElementById('categoryState').style.display = 'block';
+  document.getElementById('formState').style.display = 'none';
+  document.getElementById('confirmState').style.display = 'none';
+  document.getElementById('errorState').style.display = 'none';
+  document.getElementById('errorMsg').textContent = '';
+}
+
+// ===== FEEDBACK FORM =====
 function updateCharCount() {
   const len = document.getElementById('inputMessage').value.length;
   document.getElementById('charCount').textContent = len;
-}
-
-function showForm() {
-  document.getElementById('formState').style.display = 'block';
-  document.getElementById('confirmState').style.display = 'none';
-  document.getElementById('errorState').style.display = 'none';
 }
 
 async function submitFeedback() {
@@ -375,7 +534,7 @@ async function submitFeedback() {
   const message = document.getElementById('inputMessage').value.trim();
   const honeypot = document.getElementById('honeypot').value;
   const errorEl = document.getElementById('errorMsg');
-  const btn = document.querySelector('.btn-primary');
+  const btn = document.querySelector('#formState .btn-primary');
 
   if (!name) { errorEl.textContent = '⚠ Enter your name'; return; }
   if (!message) { errorEl.textContent = '⚠ Tell us your idea or what\'s broken'; return; }
@@ -385,14 +544,11 @@ async function submitFeedback() {
   btn.disabled = true;
   btn.textContent = '📡 TRANSMITTING...';
 
-  const title = `${message.slice(0, 50)}${message.length > 50 ? '…' : ''}`;
-  const body = `${message}\n\n--\n\n**Submitter**: ${name}`;
-
   try {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, body, honeypot }),
+      body: JSON.stringify({ name, message, category: selectedCategory, honeypot }),
     });
 
     if (res.ok) {
