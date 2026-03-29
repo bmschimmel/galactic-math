@@ -2130,6 +2130,8 @@ function launchHyperspace(onComplete) {
 }
 
 // ===== APP STATE =====
+const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
+const SESSION_LENGTH = DEBUG_MODE ? 1 : 20;
 let selectedNums = new Set([2,3,4,5,6,7,8,9,10,11,12]);
 const sessionScores = [];
 let questions = [];
@@ -2435,8 +2437,8 @@ function startQuiz() {
     const j = Math.floor(Math.random() * (i + 1));
     [combined[i], combined[j]] = [combined[j], combined[i]];
   }
-  const picked = combined.slice(0, Math.min(20, combined.length));
-  while (picked.length < 20) {
+  const picked = combined.slice(0, Math.min(SESSION_LENGTH, combined.length));
+  while (picked.length < SESSION_LENGTH) {
     const extra = combined[Math.floor(Math.random() * combined.length)];
     picked.push({ q: [...extra.q], op: extra.op });
   }
@@ -2455,7 +2457,7 @@ function startQuiz() {
   // At 1300ms — transition to quiz screen
   setTimeout(() => {
     btn.classList.remove('launching', 'liftoff');
-    answers = new Array(20).fill(null);
+    answers = new Array(SESSION_LENGTH).fill(null);
     currentQ = 0;
     score = 0;
     hyperspaceHandled = false;
