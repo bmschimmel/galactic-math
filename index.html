@@ -425,7 +425,8 @@
     filter: drop-shadow(0 0 4px var(--saber-green));
   }
   @media (max-width: 480px) {
-    .game-mode-tiles { flex-direction: column; }
+    .game-mode-tiles { flex-direction: column; align-items: center; }
+    .game-mode-tile-wrap { width: 100%; }
   }
 
   /* ===== MOBILE LAYOUT ===== */
@@ -445,6 +446,26 @@
     }
     .history-btn {
       left: max(16px, env(safe-area-inset-left, 16px));
+    }
+
+    /* Reduce card padding so the 7-column number grid fits without overflow */
+    .setup-card {
+      padding: 16px;
+    }
+
+    /* Tighter gap and smaller touch targets to fit 7 buttons across ~303px */
+    .number-grid {
+      gap: 6px;
+    }
+
+    .num-btn {
+      min-height: 36px;
+      font-size: 12px;
+    }
+
+    /* Center operation and preset button rows */
+    .quick-btns {
+      justify-content: center;
     }
   }
 

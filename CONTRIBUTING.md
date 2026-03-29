@@ -124,6 +124,13 @@ When picking up a Linear issue:
    label. Do not work on issues in any other state or without this label.
    If multiple issues match, select by priority first (Urgent → High → Medium → Low).
    Break ties by creation date — pick the oldest issue first.
+
+   **Finding the right issue:** Use `list_issues` with `status: Todo` and
+   `labels: ["claude"]`. If the response is saved to a file that is too large to
+   read (the JSON is a single line), do **not** try to parse it with shell tools.
+   Instead fall back to `get_issue` with specific IDs — start from the last known
+   completed issue number and increment (e.g. try IDT-43, IDT-44, …) until you
+   find issues in "Todo" state with the "claude" label.
 2. Confirm you are on `main` and it is up to date: `git pull origin main`
 3. If no Linear issue exists for the work, create one and assign it to the
    **"Galactic Math"** project and label it **claude**
