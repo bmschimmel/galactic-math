@@ -1649,7 +1649,7 @@
   </div>
 
   <footer class="page-footer">
-    Created for fun. Created for free. Have fun! &nbsp;·&nbsp; © Brendan Schimmel &nbsp;·&nbsp; <a href="pages/feedback.html">💬 Feedback</a>
+    Created for fun. Created for free. Have fun! &nbsp;·&nbsp; © Brendan Schimmel &nbsp;·&nbsp; <a href="pages/feedback.html">💬 Feedback</a> &nbsp;·&nbsp; <a href="pages/workflow.html">How It Works</a>
     <div style="margin-top:4px; opacity:0.4;">v1.0.0</div>
   </footer>
 
@@ -1867,6 +1867,21 @@ const sounds = {
     playFreqSweep(600, 80, 'sawtooth', 0.5, 0.15);
     setTimeout(() => playFreqSweep(400, 60, 'square', 0.4, 0.1), 350);
     setTimeout(() => playTone(120, 'square', 0.4, 0.12), 700);
+  },
+  hyperspaceActivate() {
+    // Hyperdrive charging up — low rumble builds to a high-energy peak
+    playFreqSweep(60, 300, 'sawtooth', 0.4, 0.1);
+    setTimeout(() => playFreqSweep(200, 700, 'sine', 0.45, 0.08), 200);
+    setTimeout(() => playFreqSweep(400, 1100, 'sine', 0.35, 0.07), 450);
+    setTimeout(() => playNoise(0.15, 0.08, 400), 700);
+    setTimeout(() => playTone(1400, 'sine', 0.2, 0.1), 720);
+  },
+  kesselRunActivate() {
+    // Countdown beeps + engine burst — race start signal
+    playTone(660, 'square', 0.07, 0.1);
+    setTimeout(() => playTone(660, 'square', 0.07, 0.1), 200);
+    setTimeout(() => playTone(660, 'square', 0.07, 0.1), 400);
+    setTimeout(() => playFreqSweep(880, 1760, 'sawtooth', 0.25, 0.12), 650);
   }
 };
 
@@ -2197,7 +2212,7 @@ function toggleHyperspace() {
   document.getElementById('hyperspaceBadge').textContent = hyperspaceEnabled ? 'ON' : 'OFF';
   document.getElementById('hyperspaceOptions').classList.toggle('open', hyperspaceEnabled);
   if (hyperspaceEnabled) {
-    sounds.modeActivate();
+    sounds.hyperspaceActivate();
     if (kesselRunEnabled) {
       kesselRunEnabled = false;
       document.getElementById('kesselToggle').classList.remove('selected-mode');
@@ -2297,7 +2312,7 @@ function toggleKesselRun() {
   btn.classList.toggle('selected-mode', kesselRunEnabled);
   document.getElementById('kesselBadge').textContent = kesselRunEnabled ? 'ON' : 'OFF';
   if (kesselRunEnabled) {
-    sounds.modeActivate();
+    sounds.kesselRunActivate();
     if (hyperspaceEnabled) {
       hyperspaceEnabled = false;
       document.getElementById('hyperspaceToggle').classList.remove('selected-mode');
