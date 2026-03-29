@@ -298,9 +298,9 @@
     transition: opacity 0.2s;
   }
   .category-badge:hover { opacity: 0.7; }
-  .badge-bug     { color: var(--saber-red);    border-color: rgba(255, 45, 85, 0.4); }
-  .badge-feature { color: var(--saber-purple); border-color: rgba(185, 79, 255, 0.4); }
-  .badge-other   { color: var(--saber-blue);   border-color: rgba(0, 212, 255, 0.4); }
+  .badge-bug     { color: var(--saber-red);    border-color: var(--saber-red);    background: rgba(255, 45, 85, 0.12);  box-shadow: 0 0 10px rgba(255, 45, 85, 0.2); }
+  .badge-feature { color: var(--saber-purple); border-color: var(--saber-purple); background: rgba(185, 79, 255, 0.12); box-shadow: 0 0 10px rgba(185, 79, 255, 0.2); }
+  .badge-other   { color: var(--saber-blue);   border-color: var(--saber-blue);   background: rgba(0, 212, 255, 0.12);  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
 
   /* ===== CONFIRMATION ===== */
   .confirm-state {
@@ -394,7 +394,7 @@
              placeholder="Han Solo" maxlength="80"
              onkeydown="if(event.key==='Enter') document.getElementById('inputMessage').focus()">
 
-      <span class="field-label">▸ What's your idea or what's broken?</span>
+      <span class="field-label" id="messageLabel">▸ What's your idea or what's broken?</span>
       <textarea class="field-input field-textarea" id="inputMessage"
                 placeholder="Tell us what you'd like to see, or describe the bug..."
                 maxlength="500" oninput="updateCharCount()"></textarea>
@@ -497,9 +497,24 @@ const WORKER_URL = 'https://galactic-math-feedback.bmschimmel.workers.dev';
 let selectedCategory = null;
 
 const CATEGORY_META = {
-  bug:     { label: '🐛 Bug',             cssClass: 'badge-bug' },
-  feature: { label: '💡 Feature Request', cssClass: 'badge-feature' },
-  other:   { label: '🌌 Other',           cssClass: 'badge-other' },
+  bug: {
+    label:       '🐛 Bug',
+    cssClass:    'badge-bug',
+    fieldLabel:  '▸ What\'s broken?',
+    placeholder: 'Describe the bug — what happened, and what did you expect?',
+  },
+  feature: {
+    label:       '💡 Feature Request',
+    cssClass:    'badge-feature',
+    fieldLabel:  '▸ What\'s your idea?',
+    placeholder: 'Describe your idea — what would make the game more fun?',
+  },
+  other: {
+    label:       '🌌 Other',
+    cssClass:    'badge-other',
+    fieldLabel:  '▸ What\'s on your mind?',
+    placeholder: 'Tell us anything — questions, thoughts, whatever you\'d like...',
+  },
 };
 
 function selectCategory(category) {
@@ -509,6 +524,10 @@ function selectCategory(category) {
   // Render the badge (clicking it returns to category picker)
   const badge = document.getElementById('categoryBadge');
   badge.innerHTML = `<button class="category-badge ${meta.cssClass}" onclick="showCategory()" title="Change category">${meta.label} ✕</button>`;
+
+  // Update form copy to match the chosen category
+  document.getElementById('messageLabel').textContent = meta.fieldLabel;
+  document.getElementById('inputMessage').placeholder = meta.placeholder;
 
   document.getElementById('categoryState').style.display = 'none';
   document.getElementById('formState').style.display = 'block';
