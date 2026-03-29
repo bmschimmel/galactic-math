@@ -36,7 +36,7 @@
 
     h1 {
       font-family: 'Orbitron', monospace;
-      font-size: clamp(18px, 4vw, 28px);
+      font-size: clamp(18px, 4vw, 26px);
       text-align: center;
       color: var(--saber-blue);
       letter-spacing: 2px;
@@ -46,18 +46,17 @@
     .subtitle {
       text-align: center;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
       letter-spacing: 1px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .hover-hint-global {
       text-align: center;
       color: var(--muted);
       font-size: 11px;
-      letter-spacing: 0.5px;
       margin-bottom: 36px;
-      opacity: 0.7;
+      opacity: 0.6;
     }
 
     .back-link {
@@ -77,28 +76,58 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 12px 24px;
-      margin-bottom: 40px;
+      gap: 10px 20px;
+      margin-bottom: 48px;
     }
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       font-size: 12px;
       color: var(--star-white);
     }
     .legend-dot {
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       border-radius: 3px;
       border: 2px solid;
       flex-shrink: 0;
     }
 
-    /* ── Flow container ── */
-    .flow {
-      max-width: 680px;
+    /* ── Two-column layout ── */
+    .flows-wrap {
+      max-width: 960px;
       margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 680px) {
+      .flows-wrap { grid-template-columns: 1fr; }
+    }
+
+    .flow-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .flow-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      padding: 6px 16px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .flow {
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -107,184 +136,125 @@
     /* ── Node ── */
     .node {
       width: 100%;
-      max-width: 440px;
       border-radius: 10px;
       border: 2px solid;
-      padding: 14px 18px;
-      position: relative;
+      padding: 12px 14px;
       cursor: pointer;
-      transition: box-shadow 0.25s, border-color 0.25s;
-    }
-
-    .node:hover,
-    .node.active {
-      box-shadow: 0 0 18px rgba(255,255,255,0.08);
+      transition: box-shadow 0.25s;
     }
 
     .node-header {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
     }
 
     .node .label {
       font-family: 'Orbitron', monospace;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
       flex: 1;
     }
 
-    /* The ▸ / ▾ toggle hint */
     .node .toggle-hint {
       font-size: 10px;
-      font-family: 'Orbitron', monospace;
-      letter-spacing: 0.5px;
       color: var(--muted);
       white-space: nowrap;
       padding-top: 2px;
       flex-shrink: 0;
-      transition: color 0.2s, opacity 0.2s;
       user-select: none;
     }
-    .node:hover .toggle-hint,
-    .node.active .toggle-hint {
-      opacity: 1;
-    }
-    .node.active .toggle-hint::after { content: " ▾"; }
+    .node.active .toggle-hint::after,
+    .node:hover  .toggle-hint::after { content: " ▾"; }
     .node:not(.active) .toggle-hint::after { content: " ▸"; }
 
     .node .detail {
       font-size: 11px;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.55;
     }
     .node .detail strong { color: var(--star-white); font-weight: 600; }
-    .node .detail em { color: var(--star-white); }
 
     .node .badge {
       display: inline-block;
-      font-size: 10px;
+      font-size: 9px;
       font-family: 'Orbitron', monospace;
       letter-spacing: 0.5px;
-      padding: 2px 7px;
+      padding: 2px 6px;
       border-radius: 4px;
       border: 1px solid;
-      margin-top: 6px;
+      margin-top: 5px;
     }
 
-    /* ── Explainer panel ── */
+    /* ── Explainer ── */
     .explainer {
       overflow: hidden;
       max-height: 0;
       opacity: 0;
-      transition: max-height 0.35s ease, opacity 0.25s ease, margin-top 0.25s ease;
       margin-top: 0;
+      transition: max-height 0.3s ease, opacity 0.2s ease, margin-top 0.2s ease;
     }
-
     .node:hover .explainer,
     .node.active .explainer {
-      max-height: 600px;
+      max-height: 300px;
       opacity: 1;
-      margin-top: 12px;
+      margin-top: 10px;
     }
-
     .explainer-inner {
       border-top: 1px solid var(--border);
-      padding-top: 10px;
-    }
-
-    .explainer-title {
-      font-family: 'Orbitron', monospace;
-      font-size: 10px;
-      letter-spacing: 1px;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .explainer-body {
-      font-size: 12px;
-      color: var(--star-white);
-      line-height: 1.7;
-    }
-
-    .explainer-body p { margin-bottom: 8px; }
-    .explainer-body p:last-child { margin-bottom: 0; }
-
-    .explainer-body .ex-code {
-      display: inline-block;
-      font-family: monospace;
+      padding-top: 8px;
       font-size: 11px;
+      color: var(--star-white);
+      line-height: 1.65;
+    }
+    .explainer-inner code {
+      font-family: monospace;
+      font-size: 10px;
       background: rgba(255,255,255,0.06);
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 1px 6px;
-      color: var(--star-white);
+      border-radius: 3px;
+      padding: 1px 5px;
     }
-
-    .explainer-body .ex-highlight {
-      color: var(--gold);
-      font-weight: 600;
-    }
-
-    .explainer-body .ex-warn {
-      color: var(--saber-red);
-      font-weight: 600;
-    }
-
-    .explainer-body .ex-tip {
-      display: flex;
-      gap: 6px;
-      background: rgba(0,212,255,0.06);
-      border-left: 3px solid var(--saber-blue);
-      border-radius: 0 6px 6px 0;
-      padding: 8px 10px;
-      margin-top: 8px;
-      font-size: 11px;
-      color: var(--muted);
-    }
-    .explainer-body .ex-tip::before { content: "💡"; flex-shrink: 0; }
 
     /* color variants */
-    .github   { border-color: var(--col-github);  background: rgba(57,255,20,0.05); }
-    .github   .label { color: var(--col-github); }
-    .github   .badge { border-color: var(--col-github); color: var(--col-github); }
-    .github   .toggle-hint { color: var(--col-github); }
-    .github:hover, .github.active { box-shadow: 0 0 16px rgba(57,255,20,0.15); }
+    .github    { border-color: var(--col-github);  background: rgba(57,255,20,0.05); }
+    .github    .label { color: var(--col-github); }
+    .github    .badge { border-color: var(--col-github); color: var(--col-github); }
+    .github    .toggle-hint { color: var(--col-github); }
+    .github:hover, .github.active { box-shadow: 0 0 14px rgba(57,255,20,0.15); }
 
-    .linear   { border-color: var(--col-linear);  background: rgba(185,79,255,0.05); }
-    .linear   .label { color: var(--col-linear); }
-    .linear   .badge { border-color: var(--col-linear); color: var(--col-linear); }
-    .linear   .toggle-hint { color: var(--col-linear); }
-    .linear:hover, .linear.active { box-shadow: 0 0 16px rgba(185,79,255,0.15); }
+    .linear    { border-color: var(--col-linear);  background: rgba(185,79,255,0.05); }
+    .linear    .label { color: var(--col-linear); }
+    .linear    .badge { border-color: var(--col-linear); color: var(--col-linear); }
+    .linear    .toggle-hint { color: var(--col-linear); }
+    .linear:hover, .linear.active { box-shadow: 0 0 14px rgba(185,79,255,0.15); }
 
-    .claude   { border-color: var(--col-claude);  background: rgba(245,166,35,0.05); }
-    .claude   .label { color: var(--col-claude); }
-    .claude   .badge { border-color: var(--col-claude); color: var(--col-claude); }
-    .claude   .toggle-hint { color: var(--col-claude); }
-    .claude:hover, .claude.active { box-shadow: 0 0 16px rgba(245,166,35,0.15); }
+    .claude    { border-color: var(--col-claude);  background: rgba(245,166,35,0.05); }
+    .claude    .label { color: var(--col-claude); }
+    .claude    .badge { border-color: var(--col-claude); color: var(--col-claude); }
+    .claude    .toggle-hint { color: var(--col-claude); }
+    .claude:hover, .claude.active { box-shadow: 0 0 14px rgba(245,166,35,0.15); }
 
-    .cf       { border-color: var(--col-cf);      background: rgba(0,212,255,0.05); }
-    .cf       .label { color: var(--col-cf); }
-    .cf       .badge { border-color: var(--col-cf); color: var(--col-cf); }
-    .cf       .toggle-hint { color: var(--col-cf); }
-    .cf:hover, .cf.active { box-shadow: 0 0 16px rgba(0,212,255,0.15); }
+    .cf        { border-color: var(--col-cf);      background: rgba(0,212,255,0.05); }
+    .cf        .label { color: var(--col-cf); }
+    .cf        .badge { border-color: var(--col-cf); color: var(--col-cf); }
+    .cf        .toggle-hint { color: var(--col-cf); }
+    .cf:hover, .cf.active { box-shadow: 0 0 14px rgba(0,212,255,0.15); }
 
-    .user-node { border-color: var(--col-user);   background: rgba(170,180,200,0.05); }
+    .user-node { border-color: var(--col-user);    background: rgba(170,180,200,0.05); }
     .user-node .label { color: var(--col-user); }
     .user-node .toggle-hint { color: var(--col-user); }
-    .user-node:hover, .user-node.active { box-shadow: 0 0 16px rgba(170,180,200,0.12); }
+    .user-node:hover, .user-node.active { box-shadow: 0 0 14px rgba(170,180,200,0.12); }
 
-    .danger   { border-color: var(--saber-red);   background: rgba(255,45,85,0.05); }
-    .danger   .label { color: var(--saber-red); }
-    .danger   .toggle-hint { color: var(--saber-red); }
-    .danger:hover, .danger.active { box-shadow: 0 0 16px rgba(255,45,85,0.15); }
+    .danger    { border-color: var(--saber-red);   background: rgba(255,45,85,0.05); }
+    .danger    .label { color: var(--saber-red); }
+    .danger    .toggle-hint { color: var(--saber-red); }
 
-    .success  { border-color: var(--col-github);  background: rgba(57,255,20,0.09);
-                box-shadow: 0 0 12px rgba(57,255,20,0.2); }
+    .success   { border-color: var(--col-github);  background: rgba(57,255,20,0.09);
+                 box-shadow: 0 0 10px rgba(57,255,20,0.2); }
 
     /* ── Arrow ── */
     .arrow {
@@ -294,24 +264,24 @@
     }
     .arrow-line {
       width: 2px;
-      height: 28px;
+      height: 22px;
       background: var(--border);
     }
     .arrow-label {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--muted);
-      letter-spacing: 0.5px;
       background: var(--bg);
-      padding: 0 6px;
-      margin: -4px 0;
+      padding: 0 5px;
+      margin: -3px 0;
       z-index: 1;
       position: relative;
+      letter-spacing: 0.3px;
     }
     .arrow-tip {
       width: 0; height: 0;
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
-      border-top: 8px solid var(--border);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--border);
     }
     .arrow.green  .arrow-line { background: var(--col-github); }
     .arrow.green  .arrow-tip  { border-top-color: var(--col-github); }
@@ -324,40 +294,39 @@
 
     /* ── Decision diamond ── */
     .decision-wrap {
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 100%;
-      max-width: 440px;
     }
     .diamond {
-      width: 130px;
-      height: 65px;
+      width: 110px;
+      height: 55px;
       background: var(--bg2);
       border: 2px solid var(--border);
       transform: rotate(45deg);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 8px 0;
+      margin: 6px 0;
+      flex-shrink: 0;
     }
     .diamond-text {
       transform: rotate(-45deg);
       font-family: 'Orbitron', monospace;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       color: var(--star-white);
       text-align: center;
-      line-height: 1.4;
+      line-height: 1.3;
     }
     .decision-branches {
       display: flex;
       width: 100%;
-      max-width: 540px;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 8px;
       margin-top: 4px;
-      gap: 12px;
     }
     .branch {
       flex: 1;
@@ -366,36 +335,30 @@
       align-items: center;
     }
     .branch-label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      padding: 2px 8px;
+      padding: 1px 7px;
       border-radius: 4px;
       margin-bottom: 4px;
     }
     .branch-label.yes { color: var(--col-github); border: 1px solid var(--col-github); }
     .branch-label.no  { color: var(--saber-red);  border: 1px solid var(--saber-red); }
 
-    /* ── Checklist ── */
-    .checklist { list-style: none; margin-top: 6px; }
-    .checklist li { font-size: 11px; color: var(--muted); line-height: 1.7; }
-    .checklist li::before { content: "☐ "; color: var(--col-claude); }
-
-    /* ── Section separator ── */
-    .section-sep {
+    /* ── Loop-back indicator ── */
+    .loop-back {
       width: 100%;
-      max-width: 440px;
+      margin-top: 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin: 24px 0 8px;
+      gap: 8px;
     }
-    .section-sep hr { flex: 1; border: none; border-top: 1px dashed var(--border); }
-    .section-sep span {
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 1px;
-      white-space: nowrap;
+    .loop-back hr { flex: 1; border: none; border-top: 1px dashed var(--border); }
+    .loop-back span {
+      font-size: 10px;
+      letter-spacing: 0.5px;
       font-family: 'Orbitron', monospace;
+      color: var(--muted);
+      white-space: nowrap;
     }
 
     /* ── Footer ── */
@@ -415,8 +378,8 @@
   <a href="../index.html" class="back-link">← Back to Galactic Math Academy</a>
 
   <h1>How It Works</h1>
-  <p class="subtitle">End-to-end development workflow · GitHub · Linear · Claude Code · Cloudflare</p>
-  <p class="hover-hint-global">Hover any box (or tap on mobile) for a deeper explanation</p>
+  <p class="subtitle">GitHub · Linear · Claude Code · Cloudflare</p>
+  <p class="hover-hint-global">Hover any box for more detail</p>
 
   <div class="legend">
     <div class="legend-item">
@@ -432,478 +395,320 @@
       <div class="legend-dot" style="border-color:var(--col-cf);background:rgba(0,212,255,0.15)"></div>Cloudflare
     </div>
     <div class="legend-item">
-      <div class="legend-dot" style="border-color:var(--col-user);background:rgba(170,180,200,0.15)"></div>Human / User
+      <div class="legend-dot" style="border-color:var(--col-user);background:rgba(170,180,200,0.15)"></div>Human
     </div>
   </div>
 
-  <div class="flow">
+  <div class="flows-wrap">
 
-    <!-- 1. Issue Submitted -->
-    <div class="node user-node">
-      <div class="node-header">
-        <div class="label">Issue Submitted</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        <strong>GitHub:</strong> user opens a bug report or feature request on bmschimmel/galactic-math<br>
-        <strong>— or —</strong><br>
-        <strong>Linear:</strong> staff creates an issue directly into the IDT project backlog
-      </div>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">How issues enter the system</div>
-          <div class="explainer-body">
-            <p>There are two entry points. The most common is a <span class="ex-highlight">GitHub issue</span> — anyone with a GitHub account can open one. The Linear–GitHub integration picks it up automatically and places it in Triage within seconds.</p>
-            <p>The second path is staff creating a Linear issue directly, usually for planned internal work like infrastructure updates or refactors where no external reporter is involved.</p>
-            <div class="ex-tip">Both paths converge at Triage. It doesn't matter which way an issue arrives — the review process is the same.</div>
+    <!-- ═══════════════════════ -->
+    <!-- FLOW 1: Development    -->
+    <!-- ═══════════════════════ -->
+    <div class="flow-section">
+      <div class="flow-title">Development Flow</div>
+      <div class="flow">
+
+        <div class="node user-node">
+          <div class="node-header">
+            <div class="label">Issue Submitted</div>
+            <span class="toggle-hint">info</span>
           </div>
+          <div class="detail">GitHub issue or staff creates directly in Linear IDT project.</div>
+          <div class="explainer"><div class="explainer-inner">
+            GitHub issues auto-sync to Linear Triage via the integration. Staff can also create Linear issues directly for internal work that doesn't need a GitHub reporter.
+          </div></div>
         </div>
-      </div>
-    </div>
 
-    <div class="arrow purple"><div class="arrow-line"></div><div class="arrow-label">auto-sync GitHub → Linear</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+        <div class="arrow purple"><div class="arrow-line"></div><div class="arrow-label">auto-sync → Linear</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
 
-    <!-- 2. Triage -->
-    <div class="node linear">
-      <div class="node-header">
-        <div class="label">Triage</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">Team IDT reviews the issue. Is it valid and worth building?</div>
-      <span class="badge">Linear state: Triage</span>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">What happens during triage</div>
-          <div class="explainer-body">
-            <p>The team asks a few questions: Is this reproducible? Is it in scope for a K-6 math trainer? Does it affect the core experience kids actually use?</p>
-            <p>Issues stay in Triage until someone consciously moves them — there's no timeout. The goal is that nothing gets accidentally dropped.</p>
-            <div class="ex-tip">Triage is a forcing function: every issue needs a human decision before any work starts. That keeps the backlog clean and intentional.</div>
+        <div class="node linear">
+          <div class="node-header">
+            <div class="label">Triage</div>
+            <span class="toggle-hint">info</span>
           </div>
+          <div class="detail">Team IDT reviews: is it valid, in scope, worth building?</div>
+          <span class="badge">Linear: Triage</span>
+          <div class="explainer"><div class="explainer-inner">
+            Issues stay here until someone consciously accepts or declines — nothing gets dropped. Key question: does this improve the core experience for a K-6 kid?
+          </div></div>
         </div>
-      </div>
-    </div>
 
-    <!-- Decision: Accept? -->
-    <div class="arrow purple"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-    <div class="decision-wrap">
-      <div class="diamond"><div class="diamond-text">Accept?</div></div>
-      <div class="decision-branches">
-        <div class="branch">
-          <span class="branch-label no">No</span>
-          <div class="node danger" style="max-width:100%">
-            <div class="node-header">
-              <div class="label">Close / Decline</div>
-              <span class="toggle-hint">details</span>
-            </div>
-            <div class="detail">Comment added on GitHub issue explaining why.</div>
-            <div class="explainer">
-              <div class="explainer-inner">
-                <div class="explainer-title">Why we close issues</div>
-                <div class="explainer-body">
-                  <p>Not every idea fits. This game is intentionally focused and simple — feature creep makes it harder to maintain and harder for kids to use.</p>
-                  <p>A decline always gets a comment. The reporter put in effort; they deserve to know why. Common reasons: out of scope, duplicate, too complex for the single-file constraint.</p>
+        <div class="arrow purple"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="decision-wrap">
+          <div class="diamond"><div class="diamond-text">Accept?</div></div>
+          <div class="decision-branches">
+            <div class="branch">
+              <span class="branch-label no">No</span>
+              <div class="node danger" style="max-width:100%">
+                <div class="node-header">
+                  <div class="label">Close</div>
+                  <span class="toggle-hint">info</span>
                 </div>
+                <div class="detail">Comment added on the GitHub issue.</div>
+                <div class="explainer"><div class="explainer-inner">
+                  A decline always gets a comment — out of scope, duplicate, or too complex for the single-file constraint.
+                </div></div>
+              </div>
+            </div>
+            <div class="branch">
+              <span class="branch-label yes">Yes</span>
+              <div class="node linear" style="max-width:100%">
+                <div class="node-header">
+                  <div class="label">Backlog → To Do</div>
+                  <span class="toggle-hint">info</span>
+                </div>
+                <div class="detail">Refine, label, prioritize. Add <strong>"claude"</strong> label if Claude should build it.</div>
+                <span class="badge">Linear: Backlog → To Do</span>
+                <div class="explainer"><div class="explainer-inner">
+                  The <code>claude</code> label means the task is well-defined and code-only. Claude picks it up only when it's <em>both</em> To Do <em>and</em> has the label.
+                </div></div>
               </div>
             </div>
           </div>
         </div>
-        <div class="branch">
-          <span class="branch-label yes">Yes</span>
-          <div class="node linear" style="max-width:100%">
-            <div class="node-header">
-              <div class="label">Backlog</div>
-              <span class="toggle-hint">details</span>
-            </div>
-            <div class="detail">Refine, label, prioritize. Add <strong>"claude"</strong> label if Claude should implement it.</div>
-            <span class="badge">Linear state: Backlog → To Do</span>
-            <div class="explainer">
-              <div class="explainer-inner">
-                <div class="explainer-title">Backlog vs. To Do</div>
-                <div class="explainer-body">
-                  <p><span class="ex-highlight">Backlog</span> = accepted but not yet scheduled. <span class="ex-highlight">To Do</span> = ready to start right now.</p>
-                  <p>The <span class="ex-code">claude</span> label signals that the issue is well-defined enough for Claude Code to implement autonomously — no ambiguity, no external credentials needed, code-only change.</p>
-                  <div class="ex-tip">Claude only picks up issues that are <em>both</em> in To Do state <em>and</em> have the claude label. Both conditions must be true.</div>
+
+        <div class="arrow purple"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="decision-wrap">
+          <div class="diamond"><div class="diamond-text">"claude"<br>label?</div></div>
+          <div class="decision-branches">
+            <div class="branch">
+              <span class="branch-label no">No</span>
+              <div class="node user-node" style="max-width:100%">
+                <div class="node-header">
+                  <div class="label">Staff Completes</div>
+                  <span class="toggle-hint">info</span>
                 </div>
+                <div class="detail">Human handles infra, config, or anything needing credentials.</div>
+                <div class="explainer"><div class="explainer-inner">
+                  Cloudflare config, <code>wrangler.toml</code>, domain settings, or exploratory work not yet well-specified enough for Claude.
+                </div></div>
+              </div>
+            </div>
+            <div class="branch">
+              <span class="branch-label yes">Yes</span>
+              <div class="node linear" style="max-width:100%">
+                <div class="node-header">
+                  <div class="label">In Progress</div>
+                  <span class="toggle-hint">info</span>
+                </div>
+                <div class="detail">Set manually when branch is created. Priority: Urgent → High → Medium → Low.</div>
+                <span class="badge">Linear: In Progress</span>
+                <div class="explainer"><div class="explainer-inner">
+                  Moving to In Progress is manual — it prevents two people or two Claude sessions from picking up the same issue at once.
+                </div></div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Decision: claude label? -->
-    <div class="arrow purple"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-    <div class="decision-wrap">
-      <div class="diamond"><div class="diamond-text">"claude"<br>label?</div></div>
-      <div class="decision-branches">
-        <div class="branch">
-          <span class="branch-label no">No</span>
-          <div class="node user-node" style="max-width:100%">
-            <div class="node-header">
-              <div class="label">Staff Completes</div>
-              <span class="toggle-hint">details</span>
-            </div>
-            <div class="detail">Human handles infra, docs, or config work manually.</div>
-            <div class="explainer">
-              <div class="explainer-inner">
-                <div class="explainer-title">What staff handles directly</div>
-                <div class="explainer-body">
-                  <p>Some work requires human judgment or credentials: Cloudflare config changes, <span class="ex-code">wrangler.toml</span> updates, domain settings, billing, or anything that needs production access.</p>
-                  <p>Also: issues that are deliberately vague or exploratory — Claude Code works best on well-specified, self-contained tasks.</p>
+        <div class="arrow orange"><div class="arrow-line"></div><div class="arrow-label">Claude starts here</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node claude">
+          <div class="node-header">
+            <div class="label">Create Branch</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail"><strong>git pull origin main</strong>, then <strong>git checkout -b idt-[num]-description</strong></div>
+          <div class="explainer"><div class="explainer-inner">
+            The <code>idt-</code> prefix links the branch to the Linear issue. Never push directly to <code>main</code> — branch protection will reject it.
+          </div></div>
+        </div>
+
+        <div class="arrow orange"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node claude">
+          <div class="node-header">
+            <div class="label">Build Solution</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail">Edit <strong>index.html</strong> only. No deps, no localStorage, Web Audio for sounds. Commit: <strong>IDT-XX message</strong>.</div>
+          <div class="explainer"><div class="explainer-inner">
+            The entire game is one file — no build pipeline needed. The <code>IDT-XX</code> prefix in commit messages is parsed by Linear to auto-link commits to the issue.
+          </div></div>
+        </div>
+
+        <div class="arrow orange"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node claude">
+          <div class="node-header">
+            <div class="label">Test Locally</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail">Open <strong>index.html</strong> directly in a browser — no server needed.</div>
+          <div class="explainer"><div class="explainer-inner">
+            Verify: quiz runs end-to-end, sounds play, keyboard nav works, comet celebration at ≥75%, Hyperspace and Kessel Run modes, all 5 themes, mobile at ~375px.
+          </div></div>
+        </div>
+
+        <div class="arrow orange"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node claude">
+          <div class="node-header">
+            <div class="label">Open Pull Request</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail">Title: <strong>IDT-XX description</strong> · Body must include <strong>Fixes IDT-XX</strong>. Claude never merges its own PR.</div>
+          <span class="badge">Linear: auto → In Review</span>
+          <div class="explainer"><div class="explainer-inner">
+            <code>Fixes IDT-XX</code> in the body is parsed by Linear — when the PR merges, Linear automatically closes the issue. Without it, you'd close it manually.
+          </div></div>
+        </div>
+
+        <div class="arrow green"><div class="arrow-line"></div><div class="arrow-label">notifies reviewer</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node user-node">
+          <div class="node-header">
+            <div class="label">Review + Test</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail">Human opens branch locally, verifies the checklist, approves or requests changes.</div>
+          <div class="explainer"><div class="explainer-inner">
+            Check for colors outside CSS variables, any <code>localStorage</code> calls, or external scripts. Also: does it feel right for a 6-year-old? If requesting changes, be specific — Claude re-reads the comment.
+          </div></div>
+        </div>
+
+        <div class="arrow green"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="decision-wrap">
+          <div class="diamond"><div class="diamond-text">Approve?</div></div>
+          <div class="decision-branches">
+            <div class="branch">
+              <span class="branch-label no">No</span>
+              <div class="node danger" style="max-width:100%">
+                <div class="node-header">
+                  <div class="label">Request Changes</div>
+                  <span class="toggle-hint">info</span>
                 </div>
+                <div class="detail">Claude reads the review, commits a fix, loops back.</div>
+                <div class="explainer"><div class="explainer-inner">
+                  The PR stays open. Each fix is a new commit on the same branch with the <code>IDT-XX</code> prefix.
+                </div></div>
+              </div>
+            </div>
+            <div class="branch">
+              <span class="branch-label yes">Yes</span>
+              <div class="node success" style="max-width:100%">
+                <div class="node-header">
+                  <div class="label">Merge to Main</div>
+                  <span class="toggle-hint">info</span>
+                </div>
+                <div class="detail">CI passes → merge → Linear closes → CF Pages deploys (~60s).</div>
+                <span class="badge">Linear: auto → Done</span>
+                <div class="explainer"><div class="explainer-inner">
+                  Three things happen automatically: Linear issue closes, Cloudflare Pages build kicks off, live site updates. No manual steps.
+                </div></div>
               </div>
             </div>
           </div>
         </div>
-        <div class="branch">
-          <span class="branch-label yes">Yes ↓ Claude picks up</span>
-          <div class="node linear" style="max-width:100%">
-            <div class="node-header">
-              <div class="label">In Progress</div>
-              <span class="toggle-hint">details</span>
-            </div>
-            <div class="detail">Set manually when the branch is created.</div>
-            <span class="badge">Linear state: In Progress</span>
-            <div class="explainer">
-              <div class="explainer-inner">
-                <div class="explainer-title">Why this state matters</div>
-                <div class="explainer-body">
-                  <p>Moving to In Progress is a manual step done when the branch is created. This prevents two people — or two Claude sessions — from picking up the same issue at the same time.</p>
-                  <p>Priority tiebreaking: <span class="ex-highlight">Urgent → High → Medium → Low</span>, then oldest creation date first.</p>
-                </div>
-              </div>
-            </div>
+
+        <div class="arrow blue"><div class="arrow-line"></div><div class="arrow-label">triggers CF Pages build</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node cf">
+          <div class="node-header">
+            <div class="label">Live at galactic-math.pages.dev</div>
+            <span class="toggle-hint">info</span>
           </div>
+          <div class="detail">Auto-deployed. No manual step. Site updates within ~60 seconds of merge.</div>
+          <div class="explainer"><div class="explainer-inner">
+            Cloudflare Pages watches <code>main</code>. No build step means "deploy" is just copying files to CF's edge network. The game works offline after first load.
+          </div></div>
         </div>
+
       </div>
     </div>
 
-    <div class="arrow orange"><div class="arrow-line"></div><div class="arrow-label">Claude starts here</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
 
-    <!-- 3. Create Branch -->
-    <div class="node claude">
-      <div class="node-header">
-        <div class="label">Create Branch</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        <strong>git pull origin main</strong> first, then:<br>
-        <strong>git checkout -b idt-[num]-short-description</strong><br>
-        e.g. <em>idt-12-add-division-mode</em>, <em>idt-23-fix-wrong-answer-sound</em>
-      </div>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">Branch naming convention</div>
-          <div class="explainer-body">
-            <p>Format: <span class="ex-code">idt-[issue-number]-short-description</span></p>
-            <p>The <span class="ex-code">idt-</span> prefix links the branch to the Linear issue in some integrations and makes the git log instantly scannable — you can see what every branch is doing at a glance.</p>
-            <p><span class="ex-warn">Never push directly to main.</span> Branch protection is enforced — direct pushes will be rejected.</p>
-            <div class="ex-tip">Always pull main first. If another PR merged while you were working, rebase rather than merge to keep history clean.</div>
+    <!-- ═══════════════════════ -->
+    <!-- FLOW 2: Feedback       -->
+    <!-- ═══════════════════════ -->
+    <div class="flow-section">
+      <div class="flow-title">Feedback Flow</div>
+      <div class="flow">
+
+        <div class="node user-node">
+          <div class="node-header">
+            <div class="label">Kids / Parents / Teachers</div>
+            <span class="toggle-hint">info</span>
           </div>
+          <div class="detail">Primary users are kids ages 5–12. Parents and teachers share and assign it.</div>
+          <div class="explainer"><div class="explainer-inner">
+            Keep UI language simple and encouraging — never punishing. The feedback link lives in the footer so kids don't see it as part of the game.
+          </div></div>
         </div>
+
+        <div class="arrow blue"><div class="arrow-line"></div><div class="arrow-label">finds a bug or has feedback</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node cf">
+          <div class="node-header">
+            <div class="label">pages/feedback.html</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail">Feedback form linked from the footer of the main app.</div>
+          <div class="explainer"><div class="explainer-inner">
+            A static page — no server logic here. On submit it POSTs to the Cloudflare Worker, which holds the GitHub API token server-side so it's never exposed in client code.
+          </div></div>
+        </div>
+
+        <div class="arrow blue"><div class="arrow-line"></div><div class="arrow-label">POST to worker</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node cf">
+          <div class="node-header">
+            <div class="label">Cloudflare Worker</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail"><strong>worker/feedback-worker.js</strong> — receives the form, calls GitHub API to create an issue.</div>
+          <div class="explainer"><div class="explainer-inner">
+            Deployed separately via <code>wrangler deploy</code> — not auto-deployed on git push. Observability and invocation logs are on in <code>wrangler.toml</code> for debugging.
+          </div></div>
+        </div>
+
+        <div class="arrow green"><div class="arrow-line"></div><div class="arrow-label">creates GitHub issue</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node github">
+          <div class="node-header">
+            <div class="label">GitHub Issue Created</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail">Pre-filled from the feedback form. Lands on bmschimmel/galactic-math.</div>
+          <div class="explainer"><div class="explainer-inner">
+            The issue is structured for easy triage. The Linear–GitHub integration picks it up immediately and places it in Triage — same as any manually-filed issue.
+          </div></div>
+        </div>
+
+        <div class="arrow purple"><div class="arrow-line"></div><div class="arrow-label">auto-sync → Linear Triage</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
+
+        <div class="node linear">
+          <div class="node-header">
+            <div class="label">Triage</div>
+            <span class="toggle-hint">info</span>
+          </div>
+          <div class="detail">Re-enters the development flow. Same review process applies.</div>
+          <span class="badge">Linear: Triage</span>
+          <div class="explainer"><div class="explainer-inner">
+            Loop complete: user plays → submits feedback → issue in Triage → reviewed → built by Claude → deployed → user plays the fix.
+          </div></div>
+        </div>
+
+        <div class="loop-back">
+          <hr><span>↑ continues in Dev Flow</span><hr>
+        </div>
+
       </div>
     </div>
 
-    <div class="arrow orange"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-
-    <!-- 4. Build Solution -->
-    <div class="node claude">
-      <div class="node-header">
-        <div class="label">Build Solution</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        Edit <strong>index.html</strong> only — unless the issue explicitly requires <em>pages/</em> or <em>worker/</em>.<br>
-        Commit: <strong>IDT-XX description in imperative lowercase</strong> · one commit per logical change.
-      </div>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">The single-file constraint</div>
-          <div class="explainer-body">
-            <p>The entire game lives in <span class="ex-code">index.html</span> — HTML, CSS, and JS together. This is intentional: no build pipeline, no npm, no bundler. Anyone can open the file in a browser and it just works, even offline.</p>
-            <p>Hard rules:</p>
-            <p>
-              · No external dependencies (no npm, no CDN libraries)<br>
-              · No <span class="ex-code">localStorage</span> or cookies — no data persists between sessions<br>
-              · All sounds via <span class="ex-code">Web Audio API</span> — no audio files<br>
-              · CSS variables only for colors — defined in <span class="ex-code">:root</span><br>
-              · No <span class="ex-code">&lt;form&gt;</span> tags — use button onClick handlers
-            </p>
-            <div class="ex-tip">The commit ID format <span class="ex-code">IDT-XX</span> is parsed by the Linear integration to auto-link commits to the issue. Without it, Linear won't show your commits in the issue timeline.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arrow orange"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-
-    <!-- 5. Test Locally -->
-    <div class="node claude">
-      <div class="node-header">
-        <div class="label">Test Locally</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">No build step — open <strong>index.html</strong> directly in a browser.</div>
-      <ul class="checklist">
-        <li>Quiz runs start to finish without errors</li>
-        <li>Correct / wrong sounds play on answer submission</li>
-        <li>Keyboard navigation works (Enter to submit)</li>
-        <li>Comet celebration triggers on passing score ≥75% (Standard &amp; Kessel Run)</li>
-        <li>Hyperspace mode: difficulty cards, countdown, blue jump on timeout</li>
-        <li>Kessel Run: timer runs, wrong answers add 5s penalty</li>
-        <li>Theme cycler: all 5 themes cycle without visual breakage</li>
-        <li>Session history shows scores with correct mode labels</li>
-        <li>Footer link opens pages/feedback.html and submits correctly</li>
-        <li>Page usable on mobile (~375px wide)</li>
-      </ul>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">Why there's no test runner</div>
-          <div class="explainer-body">
-            <p>This project deliberately has no build step and no test framework. The game is a single HTML file — the "test" is opening it in a browser and clicking through it.</p>
-            <p>This isn't laziness; it's a constraint that keeps the project approachable. A parent or teacher who wants to verify a fix can do it without installing anything.</p>
-            <p>On Linux/WSL: <span class="ex-code">xdg-open index.html</span></p>
-            <div class="ex-tip">Test on a real mobile device or at 375px in DevTools before marking done. The game is used on tablets by kids — layout bugs on small screens matter.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arrow orange"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-
-    <!-- 6. Open PR -->
-    <div class="node claude">
-      <div class="node-header">
-        <div class="label">Open Pull Request</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        <strong>gh pr create --base main</strong><br>
-        Title: <em>IDT-XX Add feature name</em> &nbsp;·&nbsp; Body must include: <strong>Fixes IDT-XX</strong>
-      </div>
-      <span class="badge">Linear state: auto → In Review</span>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">The magic of "Fixes IDT-XX"</div>
-          <div class="explainer-body">
-            <p>Including <span class="ex-code">Fixes IDT-XX</span> in the PR description is parsed by the Linear–GitHub integration. When the PR merges to main, Linear automatically moves the issue to <span class="ex-highlight">Done</span>. Without it, you'd have to close the issue manually.</p>
-            <p>Opening the PR also automatically moves Linear to <span class="ex-highlight">In Review</span> — no manual state change needed.</p>
-            <p><span class="ex-warn">Claude never merges its own PR.</span> It pushes the branch and opens the PR, then stops. A human must approve and merge.</p>
-            <div class="ex-tip">For UI changes, note in the PR body which browser you tested in. Reviewers often skip re-testing if they trust the test notes.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arrow green"><div class="arrow-line"></div><div class="arrow-label">PR opened → notifies reviewer</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-
-    <!-- 7. Human Review -->
-    <div class="node user-node">
-      <div class="node-header">
-        <div class="label">Review + Test</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        Human reviewer opens the branch locally, verifies the checklist, then approves or requests changes.
-      </div>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">What a good review looks like</div>
-          <div class="explainer-body">
-            <p>Clone/pull the branch, open <span class="ex-code">index.html</span> in a browser, and play through the affected feature. The checklist above is the minimum bar.</p>
-            <p>Also check: does the change feel right for a 6-year-old? Is the language simple and encouraging? Does anything feel punishing or frustrating?</p>
-            <p>Code review: look for new colors that aren't CSS variables, any <span class="ex-code">localStorage</span> calls, or external script tags that would break offline use.</p>
-            <div class="ex-tip">If you request changes, be specific in the PR comment. Claude will re-read it and loop back — vague feedback leads to vague fixes.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Decision: Approve? -->
-    <div class="arrow green"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-    <div class="decision-wrap">
-      <div class="diamond"><div class="diamond-text">Approve?</div></div>
-      <div class="decision-branches">
-        <div class="branch">
-          <span class="branch-label no">No</span>
-          <div class="node danger" style="max-width:100%">
-            <div class="node-header">
-              <div class="label">Request Changes</div>
-              <span class="toggle-hint">details</span>
-            </div>
-            <div class="detail">Reviewer comments on the PR. Claude picks up feedback and loops back to Build.</div>
-            <div class="explainer">
-              <div class="explainer-inner">
-                <div class="explainer-title">The feedback loop</div>
-                <div class="explainer-body">
-                  <p>Claude re-reads the PR review comments and makes a new commit on the same branch. Each fix should be a separate commit with its own <span class="ex-code">IDT-XX</span> prefix.</p>
-                  <p>The PR stays open — no need to close and re-open. GitHub notifies the reviewer when new commits are pushed.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="branch">
-          <span class="branch-label yes">Yes</span>
-          <div class="node success" style="max-width:100%">
-            <div class="node-header">
-              <div class="label">Merge to Main</div>
-              <span class="toggle-hint">details</span>
-            </div>
-            <div class="detail">GitHub merge + CI pass. <strong>Fixes IDT-XX</strong> auto-closes Linear.</div>
-            <span class="badge">Linear state: auto → Done</span>
-            <div class="explainer">
-              <div class="explainer-inner">
-                <div class="explainer-title">What happens on merge</div>
-                <div class="explainer-body">
-                  <p>Three things happen automatically the moment the PR merges to main:</p>
-                  <p>
-                    1. <span class="ex-highlight">Linear issue closes</span> — parsed from "Fixes IDT-XX" in the PR body<br>
-                    2. <span class="ex-highlight">Cloudflare Pages build kicks off</span> — ~60 second deploy<br>
-                    3. <span class="ex-highlight">Live site updates</span> at galactic-math.pages.dev
-                  </p>
-                  <div class="ex-tip">No manual deploy step. No staging environment. Merge = ship.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arrow blue"><div class="arrow-line"></div><div class="arrow-label">merge triggers Cloudflare Pages build</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-
-    <!-- 8. CF Pages Deploy -->
-    <div class="node cf">
-      <div class="node-header">
-        <div class="label">Cloudflare Pages Deploy</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        Auto-deploys on every merge to <strong>main</strong>. Live within ~60 seconds at <strong>galactic-math.pages.dev</strong>
-      </div>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">How CF Pages works here</div>
-          <div class="explainer-body">
-            <p>Cloudflare Pages watches the <span class="ex-code">main</span> branch. Any push triggers a build and deploy. Because there's no build step (no npm, no bundler), the "build" is essentially just copying files to Cloudflare's edge network.</p>
-            <p>The result is a globally distributed static site with no server to maintain, no cold starts, and free SSL.</p>
-            <div class="ex-tip">The Cloudflare Worker (feedback handler) is a separate deployment — it lives in <span class="ex-code">worker/</span> and is deployed independently via Wrangler, not automatically on git push.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arrow blue"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-
-    <!-- 9. Live Site -->
-    <div class="node cf">
-      <div class="node-header">
-        <div class="label">Live Site</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        <strong>index.html</strong> — the K-6 math trainer game<br>
-        <strong>pages/feedback.html</strong> — feedback form<br>
-        <strong>pages/workflow.html</strong> — this page
-      </div>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">What's actually served</div>
-          <div class="explainer-body">
-            <p>The game runs entirely in the browser — no server-side logic for gameplay. All math question generation, scoring, sounds, and animations happen client-side in <span class="ex-code">index.html</span>.</p>
-            <p>The only server-side piece is the Cloudflare Worker that handles feedback form submissions. Everything else is static files on CF Pages.</p>
-            <div class="ex-tip">Because there's no server, the game works offline after first load. Google Fonts is the only external dependency — it's UI polish, not functionality.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-sep"><hr><span>Feedback Loop</span><hr></div>
-
-    <div class="arrow blue"><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-
-    <!-- 10. Users Play -->
-    <div class="node user-node">
-      <div class="node-header">
-        <div class="label">Kids / Parents / Teachers Play</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        Primary users are kids ages 5–12. Parents and teachers share and assign it.<br>
-        Found a bug? Footer link → <strong>pages/feedback.html</strong>
-      </div>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">Who this is built for</div>
-          <div class="explainer-body">
-            <p><span class="ex-highlight">Kids ages 5–12</span> are the primary users — they play the game directly. Every UI decision should consider a 6-year-old using a tablet.</p>
-            <p>Parents and teachers are secondary users — they share it, assign it, and sometimes file bugs. The feedback form is intentionally in the footer so kids don't see it as part of the game.</p>
-            <div class="ex-tip">Keep UI language simple, fun, and encouraging. Avoid anything that feels punishing. "Youngling 🌱" for a low score is still a positive frame — it's a Star Wars rank, not a failing grade.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arrow blue"><div class="arrow-line"></div><div class="arrow-label">submits feedback form</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-
-    <!-- 11. CF Worker -->
-    <div class="node cf">
-      <div class="node-header">
-        <div class="label">Cloudflare Worker — galactic-math-feedback</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        <strong>worker/feedback-worker.js</strong> — receives form POST, calls GitHub API to create a pre-filled issue.<br>
-        Observability &amp; invocation logs enabled via <em>wrangler.toml</em>.
-      </div>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">Why a Worker instead of a form action</div>
-          <div class="explainer-body">
-            <p>The feedback form can't POST directly to GitHub because the GitHub API token would be exposed in client-side code. The Cloudflare Worker runs server-side, holds the token securely, and acts as a proxy.</p>
-            <p>Observability logs (enabled in <span class="ex-code">wrangler.toml</span>) record every invocation so we can debug failures — e.g. if the GitHub API token expires or rate limits are hit.</p>
-            <p>This Worker is deployed separately from CF Pages using <span class="ex-code">wrangler deploy</span> — it doesn't auto-deploy on git push to main.</p>
-            <div class="ex-tip">The Worker is a separate Cloudflare service from the Pages site. Changes to <span class="ex-code">worker/feedback-worker.js</span> require a manual <span class="ex-code">wrangler deploy</span> from the <span class="ex-code">worker/</span> directory.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arrow green"><div class="arrow-line"></div><div class="arrow-label">creates GitHub issue → auto-syncs to Linear Triage</div><div class="arrow-line"></div><div class="arrow-tip"></div></div>
-
-    <!-- 12. GitHub Issue Created -->
-    <div class="node github">
-      <div class="node-header">
-        <div class="label">GitHub Issue Created</div>
-        <span class="toggle-hint">details</span>
-      </div>
-      <div class="detail">
-        Pre-filled from the feedback form. Auto-syncs to Linear Triage — re-enters the main workflow from the top.
-      </div>
-      <div class="explainer">
-        <div class="explainer-inner">
-          <div class="explainer-title">Closing the loop</div>
-          <div class="explainer-body">
-            <p>The Worker creates a GitHub issue with the feedback text pre-filled in a structured format. The Linear–GitHub integration immediately picks it up and places it in <span class="ex-highlight">Triage</span> — exactly the same as if a user had opened the issue manually on GitHub.</p>
-            <p>This means user feedback from the live site feeds directly into the development workflow without any manual forwarding or copy-pasting.</p>
-            <div class="ex-tip">The loop is complete: users play → submit feedback → issue in Triage → reviewed → built by Claude → deployed → users play the fix.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /flow -->
+  </div><!-- /flows-wrap -->
 
   <footer class="page-footer">
     <a href="../index.html">← Galactic Math Academy</a> &nbsp;·&nbsp; © Brendan Schimmel
   </footer>
 
   <script>
-    // Touch / click toggle for mobile (CSS :hover handles desktop)
+    // Tap-to-toggle for touch / narrow screens
     document.querySelectorAll('.node').forEach(function(node) {
-      node.addEventListener('click', function(e) {
-        // Only toggle on touch devices or narrow screens
+      node.addEventListener('click', function() {
         if (window.matchMedia('(hover: none)').matches || window.innerWidth < 600) {
           node.classList.toggle('active');
         }
