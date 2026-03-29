@@ -122,6 +122,8 @@ When picking up a Linear issue:
 
 1. Only pick up issues that are in the **"To Do"** state **and** have the **"claude"**
    label. Do not work on issues in any other state or without this label.
+   If multiple issues match, select by priority first (Urgent → High → Medium → Low).
+   Break ties by creation date — pick the oldest issue first.
 2. Confirm you are on `main` and it is up to date: `git pull origin main`
 3. If no Linear issue exists for the work, create one and assign it to the
    **"Galactic Math"** project and label it **claude**
