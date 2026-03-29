@@ -385,8 +385,8 @@ async function submitFeedback() {
   btn.disabled = true;
   btn.textContent = '📡 TRANSMITTING...';
 
-  const title = `Feedback: ${name}: ${message.slice(0, 50)}${message.length > 50 ? '…' : ''}`;
-  const body = `**From:** ${name}\n\n**Message:**\n${message}`;
+  const title = `${message.slice(0, 50)}${message.length > 50 ? '…' : ''}`;
+  const body = `${message}\n\n--\n\n**Submitter**: ${name}`;
 
   try {
     const res = await fetch(WORKER_URL, {
