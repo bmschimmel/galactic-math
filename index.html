@@ -535,6 +535,39 @@
     cursor: not-allowed;
   }
 
+  #startBtn {
+    position: relative;
+    overflow: hidden;
+  }
+  #startBtn span {
+    position: relative;
+    z-index: 1;
+  }
+  #startBtn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, rgba(0,212,255,0.35) 0%, rgba(57,255,20,0.25) 100%);
+    pointer-events: none;
+  }
+  #startBtn.launching::before {
+    animation: launchFill 1.3s linear forwards;
+  }
+  #startBtn.liftoff::before {
+    animation: none;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(0,212,255,0.55), rgba(255,255,255,0.35));
+    transition: background 0.1s;
+  }
+  @keyframes launchFill {
+    0%   { width: 0%; }
+    46%  { width: 35%; }
+    85%  { width: 88%; }
+    100% { width: 100%; }
+  }
+
   /* ===== QUIZ SCREEN ===== */
   .quiz-header {
     display: flex;
@@ -1567,7 +1600,7 @@
       <div class="error-msg" id="setupError"></div>
       <div class="saber-divider" style="margin: 20px 0 16px;"></div>
       <button class="btn-primary" onclick="startQuiz()" id="startBtn">
-        🚀 BEGIN TRAINING MISSION
+        <span>🚀 BEGIN TRAINING MISSION</span>
       </button>
     </div>
   </div>
@@ -1846,10 +1879,12 @@ const sounds = {
     setTimeout(() => playTone(1760, 'sine', 0.07, 0.08), 80);
   },
   missionStart() {
-    // Hyperdrive spool: rising sweep + thud
-    playFreqSweep(100, 800, 'sawtooth', 0.6, 0.1);
-    setTimeout(() => playNoise(0.2, 0.1, 400), 400);
-    setTimeout(() => playFreqSweep(800, 200, 'sine', 0.3, 0.08), 600);
+    // Rocket launch: ignition rumble → building thrust → liftoff shriek
+    playNoise(1.8, 0.08, 40);
+    playFreqSweep(55, 180, 'sawtooth', 1.2, 0.15);
+    setTimeout(() => playFreqSweep(120, 600, 'sawtooth', 0.7, 0.12), 600);
+    setTimeout(() => playNoise(0.25, 0.1, 80), 1000);
+    setTimeout(() => playFreqSweep(400, 2400, 'sine', 0.5, 0.07), 1100);
   },
   victory() {
     // Triumphant fanfare (Star Wars-ish 4-note motif)
@@ -1871,11 +1906,12 @@ const sounds = {
     setTimeout(() => playTone(900, 'sine', 0.15, 0.1), 80);
     setTimeout(() => playTone(1200, 'sine', 0.08, 0.12), 200);
   },
-  blasterFlyby() {
-    // Tie-fighter-like whoosh: noise burst + pitch sweep
-    playNoise(0.15, 0.12, 200);
-    playFreqSweep(1200, 180, 'sawtooth', 0.4, 0.08);
-    setTimeout(() => playFreqSweep(800, 120, 'square', 0.3, 0.06), 80);
+  shockwaveImpact() {
+    // Deep bass thud as rings expand outward
+    playTone(80, 'sine', 0.5, 0.3);
+    playTone(55, 'sine', 0.4, 0.4);
+    playNoise(0.15, 0.1, 50);
+    setTimeout(() => playTone(110, 'sine', 0.2, 0.2), 200);
   },
   hyperspaceJump() {
     // Rising roar as ship jumps to hyperspace
@@ -1919,54 +1955,42 @@ function resizeShipCanvas() {
 resizeShipCanvas();
 window.addEventListener('resize', resizeShipCanvas);
 
-// ===== COMET CELEBRATION =====
+// ===== RING SHOCKWAVE CELEBRATION =====
 let celebrationActive = false;
 
 function launchCelebration() {
   if (celebrationActive) return;
   celebrationActive = true;
 
-  // Palette: gold, cyan, green, white, purple
-  const colors = [
-    [255, 215, 0],
-    [0, 212, 255],
-    [57, 255, 20],
-    [232, 244, 255],
-    [185, 79, 255]
+  // Design system palette
+  const palette = [
+    [0, 212, 255],    // saber-blue
+    [57, 255, 20],    // saber-green
+    [185, 79, 255],   // saber-purple
+    [255, 215, 0],    // gold
+    [232, 244, 255],  // star-white
+    [0, 212, 255],    // saber-blue (close the loop)
   ];
 
-  let comets = [];
+  let rings = [];
+  let ringCount = 0;
 
-  function spawnComet() {
-    const W = shipCanvas.width;
-    const H = shipCanvas.height;
-    // Random entry from left or top edges, exit opposite side
-    const fromLeft = Math.random() > 0.4;
-    const col = colors[Math.floor(Math.random() * colors.length)];
-    const angle = fromLeft
-      ? (Math.random() * 0.5 - 0.1)           // mostly rightward, slight diagonal
-      : (Math.PI * 0.4 + Math.random() * 0.5); // downward-right from top
-    const spd = 6 + Math.random() * 8;
-    comets.push({
-      x: fromLeft ? -60 : W * (0.1 + Math.random() * 0.8),
-      y: fromLeft ? H * (0.1 + Math.random() * 0.8) : -60,
-      vx: Math.cos(angle) * spd,
-      vy: Math.sin(angle) * spd,
-      life: 1,
-      decay: 0.005 + Math.random() * 0.005,
-      tailLen: 80 + Math.random() * 120,
-      width: 2 + Math.random() * 2.5,
-      r: col[0], g: col[1], b: col[2]
-    });
+  function spawnRing() {
+    const cx = shipCanvas.width / 2;
+    const cy = shipCanvas.height / 2;
+    const maxR = Math.hypot(cx, cy) * 1.15;
+    const col = palette[ringCount % palette.length];
+    ringCount++;
+    rings.push({ cx, cy, radius: 0, maxRadius: maxR, life: 1, r: col[0], g: col[1], b: col[2] });
   }
 
-  // Spawn 8 comets staggered over ~2s
-  for (let i = 0; i < 8; i++) {
-    setTimeout(spawnComet, i * 250);
+  // 6 rings staggered over ~2s
+  for (let i = 0; i < 6; i++) {
+    setTimeout(spawnRing, i * 350);
   }
-  sounds.blasterFlyby();
 
-  // Show banner early
+  sounds.shockwaveImpact();
+
   setTimeout(() => {
     const banner = document.getElementById('congratsBanner');
     banner.classList.add('show');
@@ -1977,55 +2001,49 @@ function launchCelebration() {
     }, 3500);
   }, 300);
 
+  // Keep loop alive until all rings have spawned and faded
+  const loopUntil = Date.now() + 3500;
+
   function frame() {
-    const W2 = shipCanvas.width;
-    const H2 = shipCanvas.height;
-    shipCtx.clearRect(0, 0, W2, H2);
+    const W = shipCanvas.width;
+    const H = shipCanvas.height;
+    shipCtx.clearRect(0, 0, W, H);
 
-    comets = comets.filter(c => c.life > 0.02);
+    rings = rings.filter(r => r.life > 0.01);
 
-    comets.forEach(c => {
-      // Draw glowing tail as gradient line
-      const tailX = c.x - c.vx / Math.hypot(c.vx, c.vy) * c.tailLen * c.life;
-      const tailY = c.y - c.vy / Math.hypot(c.vx, c.vy) * c.tailLen * c.life;
+    rings.forEach(r => {
+      r.radius += 5 + (1 - r.life) * 4;
+      r.life = Math.max(0, 1 - r.radius / r.maxRadius);
 
-      const grad = shipCtx.createLinearGradient(tailX, tailY, c.x, c.y);
-      grad.addColorStop(0, `rgba(${c.r},${c.g},${c.b},0)`);
-      grad.addColorStop(1, `rgba(${c.r},${c.g},${c.b},${c.life * 0.9})`);
+      const alpha = r.life * 0.85;
+      const lw = 4 + r.life * 8;
 
+      // Soft outer glow
       shipCtx.beginPath();
-      shipCtx.moveTo(tailX, tailY);
-      shipCtx.lineTo(c.x, c.y);
-      shipCtx.strokeStyle = grad;
-      shipCtx.lineWidth = c.width * c.life;
-      shipCtx.lineCap = 'round';
+      shipCtx.arc(r.cx, r.cy, r.radius, 0, Math.PI * 2);
+      shipCtx.strokeStyle = `rgba(${r.r},${r.g},${r.b},${alpha * 0.3})`;
+      shipCtx.lineWidth = lw * 3;
       shipCtx.stroke();
 
-      // Bright head glow
-      const glowGrad = shipCtx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.width * 5 * c.life);
-      glowGrad.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${c.life})`);
-      glowGrad.addColorStop(1, 'transparent');
+      // Core ring
       shipCtx.beginPath();
-      shipCtx.arc(c.x, c.y, c.width * 5 * c.life, 0, Math.PI * 2);
-      shipCtx.fillStyle = glowGrad;
-      shipCtx.fill();
+      shipCtx.arc(r.cx, r.cy, r.radius, 0, Math.PI * 2);
+      shipCtx.strokeStyle = `rgba(${r.r},${r.g},${r.b},${alpha})`;
+      shipCtx.lineWidth = lw;
+      shipCtx.stroke();
 
-      // Move
-      c.x += c.vx;
-      c.y += c.vy;
-
-      // Fade once off-screen
-      if (c.x > W2 + 100 || c.y > H2 + 100 || c.x < -100 || c.y < -100) {
-        c.life -= 0.08;
-      } else {
-        c.life -= c.decay;
-      }
+      // Bright white inner edge
+      shipCtx.beginPath();
+      shipCtx.arc(r.cx, r.cy, r.radius * 0.97, 0, Math.PI * 2);
+      shipCtx.strokeStyle = `rgba(255,255,255,${alpha * 0.5})`;
+      shipCtx.lineWidth = 1.5;
+      shipCtx.stroke();
     });
 
-    if (comets.length > 0) {
+    if (Date.now() < loopUntil || rings.length > 0) {
       requestAnimationFrame(frame);
     } else {
-      shipCtx.clearRect(0, 0, W2, H2);
+      shipCtx.clearRect(0, 0, W, H);
       celebrationActive = false;
     }
   }
@@ -2425,18 +2443,29 @@ function startQuiz() {
   questions = picked.map(x => x.q);
   questionOps = picked.map(x => x.op);
 
-  answers = new Array(20).fill(null);
-  currentQ = 0;
-  score = 0;
-
-  hyperspaceHandled = false;
-  buildNavDots();
-  showScreen('quiz');
-  loadQuestion(0);
-  setTimeout(() => document.getElementById('answerInput').focus(), 200);
+  // Animate button fill left-to-right, then launch
+  const btn = document.getElementById('startBtn');
+  if (btn.classList.contains('launching')) return;
+  btn.classList.add('launching');
   sounds.missionStart();
-  if (hyperspaceEnabled) startHyperspaceTimer();
-  if (kesselRunEnabled) startKesselTimer();
+
+  // At liftoff (1100ms) — burst flash on the fill
+  setTimeout(() => btn.classList.add('liftoff'), 1100);
+
+  // At 1300ms — transition to quiz screen
+  setTimeout(() => {
+    btn.classList.remove('launching', 'liftoff');
+    answers = new Array(20).fill(null);
+    currentQ = 0;
+    score = 0;
+    hyperspaceHandled = false;
+    buildNavDots();
+    showScreen('quiz');
+    loadQuestion(0);
+    setTimeout(() => document.getElementById('answerInput').focus(), 200);
+    if (hyperspaceEnabled) startHyperspaceTimer();
+    if (kesselRunEnabled) startKesselTimer();
+  }, 1300);
 }
 
 // ===== HELPERS =====
