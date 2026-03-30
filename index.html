@@ -1906,12 +1906,25 @@ const sounds = {
     setTimeout(() => playTone(900, 'sine', 0.15, 0.1), 80);
     setTimeout(() => playTone(1200, 'sine', 0.08, 0.12), 200);
   },
+  blasterFlyby() {
+    // Tie-fighter-like whoosh for comet celebration
+    playNoise(0.15, 0.12, 200);
+    playFreqSweep(1200, 180, 'sawtooth', 0.4, 0.08);
+    setTimeout(() => playFreqSweep(800, 120, 'square', 0.3, 0.06), 80);
+  },
   shockwaveImpact() {
     // Deep bass thud as rings expand outward
     playTone(80, 'sine', 0.5, 0.3);
     playTone(55, 'sine', 0.4, 0.4);
     playNoise(0.15, 0.1, 50);
     setTimeout(() => playTone(110, 'sine', 0.2, 0.2), 200);
+  },
+  burstPop() {
+    // Sharp crack + sparkle for particle explosion
+    playNoise(0.06, 0.28, 350);
+    playFreqSweep(900, 180, 'sine', 0.3, 0.1);
+    setTimeout(() => playTone(1200, 'sine', 0.1, 0.08), 60);
+    setTimeout(() => playTone(1600, 'sine', 0.07, 0.06), 130);
   },
   hyperspaceJump() {
     // Rising roar as ship jumps to hyperspace
@@ -1984,9 +1997,9 @@ function launchCelebration() {
     rings.push({ cx, cy, radius: 0, maxRadius: maxR, life: 1, r: col[0], g: col[1], b: col[2] });
   }
 
-  // 6 rings staggered over ~2s
-  for (let i = 0; i < 6; i++) {
-    setTimeout(spawnRing, i * 350);
+  // 9 rings staggered over ~2.5s
+  for (let i = 0; i < 9; i++) {
+    setTimeout(spawnRing, i * 280);
   }
 
   sounds.shockwaveImpact();
@@ -2001,8 +2014,7 @@ function launchCelebration() {
     }, 3500);
   }, 300);
 
-  // Keep loop alive until all rings have spawned and faded
-  const loopUntil = Date.now() + 3500;
+  const loopUntil = Date.now() + 5000;
 
   function frame() {
     const W = shipCanvas.width;
@@ -2044,6 +2056,113 @@ function launchCelebration() {
       requestAnimationFrame(frame);
     } else {
       shipCtx.clearRect(0, 0, W, H);
+      celebrationActive = false;
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+// ===== KESSEL RUN COMET CELEBRATION =====
+function launchKesselCelebration() {
+  if (celebrationActive) return;
+  celebrationActive = true;
+
+  const colors = [
+    [255, 215, 0],
+    [0, 212, 255],
+    [57, 255, 20],
+    [232, 244, 255],
+    [185, 79, 255]
+  ];
+
+  let comets = [];
+
+  function spawnComet() {
+    const W = shipCanvas.width;
+    const H = shipCanvas.height;
+    const fromLeft = Math.random() > 0.4;
+    const col = colors[Math.floor(Math.random() * colors.length)];
+    const angle = fromLeft
+      ? (Math.random() * 0.5 - 0.1)
+      : (Math.PI * 0.4 + Math.random() * 0.5);
+    const spd = 6 + Math.random() * 8;
+    comets.push({
+      x: fromLeft ? -60 : W * (0.1 + Math.random() * 0.8),
+      y: fromLeft ? H * (0.1 + Math.random() * 0.8) : -60,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd,
+      life: 1,
+      decay: 0.005 + Math.random() * 0.005,
+      tailLen: 80 + Math.random() * 120,
+      width: 2 + Math.random() * 2.5,
+      r: col[0], g: col[1], b: col[2]
+    });
+  }
+
+  // 22 comets staggered over ~4s
+  for (let i = 0; i < 22; i++) {
+    setTimeout(spawnComet, i * 185);
+  }
+
+  sounds.blasterFlyby();
+
+  setTimeout(() => {
+    const banner = document.getElementById('congratsBanner');
+    banner.classList.add('show');
+    sounds.victory();
+    setTimeout(() => {
+      banner.classList.remove('show');
+      banner.style.animation = 'none';
+    }, 3500);
+  }, 300);
+
+  const loopUntil = Date.now() + 9000;
+
+  function frame() {
+    const W2 = shipCanvas.width;
+    const H2 = shipCanvas.height;
+    shipCtx.clearRect(0, 0, W2, H2);
+
+    comets = comets.filter(c => c.life > 0.02);
+
+    comets.forEach(c => {
+      const tailX = c.x - c.vx / Math.hypot(c.vx, c.vy) * c.tailLen * c.life;
+      const tailY = c.y - c.vy / Math.hypot(c.vx, c.vy) * c.tailLen * c.life;
+
+      const grad = shipCtx.createLinearGradient(tailX, tailY, c.x, c.y);
+      grad.addColorStop(0, `rgba(${c.r},${c.g},${c.b},0)`);
+      grad.addColorStop(1, `rgba(${c.r},${c.g},${c.b},${c.life * 0.9})`);
+
+      shipCtx.beginPath();
+      shipCtx.moveTo(tailX, tailY);
+      shipCtx.lineTo(c.x, c.y);
+      shipCtx.strokeStyle = grad;
+      shipCtx.lineWidth = c.width * c.life;
+      shipCtx.lineCap = 'round';
+      shipCtx.stroke();
+
+      const glowGrad = shipCtx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.width * 5 * c.life);
+      glowGrad.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${c.life})`);
+      glowGrad.addColorStop(1, 'transparent');
+      shipCtx.beginPath();
+      shipCtx.arc(c.x, c.y, c.width * 5 * c.life, 0, Math.PI * 2);
+      shipCtx.fillStyle = glowGrad;
+      shipCtx.fill();
+
+      c.x += c.vx;
+      c.y += c.vy;
+      if (c.x > W2 + 100 || c.y > H2 + 100 || c.x < -100 || c.y < -100) {
+        c.life -= 0.08;
+      } else {
+        c.life -= c.decay;
+      }
+    });
+
+    if (Date.now() < loopUntil || comets.length > 0) {
+      requestAnimationFrame(frame);
+    } else {
+      shipCtx.clearRect(0, 0, W2, H2);
       celebrationActive = false;
     }
   }
@@ -2704,9 +2823,9 @@ function showResults() {
 
   showScreen('results');
 
-  // Fireworks celebration on passing (≥ 75%) in Standard and Kessel Run modes
+  // Mode-specific celebrations on passing (≥ 75%)
   if (pct >= 0.75 && !hyperspaceHandled) {
-    setTimeout(launchCelebration, 400);
+    setTimeout(kesselRunEnabled ? launchKesselCelebration : launchCelebration, 400);
   }
 }
 
