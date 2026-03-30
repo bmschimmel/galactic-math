@@ -2532,44 +2532,59 @@ function startQuiz() {
   const nums = [...selectedNums];
   questions = [];
   questionOps = [];
-  const pool = [];
-  const opPool = [];
 
-  if (selectedOps.has('multiply')) {
-    nums.forEach(a => nums.forEach(b => { pool.push([a, b]); opPool.push('multiply'); }));
-  }
-  if (selectedOps.has('divide')) {
-    nums.forEach(a => nums.forEach(b => {
-      if (b > 0) { pool.push([a * b, b]); opPool.push('divide'); }
-    }));
-  }
-  if (selectedOps.has('add')) {
-    nums.forEach(a => nums.forEach(b => { pool.push([a, b]); opPool.push('add'); }));
-  }
-  if (selectedOps.has('subtract')) {
-    nums.forEach(a => nums.forEach(b => {
-      if (a >= b) { pool.push([a, b]); opPool.push('subtract'); }
-    }));
-  }
+  // Build a separate question pool for each selected operation
+  const ops = [...selectedOps];
+  const perOpPool = {};
+  ops.forEach(op => {
+    const pool = [];
+    if (op === 'multiply') {
+      nums.forEach(a => nums.forEach(b => pool.push([a, b])));
+    } else if (op === 'divide') {
+      nums.forEach(a => nums.forEach(b => { if (b > 0) pool.push([a * b, b]); }));
+    } else if (op === 'add') {
+      nums.forEach(a => nums.forEach(b => pool.push([a, b])));
+    } else if (op === 'subtract') {
+      nums.forEach(a => nums.forEach(b => { if (a >= b) pool.push([a, b]); }));
+    }
+    perOpPool[op] = pool;
+  });
 
-  if (pool.length === 0) {
+  const totalAvailable = ops.reduce((sum, op) => sum + perOpPool[op].length, 0);
+  if (totalAvailable === 0) {
     document.getElementById('setupError').textContent = '⚠ No valid problems — select non-zero numbers for division';
     return;
   }
 
-  // shuffle pool + opPool together
-  const combined = pool.map((q, i) => ({ q, op: opPool[i] }));
+  // Evenly distribute SESSION_LENGTH questions across selected operations
+  const opCount = ops.length;
+  const baseCount = Math.floor(SESSION_LENGTH / opCount);
+  const remainder = SESSION_LENGTH % opCount;
+  const combined = [];
+
+  ops.forEach((op, idx) => {
+    const quota = baseCount + (idx < remainder ? 1 : 0);
+    const pool = perOpPool[op];
+    // Shuffle this operation's pool
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    // Pick quota questions, repeating if the pool is smaller than the quota
+    const picked = pool.slice(0, Math.min(quota, pool.length));
+    while (picked.length < quota) {
+      picked.push([...pool[Math.floor(Math.random() * pool.length)]]);
+    }
+    picked.forEach(q => combined.push({ q, op }));
+  });
+
+  // Shuffle the combined set so operations are interleaved randomly
   for (let i = combined.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [combined[i], combined[j]] = [combined[j], combined[i]];
   }
-  const picked = combined.slice(0, Math.min(SESSION_LENGTH, combined.length));
-  while (picked.length < SESSION_LENGTH) {
-    const extra = combined[Math.floor(Math.random() * combined.length)];
-    picked.push({ q: [...extra.q], op: extra.op });
-  }
-  questions = picked.map(x => x.q);
-  questionOps = picked.map(x => x.op);
+  questions = combined.map(x => x.q);
+  questionOps = combined.map(x => x.op);
 
   // Animate button fill left-to-right, then launch
   const btn = document.getElementById('startBtn');
