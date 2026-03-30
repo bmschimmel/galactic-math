@@ -1654,7 +1654,7 @@
     <div class="nav-dots" id="navDots"></div>
     <div class="quiz-actions">
       <button class="restart-btn" onclick="restartQuiz()">↺ RESTART</button>
-      <button class="quit-btn" onclick="newMission()">⌂ ABORT MISSION</button>
+      <button class="quit-btn" onclick="sounds.abortMission(); newMission()">⌂ ABORT MISSION</button>
     </div>
   </div>
 
@@ -2871,7 +2871,6 @@ function retryQuiz() {
 }
 
 function newMission() {
-  sounds.abortMission();
   stopHyperspaceTimer();
   stopKesselTimer();
   showScreen('setup');
