@@ -1953,6 +1953,13 @@ const sounds = {
     setTimeout(() => playTone(660, 'square', 0.07, 0.1), 200);
     setTimeout(() => playTone(660, 'square', 0.07, 0.1), 400);
     setTimeout(() => playFreqSweep(880, 1760, 'sawtooth', 0.25, 0.12), 650);
+  },
+  abortMission() {
+    // Deflating power-down — engines losing thrust then silence
+    playFreqSweep(480, 60, 'sawtooth', 0.7, 0.14);
+    setTimeout(() => playFreqSweep(300, 40, 'sine', 0.5, 0.1), 300);
+    setTimeout(() => playNoise(0.3, 0.04, 80), 500);
+    setTimeout(() => playFreqSweep(80, 20, 'sine', 0.4, 0.06), 700);
   }
 };
 
@@ -2864,6 +2871,7 @@ function retryQuiz() {
 }
 
 function newMission() {
+  sounds.abortMission();
   stopHyperspaceTimer();
   stopKesselTimer();
   showScreen('setup');
