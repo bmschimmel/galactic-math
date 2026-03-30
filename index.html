@@ -2100,8 +2100,8 @@ function launchKesselCelebration() {
     });
   }
 
-  // 14 comets staggered over ~2.5s
-  for (let i = 0; i < 14; i++) {
+  // 22 comets staggered over ~4s
+  for (let i = 0; i < 22; i++) {
     setTimeout(spawnComet, i * 185);
   }
 
@@ -2117,7 +2117,7 @@ function launchKesselCelebration() {
     }, 3500);
   }, 300);
 
-  const loopUntil = Date.now() + 3000;
+  const loopUntil = Date.now() + 5000;
 
   function frame() {
     const W2 = shipCanvas.width;
