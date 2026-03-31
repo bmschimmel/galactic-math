@@ -105,6 +105,30 @@ Before opening a PR verify:
 
 ---
 
+## Documentation
+
+The `docs/` folder contains developer documentation explaining how each part of the app works. After making any code changes, review the relevant docs files and update them if the behavior, structure, or design has changed.
+
+### Changelog
+
+`docs/CHANGELOG.md` must be updated with every PR that changes code. Add an entry under the correct date heading (newest first) using this format:
+
+```markdown
+## YYYY-MM-DD
+
+### IDT-XX — Short description of what changed (PR #N)
+One or two sentences explaining what was added or fixed and why. Focus on
+the user-facing or developer-facing impact, not just what lines changed.
+```
+
+Rules:
+- One `### IDT-XX` entry per Linear issue, not per commit
+- Use the merge date as the date heading
+- If multiple issues merge on the same date, group them under a single `## YYYY-MM-DD` heading
+- Match the existing tone: plain declarative sentences, no bullet soup
+
+---
+
 ## Deployment
 
 Cloudflare Pages deploys automatically on every merge to `main`. No manual deploy
@@ -136,6 +160,7 @@ When picking up a Linear issue:
    **"Galactic Math"** project and label it **claude**
 4. Create a branch following the naming convention above
 5. Make changes only to `index.html` unless the issue explicitly requires otherwise
+5a. After making changes, review `docs/` and update any files whose described behavior has changed; always add a `docs/CHANGELOG.md` entry
 6. Follow all rules in `CLAUDE.md` — single file, no dependencies, no localStorage
 7. Commit with the Linear ID in every commit message
 8. Open a PR with `Fixes IDT-XX` in the description
