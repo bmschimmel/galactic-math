@@ -15,6 +15,7 @@ This folder contains developer documentation explaining how each part of Galacti
 | [audio-engine.md](audio-engine.md) | Web Audio API primitives and sound library |
 | [visuals.md](visuals.md) | Starfield, ring shockwave, comet celebration, hyperspace jump, CSS animations |
 | [ui.md](ui.md) | Theme cycler, session history, keyboard navigation, mobile support |
+| [design-ux.md](design-ux.md) | Design concept, color palette, typography, tone, wording, interaction patterns |
 | [feedback-system.md](feedback-system.md) | Feedback form, Cloudflare Worker, GitHub Issues integration |
 | [CHANGELOG.md](CHANGELOG.md) | Full history of changes by Linear issue and PR |
 
