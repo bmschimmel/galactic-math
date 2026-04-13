@@ -1554,7 +1554,7 @@
       </div>
 
       <div class="saber-divider" style="margin: 20px 0 16px;"></div>
-      <span class="setup-label">▸ Play Time Based Modes (Optional)</span>
+      <span class="setup-label">▸ Play Special Modes (Optional)</span>
       <div class="game-mode-tiles">
         <div class="game-mode-tile-wrap">
           <button class="game-mode-tile-btn" id="hyperspaceToggle" onclick="toggleHyperspace()">
@@ -1593,6 +1593,16 @@
               <div class="tile-desc">How fast can you finish?</div>
             </div>
             <span class="tile-badge" id="kesselBadge">OFF</span>
+          </button>
+        </div>
+        <div class="game-mode-tile-wrap">
+          <button class="game-mode-tile-btn" id="raceToEarthBtn" onclick="launchRaceToEarth()">
+            <span class="tile-icon">🌍</span>
+            <div class="tile-body">
+              <div class="tile-name">RACE TO EARTH</div>
+              <div class="tile-desc">Navigate 20 gates home!</div>
+            </div>
+            <span class="tile-badge" style="color:var(--saber-green);border-color:var(--saber-green);text-shadow:0 0 8px var(--saber-green);">PLAY</span>
           </button>
         </div>
       </div>
@@ -2490,6 +2500,21 @@ function toggleKesselRun() {
   } else {
     sounds.navigate();
   }
+}
+
+// ===== RACE TO EARTH MODE =====
+function launchRaceToEarth() {
+  if (selectedOps.size === 0) {
+    document.getElementById('setupError').textContent = '⚠ Select at least one operation to begin';
+    return;
+  }
+  if (selectedNums.size < 3) {
+    document.getElementById('setupError').textContent = '⚠ Select at least 3 numbers';
+    return;
+  }
+  const nums = [...selectedNums].join(',');
+  const ops = [...selectedOps].join(',');
+  window.location.href = `pages/race-to-earth.html?nums=${encodeURIComponent(nums)}&ops=${encodeURIComponent(ops)}`;
 }
 
 function startKesselTimer() {

@@ -5,6 +5,11 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-04-13 (2)
+
+### IDT-101 — Race to Earth game mode (PR #74)
+New canvas-based game at `pages/race-to-earth.html`. The player flies a spaceship through 20 math gates using arrow keys to return home. Wrong answers cost 5% oxygen; running out of oxygen or losing all 5 lives (from crashing into asteroids or alien saucers) ends the run. Three bonus rainbow gates (gates 5, 10, 15) require 3 correct answers each and refuel oxygen by 10% on completion. A pulsing directional arrow guides the player to the next gate when it's off-screen. Gates are colored by operator (purple = multiply, gold = divide, green = add, red = subtract). A "Race to Earth" tile was added to the main setup screen's Special Modes section alongside Hyperspace and Kessel Run.
+
 ## 2026-04-13
 
 ### IDT-100 — GitHub repo link in footer and developer docs TOC in README (PR #72)
