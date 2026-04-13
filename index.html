@@ -2479,6 +2479,10 @@ function hyperspaceSuccess() {
 
 function hyperspaceFailure() {
   hyperspaceHandled = true;
+  const input = document.getElementById('answerInput');
+  if (input) input.setAttribute('disabled', '');
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) submitBtn.disabled = true;
   sounds.hyperspaceTimeout();
 
   const banner = document.getElementById('hyperFailBanner');
@@ -2693,10 +2697,12 @@ function loadQuestion(idx) {
   const input = document.getElementById('answerInput');
   input.value = answers[idx] !== null ? answers[idx] : '';
   input.className = 'answer-input';
-  input.removeAttribute('disabled');
-  document.getElementById('quizError').textContent = '';
-  const submitBtn = document.getElementById('submitBtn');
-  if (submitBtn) submitBtn.disabled = false;
+  if (!hyperspaceHandled) {
+    input.removeAttribute('disabled');
+    document.getElementById('quizError').textContent = '';
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) submitBtn.disabled = false;
+  }
 
   // recolor if already answered
   if (answers[idx] !== null) {
