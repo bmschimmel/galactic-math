@@ -334,16 +334,37 @@
 
   /* Game mode tiles */
   .game-mode-tiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    display: flex;
     gap: 10px;
-    align-items: start;
   }
   .game-mode-tile-wrap {
+    flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
+  }
+  /* Race to Earth dev-mode link */
+  .rte-dev-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px dashed rgba(57,255,20,0.25);
+    border-radius: 8px;
+    color: rgba(57,255,20,0.6);
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+  }
+  .rte-dev-link:hover {
+    border-color: rgba(57,255,20,0.55);
+    color: rgba(57,255,20,0.9);
+    background: rgba(57,255,20,0.04);
   }
   .game-mode-tile-btn {
     width: 100%;
@@ -424,19 +445,6 @@
     color: var(--saber-green);
     filter: drop-shadow(0 0 4px var(--saber-green));
   }
-  /* Launch-style badge (no ON/OFF toggle, always lit) */
-  .tile-badge-launch {
-    color: var(--saber-green);
-    border-color: var(--saber-green);
-    background: rgba(57, 255, 20, 0.08);
-    text-shadow: 0 0 8px var(--saber-green);
-  }
-  .tile-badge-launch::before {
-    content: '▶';
-    opacity: 1;
-    color: var(--saber-green);
-  }
-
   /* ===== MOBILE LAYOUT ===== */
   @media (max-width: 600px) {
     /* Push content below the fixed history/theme buttons */
@@ -1562,7 +1570,7 @@
       </div>
 
       <div class="saber-divider" style="margin: 20px 0 16px;"></div>
-      <span class="setup-label">▸ Play Special Modes (Optional)</span>
+      <span class="setup-label">▸ Timed Challenge Modes (Optional)</span>
       <div class="game-mode-tiles">
         <div class="game-mode-tile-wrap">
           <button class="game-mode-tile-btn" id="hyperspaceToggle" onclick="toggleHyperspace()">
@@ -1603,16 +1611,6 @@
             <span class="tile-badge" id="kesselBadge">OFF</span>
           </button>
         </div>
-        <div class="game-mode-tile-wrap">
-          <button class="game-mode-tile-btn" id="raceToEarthBtn" onclick="launchRaceToEarth()">
-            <span class="tile-icon">🌍</span>
-            <div class="tile-body">
-              <div class="tile-name">RACE TO EARTH</div>
-              <div class="tile-desc">Navigate 20 gates home!</div>
-            </div>
-            <span class="tile-badge tile-badge-launch">PLAY</span>
-          </button>
-        </div>
       </div>
 
       <div class="error-msg" id="setupError"></div>
@@ -1620,6 +1618,7 @@
       <button class="btn-primary" onclick="startQuiz()" id="startBtn">
         <span>🚀 BEGIN TRAINING MISSION</span>
       </button>
+      <button class="rte-dev-link" onclick="launchRaceToEarth()">🌍 Try Race to Earth — new mode in development</button>
     </div>
   </div>
 
