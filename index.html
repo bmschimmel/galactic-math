@@ -1956,6 +1956,11 @@ const sounds = {
     setTimeout(() => playFreqSweep(400, 60, 'square', 0.4, 0.1), 350);
     setTimeout(() => playTone(120, 'square', 0.4, 0.12), 700);
   },
+  hyperspaceCountdownTick(secondsLeft) {
+    // Tense tick — pitch rises as time runs out
+    const freq = 440 + (10 - secondsLeft) * 40;
+    playTone(freq, 'square', 0.07, 0.09);
+  },
   hyperspaceActivate() {
     // Hyperdrive charging up — low rumble builds to a high-energy peak
     playFreqSweep(60, 300, 'sawtooth', 0.4, 0.1);
@@ -2446,6 +2451,10 @@ function startHyperspaceTimer() {
     if (!hyperspaceHalfwayShown && pct <= 0.5) {
       hyperspaceHalfwayShown = true;
       document.getElementById('hyperspaceStatusMsg').textContent = '▸ COORDINATES CHECKED, ALMOST READY';
+    }
+
+    if (hyperspaceTimeRemaining > 0 && hyperspaceTimeRemaining <= 10) {
+      sounds.hyperspaceCountdownTick(hyperspaceTimeRemaining);
     }
 
     if (hyperspaceTimeRemaining <= 0) {
