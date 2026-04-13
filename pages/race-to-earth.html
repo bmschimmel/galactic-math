@@ -582,50 +582,103 @@ const sounds = {
     });
   },
 
-  // Thrust rumble — audible engine roar while keys held
+  // Rocket engine — noise-based whoosh + low rumble (sounds like a booster)
   thrustStart() {
-    if (thrustOscNode) return; // already playing
+    if (thrustOscNode) return;
     const ctx = getAudio();
     if (ctx.state === 'suspended') ctx.resume();
-    // Main engine: sawtooth at 110Hz — audible on all speakers
-    const osc  = ctx.createOscillator();
-    const lp   = ctx.createBiquadFilter();
-    const gain = ctx.createGain();
-    osc.type = 'sawtooth'; osc.frequency.value = 110;
-    lp.type = 'lowpass'; lp.frequency.value = 600; lp.Q.value = 3;
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 0.12);
-    osc.connect(lp); lp.connect(gain); gain.connect(ctx.destination);
-    osc.start();
-    // Second oscillator: slightly detuned for texture
-    const osc2  = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = 'sawtooth'; osc2.frequency.value = 116;
-    gain2.gain.setValueAtTime(0, ctx.currentTime);
-    gain2.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.15);
-    osc2.connect(gain2); gain2.connect(ctx.destination);
-    osc2.start();
-    thrustOscNode  = osc;
-    thrustGainNode = gain;
-    gain._osc2  = osc2;
-    gain._gain2 = gain2;
+
+    // ── Noise source (looped 1-second buffer of white noise) ──
+    const bufLen = ctx.sampleRate;
+    const buf    = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const data   = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf; noise.loop = true;
+
+    // Shape the noise: bandpass centered at 350Hz for that jet-exhaust hiss
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = 350; bp.Q.value = 0.5;
+
+    // Boost low end
+    const ls = ctx.createBiquadFilter();
+    ls.type = 'lowshelf'; ls.frequency.value = 250; ls.gain.value = 10;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0, ctx.currentTime);
+    noiseGain.gain.linearRampToValueAtTime(0.38, ctx.currentTime + 0.18);
+
+    noise.connect(bp); bp.connect(ls); ls.connect(noiseGain); noiseGain.connect(ctx.destination);
+    noise.start();
+
+    // ── Low rumble oscillator (sub-bass foundation) ──
+    const rumble  = ctx.createOscillator();
+    const rumbleG = ctx.createGain();
+    rumble.type = 'sine'; rumble.frequency.value = 72;
+    rumbleG.gain.setValueAtTime(0, ctx.currentTime);
+    rumbleG.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.12);
+    rumble.connect(rumbleG); rumbleG.connect(ctx.destination);
+    rumble.start();
+
+    // ── Mid harmonic crackle (makes it sound powerful, not clean) ──
+    const crackle  = ctx.createOscillator();
+    const crackleG = ctx.createGain();
+    crackle.type = 'sawtooth'; crackle.frequency.value = 144;
+    crackleG.gain.setValueAtTime(0, ctx.currentTime);
+    crackleG.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.2);
+    crackle.connect(crackleG); crackleG.connect(ctx.destination);
+    crackle.start();
+
+    thrustOscNode  = noise;   // used as handle to check "is thrusting"
+    thrustGainNode = noiseGain;
+    noiseGain._rumble  = rumble;  noiseGain._rumbleG  = rumbleG;
+    noiseGain._crackle = crackle; noiseGain._crackleG = crackleG;
   },
 
   thrustStop() {
     if (!thrustOscNode) return;
-    const ctx  = getAudio();
-    const g    = thrustGainNode;
-    const o    = thrustOscNode;
-    const o2   = g._osc2;
-    const g2   = g._gain2;
-    const now  = ctx.currentTime;
-    g.gain.cancelScheduledValues(now);
-    g.gain.setValueAtTime(g.gain.value, now);
-    g.gain.linearRampToValueAtTime(0, now + 0.15);
-    if (g2) { g2.gain.cancelScheduledValues(now); g2.gain.setValueAtTime(g2.gain.value, now); g2.gain.linearRampToValueAtTime(0, now + 0.15); }
-    setTimeout(() => { try { o.stop(); } catch(_) {} try { if (o2) o2.stop(); } catch(_) {} }, 220);
-    thrustOscNode  = null;
-    thrustGainNode = null;
+    const ctx = getAudio();
+    const g   = thrustGainNode;
+    const n   = thrustOscNode;
+    const now = ctx.currentTime;
+    // Fade noise
+    g.gain.cancelScheduledValues(now); g.gain.setValueAtTime(g.gain.value, now);
+    g.gain.linearRampToValueAtTime(0, now + 0.22);
+    // Fade rumble and crackle
+    const nodes = [[g._rumbleG, g._rumble],[g._crackleG, g._crackle]];
+    nodes.forEach(([gg, nn]) => {
+      if (!gg) return;
+      gg.gain.cancelScheduledValues(now); gg.gain.setValueAtTime(gg.gain.value, now);
+      gg.gain.linearRampToValueAtTime(0, now + 0.22);
+    });
+    setTimeout(() => {
+      [n, g._rumble, g._crackle].forEach(nd => { try { if (nd) nd.stop(); } catch(_) {} });
+    }, 320);
+    thrustOscNode = null; thrustGainNode = null;
+  },
+
+  // Alien laser fire — classic sci-fi pew
+  laserShot() {
+    const ctx = getAudio();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(900, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.18);
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.09, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+    o.start(); o.stop(ctx.currentTime + 0.18);
+  },
+
+  // Ship hit by laser
+  laserHit() {
+    const ctx = getAudio();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.value = 320;
+    o.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.25);
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.28, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    o.start(); o.stop(ctx.currentTime + 0.25);
   },
 
   // Landing on Earth — majestic triumph
@@ -729,7 +782,7 @@ let gameState = 'setup'; // 'playing' | 'question' | 'gameover' | 'victory'
 let paused = false;
 let ship, camera;
 let gates, obstacles, starField, planets, fuelPickups;
-let particles, comets;
+let particles, comets, lasers;
 let oxygen, lives, gatesCleared;
 let allGatesCleared = false; // set true when all gates done; then fly to Earth
 let activatedGate;    // which gate is currently being questioned (null if none)
@@ -780,6 +833,7 @@ function initGame() {
   rainbowAngle  = 0;
   particles     = [];
   comets        = [];
+  lasers        = [];
   nextCometTime = Date.now() + 1500;
   thrustOscNode = null;
   thrustGainNode = null;
@@ -892,7 +946,8 @@ function generateObstacles() {
     const y = 400 + Math.random()*(WORLD_H-600);
     if (tooClose(x,y)) continue;
     const a = Math.random()*Math.PI*2;
-    obs.push({ type:'alien', x, y, radius:22, vx:Math.cos(a)*(0.6+Math.random()*0.65), vy:Math.sin(a)*(0.6+Math.random()*0.65), wobble:Math.random()*Math.PI*2, color:Math.random()<0.5?'#39ff14':'#b94fff' });
+    const isShooter = Math.random() < 0.45;
+    obs.push({ type:'alien', x, y, radius:22, vx:Math.cos(a)*(0.6+Math.random()*0.65), vy:Math.sin(a)*(0.6+Math.random()*0.65), wobble:Math.random()*Math.PI*2, color:Math.random()<0.5?'#39ff14':'#b94fff', isShooter, nextShot: Date.now() + 4000 + Math.random() * 5000 });
   }
   return obs;
 }
@@ -947,13 +1002,16 @@ function gameLoop(ts) {
   if (gameState === 'playing') {
     updateShip(dt);
     updateObstacles(dt);
+    updateAlienLasers();
     checkGateTrigger();
     checkFuelPickups();
     checkObstacleCollisions();
+    checkLaserCollisions();
     checkCometCollisions();
   }
 
   updateParticles(dt);
+  updateLasers(dt);
   updateComets(Date.now());
 
   render();
@@ -1041,6 +1099,78 @@ function hitObstacle(obs) {
 
   updateHUD();
   if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `You cleared ${gatesCleared} of ${TOTAL_GATES} gates.`);
+}
+
+// ===== ALIEN LASERS =====
+function updateAlienLasers() {
+  const now = Date.now();
+  for (const obs of obstacles) {
+    if (obs.type !== 'alien' || !obs.isShooter) continue;
+    if (now >= obs.nextShot) {
+      obs.nextShot = now + 3000 + Math.random() * 3500;
+      const dx = ship.x - obs.x, dy = ship.y - obs.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      // Only fire if within ~900 world units of the ship
+      if (dist > 900) continue;
+      const speed = 5.5;
+      lasers.push({ x: obs.x, y: obs.y, vx: (dx/dist)*speed, vy: (dy/dist)*speed, color: obs.color, life: 1.0 });
+      sounds.laserShot();
+    }
+  }
+}
+
+function updateLasers(dt) {
+  for (let i = lasers.length - 1; i >= 0; i--) {
+    const l = lasers[i];
+    l.x += l.vx * dt; l.y += l.vy * dt;
+    l.life -= 0.003 * dt;
+    if (l.life <= 0 || l.x < -200 || l.x > WORLD_W+200 || l.y < -200 || l.y > WORLD_H+200) {
+      lasers.splice(i, 1);
+    }
+  }
+}
+
+function checkLaserCollisions() {
+  if (Date.now() < invincibleUntil) return;
+  for (let i = lasers.length - 1; i >= 0; i--) {
+    const l = lasers[i];
+    if (Math.hypot(ship.x - l.x, ship.y - l.y) < SHIP_RADIUS + 7) {
+      lasers.splice(i, 1);
+      hitByLaser(l);
+      break;
+    }
+  }
+}
+
+function hitByLaser(l) {
+  lives--;
+  invincibleUntil = Date.now() + 2000;
+  sounds.laserHit();
+  spawnParticles(ship.x, ship.y, 12, [l.color, '#ff2d55', '#ffffff', '#ffdd00'], 1.5, 4, 0.02, 0.04, 2, 5);
+  screenShake = 3;
+  updateHUD();
+  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `You cleared ${gatesCleared} of ${TOTAL_GATES} gates.`);
+}
+
+function drawLasers() {
+  lasers.forEach(l => {
+    const p = w2s(l.x, l.y);
+    if (!onScreen(p.x, p.y, 40)) return;
+    const angle = Math.atan2(l.vy, l.vx);
+    const len = 22;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(angle);
+    ctx.globalAlpha = Math.min(1, l.life * 1.4);
+    ctx.shadowColor = l.color; ctx.shadowBlur = 14;
+    // Bright white core
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(-len/2, 0); ctx.lineTo(len/2, 0); ctx.stroke();
+    // Colored glow layer
+    ctx.strokeStyle = l.color; ctx.lineWidth = 5; ctx.globalAlpha *= 0.45;
+    ctx.beginPath(); ctx.moveTo(-len/2, 0); ctx.lineTo(len/2, 0); ctx.stroke();
+    ctx.restore();
+  });
 }
 
 // ===== GATE TRIGGER =====
@@ -1374,6 +1504,7 @@ function render() {
   drawFuelPickups();
   drawGates();
   drawObstacles();
+  drawLasers();
   drawParticles();
   drawShip();
   ctx.restore();
@@ -1656,6 +1787,21 @@ function drawObstacles() {
       ctx.beginPath(); ctx.ellipse(0, hover-3, 11, 9, 0, Math.PI, 0); ctx.fill();
       ctx.fillStyle='#030712'; ctx.globalAlpha=0.5;
       [-7,0,7].forEach(px => { ctx.beginPath(); ctx.arc(px,hover+4,2.5,0,Math.PI*2); ctx.fill(); });
+      // Shooter alien: gun barrel pointing toward ship
+      if (obs.isShooter) {
+        const sp = w2s(ship.x, ship.y);
+        const angle = Math.atan2(sp.y - p.y, sp.x - p.x);
+        ctx.globalAlpha = 0.9;
+        ctx.strokeStyle = '#ff2d55'; ctx.lineWidth = 3;
+        ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 10;
+        ctx.save();
+        ctx.rotate(angle);
+        ctx.beginPath(); ctx.moveTo(14, hover); ctx.lineTo(26, hover); ctx.stroke();
+        // Muzzle tip
+        ctx.fillStyle = '#ff2d55';
+        ctx.beginPath(); ctx.arc(26, hover, 3, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
     }
     ctx.restore();
   });
