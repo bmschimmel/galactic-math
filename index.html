@@ -334,12 +334,12 @@
 
   /* Game mode tiles */
   .game-mode-tiles {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    align-items: start;
   }
   .game-mode-tile-wrap {
-    flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -424,9 +424,17 @@
     color: var(--saber-green);
     filter: drop-shadow(0 0 4px var(--saber-green));
   }
-  @media (max-width: 480px) {
-    .game-mode-tiles { flex-direction: column; align-items: center; }
-    .game-mode-tile-wrap { width: 100%; }
+  /* Launch-style badge (no ON/OFF toggle, always lit) */
+  .tile-badge-launch {
+    color: var(--saber-green);
+    border-color: var(--saber-green);
+    background: rgba(57, 255, 20, 0.08);
+    text-shadow: 0 0 8px var(--saber-green);
+  }
+  .tile-badge-launch::before {
+    content: '▶';
+    opacity: 1;
+    color: var(--saber-green);
   }
 
   /* ===== MOBILE LAYOUT ===== */
@@ -1602,7 +1610,7 @@
               <div class="tile-name">RACE TO EARTH</div>
               <div class="tile-desc">Navigate 20 gates home!</div>
             </div>
-            <span class="tile-badge" style="color:var(--saber-green);border-color:var(--saber-green);text-shadow:0 0 8px var(--saber-green);">PLAY</span>
+            <span class="tile-badge tile-badge-launch">PLAY</span>
           </button>
         </div>
       </div>

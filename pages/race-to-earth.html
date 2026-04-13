@@ -543,19 +543,23 @@ const sounds = {
 // ===== SETUP STATE =====
 let rteNums = new Set([2,3,4,5,6,7,8,9,10,11,12]);
 let rteOps  = new Set(['multiply']);
+let autoLaunch = false; // set true when valid params arrive from main app
 
-// Pre-populate from URL params passed from main app
+// Read URL params passed from main app — skip setup screen if complete
 (function() {
   const p = new URLSearchParams(window.location.search);
+  let numsOk = false, opsOk = false;
   if (p.get('nums')) {
     const parsed = p.get('nums').split(',').map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 13);
-    if (parsed.length >= 3) rteNums = new Set(parsed);
+    if (parsed.length >= 3) { rteNums = new Set(parsed); numsOk = true; }
   }
   if (p.get('ops')) {
     const valid = new Set(['multiply','divide','add','subtract']);
     const parsed = p.get('ops').split(',').filter(o => valid.has(o));
-    if (parsed.length > 0) rteOps = new Set(parsed);
+    if (parsed.length > 0) { rteOps = new Set(parsed); opsOk = true; }
   }
+  // Both selections came from main app and are valid — skip setup screen
+  if (numsOk && opsOk) autoLaunch = true;
 })();
 
 // Build number grid
@@ -1441,6 +1445,14 @@ function drawDirectionArrow() {
   ctx.moveTo(0, -14); ctx.lineTo(-9, 7); ctx.lineTo(0, 1); ctx.lineTo(9, 7);
   ctx.closePath(); ctx.fill();
   ctx.restore();
+}
+
+// ===== AUTO-LAUNCH =====
+// If valid number + op selections were passed from the main app, skip the
+// setup screen and go straight into the game.
+if (autoLaunch) {
+  document.getElementById('setupScreen').style.display = 'none';
+  initGame();
 }
 </script>
 </body>
