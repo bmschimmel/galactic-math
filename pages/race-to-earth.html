@@ -304,6 +304,17 @@
 
   /* ===== KEY HINT ===== */
   #keyHint { position: fixed; bottom: 10px; right: 14px; font-size: 10px; color: rgba(107,127,163,0.4); pointer-events: none; z-index: 5; }
+
+  /* ===== DEV BANNER ===== */
+  #devBanner {
+    position: fixed; bottom: 10px; left: 14px;
+    font-size: 10px; color: rgba(107,127,163,0.55);
+    pointer-events: all; z-index: 5;
+    font-family: 'Exo 2', sans-serif;
+    display: none;
+  }
+  #devBanner a { color: rgba(0,212,255,0.55); text-decoration: none; }
+  #devBanner a:hover { color: var(--saber-blue); }
 </style>
 </head>
 <body>
@@ -402,6 +413,7 @@
 
 <!-- ===== KEY HINT ===== -->
 <div id="keyHint">Arrow keys to thrust · Enter to submit · P to pause</div>
+<div id="devBanner">🚧 Still in development — <a href="feedback.html" target="_blank">submit ideas here</a></div>
 
 <script>
 // ===== AUDIO ENGINE =====
@@ -582,78 +594,65 @@ const sounds = {
     });
   },
 
-  // Rocket engine — noise-based whoosh + low rumble (sounds like a booster)
+  // Rocket thruster — detuned oscillator chord through waveshaper distortion
   thrustStart() {
     if (thrustOscNode) return;
     const ctx = getAudio();
     if (ctx.state === 'suspended') ctx.resume();
 
-    // ── Noise source (looped 1-second buffer of white noise) ──
-    const bufLen = ctx.sampleRate;
-    const buf    = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-    const data   = buf.getChannelData(0);
-    for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
-    const noise = ctx.createBufferSource();
-    noise.buffer = buf; noise.loop = true;
+    // Soft-clipping distortion curve — adds harmonics like a real motor
+    const curve = new Float32Array(512);
+    for (let i = 0; i < 512; i++) {
+      const x = (i * 2) / 512 - 1;
+      curve[i] = (Math.PI + 80) * x / (Math.PI + 80 * Math.abs(x));
+    }
+    const dist = ctx.createWaveShaper();
+    dist.curve = curve; dist.oversample = '2x';
 
-    // Shape the noise: bandpass centered at 350Hz for that jet-exhaust hiss
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass'; bp.frequency.value = 350; bp.Q.value = 0.5;
+    // Three detuned sawtooth oscillators — beating against each other = gritty motor texture
+    const freqs = [130, 138, 196]; // root, slight detune, perfect 5th above
+    const oscs  = freqs.map(f => {
+      const o = ctx.createOscillator();
+      o.type = 'sawtooth'; o.frequency.value = f; return o;
+    });
+    const mix = ctx.createGain(); mix.gain.value = 0.33;
+    oscs.forEach(o => o.connect(mix));
 
-    // Boost low end
-    const ls = ctx.createBiquadFilter();
-    ls.type = 'lowshelf'; ls.frequency.value = 250; ls.gain.value = 10;
+    // Low-pass keeps it warm, not shrill
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 1400; lp.Q.value = 0.8;
 
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0, ctx.currentTime);
-    noiseGain.gain.linearRampToValueAtTime(0.38, ctx.currentTime + 0.18);
+    // Slow LFO tremolo (6Hz) — "engine under load" breathing
+    const lfo    = ctx.createOscillator();
+    const lfoAmt = ctx.createGain();
+    lfo.type = 'sine'; lfo.frequency.value = 6;
+    lfoAmt.gain.value = 0.06;
+    lfo.connect(lfoAmt);
 
-    noise.connect(bp); bp.connect(ls); ls.connect(noiseGain); noiseGain.connect(ctx.destination);
-    noise.start();
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0, ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0.28, ctx.currentTime + 0.18);
+    lfoAmt.connect(master.gain); // tremolo into master gain
 
-    // ── Low rumble oscillator (sub-bass foundation) ──
-    const rumble  = ctx.createOscillator();
-    const rumbleG = ctx.createGain();
-    rumble.type = 'sine'; rumble.frequency.value = 72;
-    rumbleG.gain.setValueAtTime(0, ctx.currentTime);
-    rumbleG.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.12);
-    rumble.connect(rumbleG); rumbleG.connect(ctx.destination);
-    rumble.start();
+    mix.connect(dist); dist.connect(lp); lp.connect(master); master.connect(ctx.destination);
+    oscs.forEach(o => o.start());
+    lfo.start();
 
-    // ── Mid harmonic crackle (makes it sound powerful, not clean) ──
-    const crackle  = ctx.createOscillator();
-    const crackleG = ctx.createGain();
-    crackle.type = 'sawtooth'; crackle.frequency.value = 144;
-    crackleG.gain.setValueAtTime(0, ctx.currentTime);
-    crackleG.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.2);
-    crackle.connect(crackleG); crackleG.connect(ctx.destination);
-    crackle.start();
-
-    thrustOscNode  = noise;   // used as handle to check "is thrusting"
-    thrustGainNode = noiseGain;
-    noiseGain._rumble  = rumble;  noiseGain._rumbleG  = rumbleG;
-    noiseGain._crackle = crackle; noiseGain._crackleG = crackleG;
+    thrustOscNode  = oscs[0];
+    thrustGainNode = master;
+    master._allOscs = [...oscs, lfo];
   },
 
   thrustStop() {
     if (!thrustOscNode) return;
     const ctx = getAudio();
     const g   = thrustGainNode;
-    const n   = thrustOscNode;
     const now = ctx.currentTime;
-    // Fade noise
-    g.gain.cancelScheduledValues(now); g.gain.setValueAtTime(g.gain.value, now);
-    g.gain.linearRampToValueAtTime(0, now + 0.22);
-    // Fade rumble and crackle
-    const nodes = [[g._rumbleG, g._rumble],[g._crackleG, g._crackle]];
-    nodes.forEach(([gg, nn]) => {
-      if (!gg) return;
-      gg.gain.cancelScheduledValues(now); gg.gain.setValueAtTime(gg.gain.value, now);
-      gg.gain.linearRampToValueAtTime(0, now + 0.22);
-    });
-    setTimeout(() => {
-      [n, g._rumble, g._crackle].forEach(nd => { try { if (nd) nd.stop(); } catch(_) {} });
-    }, 320);
+    g.gain.cancelScheduledValues(now);
+    g.gain.setValueAtTime(g.gain.value, now);
+    g.gain.linearRampToValueAtTime(0, now + 0.2);
+    const all = g._allOscs || [thrustOscNode];
+    setTimeout(() => all.forEach(o => { try { o.stop(); } catch(_) {} }), 300);
     thrustOscNode = null; thrustGainNode = null;
   },
 
@@ -817,8 +816,9 @@ function initGame() {
   document.getElementById('setupScreen').style.display = 'none';
   document.getElementById('endScreen').style.display   = 'none';
   canvas.style.display = 'block';
-  document.getElementById('hud').style.display     = 'block';
-  document.getElementById('keyHint').style.display  = 'block';
+  document.getElementById('hud').style.display       = 'block';
+  document.getElementById('keyHint').style.display   = 'block';
+  document.getElementById('devBanner').style.display = 'block';
 
   oxygen        = 100;
   lives         = 5;
@@ -1451,6 +1451,7 @@ function endGame(type, title, subtitle) {
   document.getElementById('hud').style.display             = 'none';
   document.getElementById('questionOverlay').style.display = 'none';
   document.getElementById('keyHint').style.display         = 'none';
+  document.getElementById('devBanner').style.display       = 'none';
   canvas.style.display = 'none';
 
   document.getElementById('endIcon').textContent     = type === 'victory' ? '🌍' : '💥';
