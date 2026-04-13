@@ -54,6 +54,23 @@ open index.html   # macOS
 
 ---
 
+## 📚 How It Works — Developer Docs
+
+| File | What it covers |
+|---|---|
+| [docs/overview.md](docs/overview.md) | Architecture, file structure, screens, global state, deployment |
+| [docs/setup.md](docs/setup.md) | Number selection, operation modes, game mode selection, Begin Mission |
+| [docs/quiz-engine.md](docs/quiz-engine.md) | Question generation, answer submission, nav dots, live score |
+| [docs/game-modes.md](docs/game-modes.md) | Standard, Hyperspace, and Kessel Run modes; rank system |
+| [docs/audio-engine.md](docs/audio-engine.md) | Web Audio API primitives and sound library |
+| [docs/visuals.md](docs/visuals.md) | Starfield, ring shockwave, comet celebration, hyperspace jump, CSS animations |
+| [docs/ui.md](docs/ui.md) | Theme cycler, session history, keyboard navigation, mobile support |
+| [docs/design-ux.md](docs/design-ux.md) | Design concept, color palette, typography, tone, wording, interaction patterns |
+| [docs/feedback-system.md](docs/feedback-system.md) | Feedback form, Cloudflare Worker, GitHub Issues integration |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | Full history of changes by Linear issue and PR |
+
+---
+
 ## 🤝 Contributing
 
 Contributions? Yeah sure...it's a side project to help my kids learn math I don't know? Sure.

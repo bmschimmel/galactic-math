@@ -5,6 +5,13 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-04-13
+
+### IDT-100 — GitHub repo link in footer and developer docs TOC in README (PR #72)
+The "Created for fun." text in the app footer now links to the GitHub repository. The main `README.md` also gains a developer docs table of contents, mirroring `docs/README.md`, so contributors can find the right doc file without digging into the `docs/` folder first.
+
+---
+
 ## 2026-03-30
 
 ### IDT-65 — Even question distribution across operations (PR #70)
