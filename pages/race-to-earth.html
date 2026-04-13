@@ -11,15 +11,15 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
     --space-black: #030712;
-    --deep-space: #0a0f1e;
+    --deep-space:  #0a0f1e;
     --nebula-blue: #1a2744;
-    --saber-blue: #00d4ff;
+    --saber-blue:  #00d4ff;
     --saber-green: #39ff14;
-    --saber-red: #ff2d55;
-    --saber-purple: #b94fff;
-    --gold: #ffd700;
-    --star-white: #e8f4ff;
-    --muted: #6b7fa3;
+    --saber-red:   #ff2d55;
+    --saber-purple:#b94fff;
+    --gold:        #ffd700;
+    --star-white:  #e8f4ff;
+    --muted:       #6b7fa3;
   }
   body {
     background: var(--space-black);
@@ -71,11 +71,7 @@
     margin-bottom: 10px;
     display: block;
   }
-  .divider {
-    height: 1px;
-    background: rgba(0,212,255,0.12);
-    margin: 16px 0;
-  }
+  .divider { height: 1px; background: rgba(0,212,255,0.12); margin: 16px 0; }
   .num-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -101,12 +97,7 @@
     box-shadow: 0 0 8px rgba(0,212,255,0.2);
   }
   .num-btn:hover { border-color: rgba(0,212,255,0.4); }
-  .preset-row {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-  }
+  .preset-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
   .preset-btn {
     background: transparent;
     border: 1px solid rgba(0,212,255,0.2);
@@ -119,12 +110,7 @@
     transition: all 0.15s;
   }
   .preset-btn:hover { border-color: var(--saber-blue); color: var(--saber-blue); }
-  .op-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
-  }
+  .op-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
   .op-btn {
     flex: 1;
     min-width: 60px;
@@ -162,14 +148,7 @@
   }
   .launch-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
   .error-msg { color: var(--saber-red); font-size: 11px; margin-top: 8px; min-height: 16px; font-family: 'Orbitron', monospace; letter-spacing: 1px; }
-  .back-link {
-    display: block;
-    text-align: center;
-    margin-top: 14px;
-    color: var(--muted);
-    font-size: 12px;
-    text-decoration: none;
-  }
+  .back-link { display: block; text-align: center; margin-top: 14px; color: var(--muted); font-size: 12px; text-decoration: none; }
   .back-link:hover { color: var(--saber-blue); }
   .how-to-play {
     margin-top: 16px;
@@ -179,16 +158,12 @@
     border-radius: 8px;
     font-size: 11px;
     color: var(--muted);
-    line-height: 1.7;
+    line-height: 1.8;
   }
   .how-to-play b { color: var(--star-white); }
 
   /* ===== CANVAS ===== */
-  #gameCanvas {
-    display: none;
-    width: 100vw;
-    height: 100vh;
-  }
+  #gameCanvas { display: none; width: 100vw; height: 100vh; }
 
   /* ===== HUD ===== */
   #hud {
@@ -207,13 +182,7 @@
     border-bottom: 1px solid rgba(0,212,255,0.15);
     backdrop-filter: blur(6px);
   }
-  .hud-label {
-    font-family: 'Orbitron', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 2px;
-    white-space: nowrap;
-  }
+  .hud-label { font-family: 'Orbitron', monospace; font-size: 9px; color: var(--muted); letter-spacing: 2px; white-space: nowrap; }
   .oxygen-bar-outer {
     flex: 1;
     height: 10px;
@@ -226,33 +195,16 @@
     height: 100%;
     background: linear-gradient(90deg, var(--saber-blue), var(--saber-green));
     border-radius: 5px;
-    transition: width 0.4s ease, background 0.4s ease;
+    transition: width 0.2s ease, background 0.4s ease;
   }
   .oxygen-bar-fill.low { background: linear-gradient(90deg, var(--saber-red), #ff8800); }
-  .oxygen-pct {
-    font-family: 'Orbitron', monospace;
-    font-size: 13px;
-    color: var(--saber-blue);
-    white-space: nowrap;
-    min-width: 46px;
-    text-align: right;
-  }
+  .oxygen-pct { font-family: 'Orbitron', monospace; font-size: 13px; color: var(--saber-blue); white-space: nowrap; min-width: 46px; text-align: right; }
   .oxygen-pct.low { color: var(--saber-red); text-shadow: 0 0 8px var(--saber-red); }
-  .hud-sep {
-    width: 1px;
-    height: 20px;
-    background: rgba(0,212,255,0.15);
-    flex-shrink: 0;
-  }
+  .hud-sep { width: 1px; height: 20px; background: rgba(0,212,255,0.15); flex-shrink: 0; }
   .hud-lives { display: flex; gap: 3px; align-items: center; }
   .life-icon { font-size: 14px; transition: opacity 0.3s; }
   .life-icon.lost { opacity: 0.18; filter: grayscale(1); }
-  .hud-gates {
-    font-family: 'Orbitron', monospace;
-    font-size: 12px;
-    color: var(--gold);
-    white-space: nowrap;
-  }
+  .hud-gates { font-family: 'Orbitron', monospace; font-size: 12px; color: var(--gold); white-space: nowrap; }
 
   /* ===== QUESTION OVERLAY ===== */
   #questionOverlay {
@@ -264,37 +216,11 @@
     z-index: 20;
     text-align: center;
   }
-  .gate-op-label {
-    font-family: 'Orbitron', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 3px;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-  }
-  .bonus-progress {
-    display: none;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-  .bonus-dot {
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    border: 2px solid var(--gold);
-    background: transparent;
-    transition: all 0.2s;
-  }
+  .gate-op-label { font-family: 'Orbitron', monospace; font-size: 9px; color: var(--muted); letter-spacing: 3px; margin-bottom: 6px; }
+  .bonus-progress { display: none; justify-content: center; gap: 10px; margin-bottom: 8px; }
+  .bonus-dot { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--gold); background: transparent; transition: all 0.2s; }
   .bonus-dot.filled { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
-  .question-text {
-    font-family: 'Orbitron', monospace;
-    font-size: 38px;
-    color: var(--star-white);
-    text-shadow: 0 0 20px rgba(0,212,255,0.4);
-    margin-bottom: 12px;
-    letter-spacing: 2px;
-  }
+  .question-text { font-family: 'Orbitron', monospace; font-size: 38px; color: var(--star-white); text-shadow: 0 0 20px rgba(0,212,255,0.4); margin-bottom: 12px; letter-spacing: 2px; }
   .answer-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
   .answer-input {
     background: rgba(26,39,68,0.9);
@@ -327,21 +253,12 @@
   .question-hint { font-size: 10px; color: var(--muted); margin-top: 6px; }
 
   /* ===== WRONG FLASH ===== */
-  #wrongFlash {
-    position: fixed;
-    inset: 0;
-    background: rgba(255,45,85,0.2);
-    pointer-events: none;
-    z-index: 15;
-    opacity: 0;
-    transition: opacity 0.08s;
-  }
+  #wrongFlash { position: fixed; inset: 0; background: rgba(255,45,85,0.2); pointer-events: none; z-index: 15; opacity: 0; transition: opacity 0.08s; }
   #wrongFlash.show { opacity: 1; }
 
   /* ===== END SCREEN ===== */
   #endScreen {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     display: none;
     flex-direction: column;
     align-items: center;
@@ -353,12 +270,7 @@
     backdrop-filter: blur(6px);
   }
   .end-icon { font-size: 80px; margin-bottom: 16px; }
-  .end-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 28px;
-    margin-bottom: 8px;
-    letter-spacing: 3px;
-  }
+  .end-title { font-family: 'Orbitron', monospace; font-size: 28px; margin-bottom: 8px; letter-spacing: 3px; }
   .end-title.win { color: var(--saber-green); text-shadow: 0 0 30px var(--saber-green); }
   .end-title.loss { color: var(--saber-red); text-shadow: 0 0 30px var(--saber-red); }
   .end-subtitle { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
@@ -367,48 +279,16 @@
   .end-stat-val { font-family: 'Orbitron', monospace; font-size: 30px; color: var(--gold); }
   .end-stat-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
   .end-btns { display: flex; gap: 12px; }
-  .end-btn {
-    padding: 12px 28px;
-    background: rgba(0,212,255,0.12);
-    border: 1px solid var(--saber-blue);
-    border-radius: 8px;
-    color: var(--saber-blue);
-    font-family: 'Orbitron', monospace;
-    font-size: 11px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.15s;
-  }
+  .end-btn { padding: 12px 28px; background: rgba(0,212,255,0.12); border: 1px solid var(--saber-blue); border-radius: 8px; color: var(--saber-blue); font-family: 'Orbitron', monospace; font-size: 11px; cursor: pointer; letter-spacing: 1px; transition: all 0.15s; }
   .end-btn:hover { background: rgba(0,212,255,0.22); }
   .end-btn.primary { background: var(--saber-blue); color: #000; font-weight: 700; }
   .end-btn.primary:hover { filter: brightness(1.1); }
 
   /* ===== PAUSE BANNER ===== */
-  #pauseBanner {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: none;
-    font-family: 'Orbitron', monospace;
-    font-size: 22px;
-    color: var(--saber-blue);
-    text-shadow: 0 0 20px var(--saber-blue);
-    letter-spacing: 4px;
-    pointer-events: none;
-    z-index: 25;
-  }
+  #pauseBanner { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); display: none; font-family: 'Orbitron', monospace; font-size: 22px; color: var(--saber-blue); text-shadow: 0 0 20px var(--saber-blue); letter-spacing: 4px; pointer-events: none; z-index: 25; }
 
   /* ===== KEY HINT ===== */
-  #keyHint {
-    position: fixed;
-    bottom: 10px;
-    right: 14px;
-    font-size: 10px;
-    color: rgba(107,127,163,0.4);
-    pointer-events: none;
-    z-index: 5;
-  }
+  #keyHint { position: fixed; bottom: 10px; right: 14px; font-size: 10px; color: rgba(107,127,163,0.4); pointer-events: none; z-index: 5; }
 </style>
 </head>
 <body>
@@ -417,15 +297,15 @@
 <div id="setupScreen">
   <div class="setup-panel">
     <div class="setup-title">🌍 RACE TO EARTH</div>
-    <div class="setup-subtitle">Fly your ship through 20 math gates to get home. Answer wrong and you lose oxygen. Crash into obstacles and lose a life. You have 5 lives. Good luck.</div>
+    <div class="setup-subtitle">Fly your rocket through 20 math gates to get home. Thrusting burns oxygen. Wrong answers cost oxygen too. Dodge comets, asteroids, and aliens — each crash costs a life. You have 5 lives.</div>
 
     <div class="divider"></div>
 
     <span class="setup-label">▸ Select Numbers (choose at least 3)</span>
     <div class="num-grid" id="numGrid"></div>
     <div class="preset-row">
-      <button class="preset-btn" onclick="rteSelectRange(2, 12)">Basic 2–12</button>
-      <button class="preset-btn" onclick="rteSelectRange(0, 13)">All 0–13</button>
+      <button class="preset-btn" onclick="rteSelectRange(2,12)">Basic 2–12</button>
+      <button class="preset-btn" onclick="rteSelectRange(0,13)">All 0–13</button>
       <button class="preset-btn" onclick="rteSelectNone()">None</button>
     </div>
 
@@ -440,9 +320,9 @@
     </div>
 
     <div class="how-to-play">
-      <b>Arrow keys</b> to fly &nbsp;·&nbsp; <b>Enter</b> to submit answer &nbsp;·&nbsp;
-      <b>⭐ Gold gates</b> are bonus — 3 questions, +10% O₂ &nbsp;·&nbsp;
-      <b>Avoid</b> asteroids and aliens — each crash costs a life
+      <b>Arrow keys</b> to thrust &nbsp;·&nbsp; <b>Enter</b> to submit answer &nbsp;·&nbsp; <b>P</b> to pause<br>
+      <b>Gates</b> can be tackled in any order — fly to any glowing ring &nbsp;·&nbsp; <b>⭐ Gold gates</b> = 3 questions, refuels +10% O₂<br>
+      <b>Watch out</b> for comets, asteroids, and alien ships — each costs a life
     </div>
 
     <div class="error-msg" id="rteError"></div>
@@ -489,31 +369,22 @@
 
 <!-- ===== END SCREEN ===== -->
 <div id="endScreen">
-  <div class="end-icon" id="endIcon"></div>
-  <div class="end-title" id="endTitle"></div>
+  <div class="end-icon"     id="endIcon"></div>
+  <div class="end-title"    id="endTitle"></div>
   <div class="end-subtitle" id="endSubtitle"></div>
   <div class="end-stats">
-    <div class="end-stat">
-      <div class="end-stat-val" id="endGates">0</div>
-      <div class="end-stat-label">GATES CLEARED</div>
-    </div>
-    <div class="end-stat">
-      <div class="end-stat-val" id="endOxygen">0%</div>
-      <div class="end-stat-label">OXYGEN LEFT</div>
-    </div>
-    <div class="end-stat">
-      <div class="end-stat-val" id="endLives">0</div>
-      <div class="end-stat-label">LIVES LEFT</div>
-    </div>
+    <div class="end-stat"><div class="end-stat-val" id="endGates">0</div><div class="end-stat-label">GATES CLEARED</div></div>
+    <div class="end-stat"><div class="end-stat-val" id="endOxygen">0%</div><div class="end-stat-label">OXYGEN LEFT</div></div>
+    <div class="end-stat"><div class="end-stat-val" id="endLives">0</div><div class="end-stat-label">LIVES LEFT</div></div>
   </div>
   <div class="end-btns">
-    <button class="end-btn" onclick="goHome()">MAIN MENU</button>
-    <button class="end-btn primary" onclick="restartGame()">PLAY AGAIN</button>
+    <button class="end-btn"         onclick="goHome()">MAIN MENU</button>
+    <button class="end-btn primary"  onclick="restartGame()">PLAY AGAIN</button>
   </div>
 </div>
 
 <!-- ===== KEY HINT ===== -->
-<div id="keyHint">Arrow keys to fly · Enter to submit</div>
+<div id="keyHint">Arrow keys to thrust · Enter to submit · P to pause</div>
 
 <script>
 // ===== AUDIO ENGINE =====
@@ -526,81 +397,145 @@ function getAudio() {
 const sounds = {
   correct() {
     const ctx = getAudio();
-    [523, 659, 784].forEach((freq, i) => {
+    [523, 659, 784].forEach((f, i) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.connect(g); g.connect(ctx.destination);
-      o.type = 'sine'; o.frequency.value = freq;
+      o.type = 'sine'; o.frequency.value = f;
       const t = ctx.currentTime + i * 0.08;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.16, t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.16, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
       o.start(t); o.stop(t + 0.25);
     });
   },
+
   wrong() {
     const ctx = getAudio();
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
-    o.type = 'sawtooth'; o.frequency.value = 200;
+    o.type = 'sawtooth'; o.frequency.value = 220;
     o.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.3);
-    g.gain.setValueAtTime(0.18, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    g.gain.setValueAtTime(0.18, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
     o.start(); o.stop(ctx.currentTime + 0.3);
   },
-  hit() {
+
+  // Asteroid impact — crunchy thud
+  asteroidHit() {
     const ctx = getAudio();
+    // Low thud
     const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'square'; o.frequency.value = 120;
+    o.type = 'sine'; o.frequency.value = 100;
+    o.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.35);
     o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.22, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
-    o.start(); o.stop(ctx.currentTime + 0.45);
+    g.gain.setValueAtTime(0.35, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    o.start(); o.stop(ctx.currentTime + 0.35);
+    // Rock crunch noise
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.25, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const ns = ctx.createBufferSource(); ns.buffer = buf;
+    const flt = ctx.createBiquadFilter(); flt.type = 'highpass'; flt.frequency.value = 300;
+    const ng = ctx.createGain(); ng.gain.value = 0.28;
+    ns.connect(flt); flt.connect(ng); ng.connect(ctx.destination);
+    ns.start(); ns.stop(ctx.currentTime + 0.25);
   },
+
+  // Alien crash — out of this world explosion
+  alienCrash() {
+    const ctx = getAudio();
+    // Deep explosive boom (layered)
+    [40, 65, 100].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f * 3, ctx.currentTime + i * 0.03);
+      o.frequency.exponentialRampToValueAtTime(f * 0.25, ctx.currentTime + 1.2);
+      o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0, ctx.currentTime + i * 0.03);
+      g.gain.linearRampToValueAtTime(0.38, ctx.currentTime + i * 0.03 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+      o.start(ctx.currentTime + i * 0.03); o.stop(ctx.currentTime + 1.2);
+    });
+    // Explosion noise burst
+    const bufLen = Math.floor(ctx.sampleRate * 0.9);
+    const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+    const ns = ctx.createBufferSource(); ns.buffer = buf;
+    const flt = ctx.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 350; flt.Q.value = 0.4;
+    const ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.55, ctx.currentTime); ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+    ns.connect(flt); flt.connect(ng); ng.connect(ctx.destination);
+    ns.start(); ns.stop(ctx.currentTime + 0.9);
+    // Alien death screech (rising then plummeting)
+    const sc = ctx.createOscillator(), sg = ctx.createGain();
+    sc.type = 'sawtooth';
+    sc.frequency.setValueAtTime(300, ctx.currentTime);
+    sc.frequency.linearRampToValueAtTime(2200, ctx.currentTime + 0.12);
+    sc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.7);
+    sc.connect(sg); sg.connect(ctx.destination);
+    sg.gain.setValueAtTime(0.28, ctx.currentTime); sg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+    sc.start(); sc.stop(ctx.currentTime + 0.7);
+    // High-pitched alien squeal harmonics
+    [1800, 2700, 3600].forEach((f, i) => {
+      const sq = ctx.createOscillator(), sqg = ctx.createGain();
+      sq.type = 'square'; sq.frequency.value = f;
+      sq.frequency.exponentialRampToValueAtTime(f * 0.1, ctx.currentTime + 0.55);
+      sq.connect(sqg); sqg.connect(ctx.destination);
+      sqg.gain.setValueAtTime(0, ctx.currentTime + i * 0.05);
+      sqg.gain.linearRampToValueAtTime(0.12, ctx.currentTime + i * 0.05 + 0.02);
+      sqg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+      sq.start(ctx.currentTime + i * 0.05); sq.stop(ctx.currentTime + 0.6);
+    });
+    // Eerie alien warble at the end
+    const wb = ctx.createOscillator(), wbg = ctx.createGain();
+    wb.type = 'sine'; wb.frequency.value = 440;
+    wb.frequency.setValueAtTime(440, ctx.currentTime + 0.5);
+    wb.frequency.linearRampToValueAtTime(220, ctx.currentTime + 1.1);
+    wb.frequency.linearRampToValueAtTime(110, ctx.currentTime + 1.4);
+    wb.connect(wbg); wbg.connect(ctx.destination);
+    wbg.gain.setValueAtTime(0, ctx.currentTime + 0.5);
+    wbg.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.55);
+    wbg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.4);
+    wb.start(ctx.currentTime + 0.5); wb.stop(ctx.currentTime + 1.4);
+  },
+
   bonusComplete() {
     const ctx = getAudio();
-    [440, 554, 659, 880].forEach((freq, i) => {
+    [440, 554, 659, 880].forEach((f, i) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'sine'; o.frequency.value = freq;
+      o.connect(g); g.connect(ctx.destination); o.type = 'sine'; o.frequency.value = f;
       const t = ctx.currentTime + i * 0.1;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.2, t + 0.03);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.2, t + 0.03); g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
       o.start(t); o.stop(t + 0.4);
     });
   },
+
   victory() {
     const ctx = getAudio();
-    [392, 494, 587, 784, 988].forEach((freq, i) => {
+    [392, 494, 587, 784, 988].forEach((f, i) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'sine'; o.frequency.value = freq;
+      o.connect(g); g.connect(ctx.destination); o.type = 'sine'; o.frequency.value = f;
       const t = ctx.currentTime + i * 0.13;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.2, t + 0.04);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.2, t + 0.04); g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
       o.start(t); o.stop(t + 0.45);
     });
   },
+
   gameOver() {
     const ctx = getAudio();
-    [440, 330, 220, 165].forEach((freq, i) => {
+    [440, 330, 220, 165].forEach((f, i) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'sawtooth'; o.frequency.value = freq;
+      o.connect(g); g.connect(ctx.destination); o.type = 'sawtooth'; o.frequency.value = f;
       const t = ctx.currentTime + i * 0.2;
-      g.gain.setValueAtTime(0.15, t);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+      g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
       o.start(t); o.stop(t + 0.6);
     });
   },
+
   navigate() {
     const ctx = getAudio();
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type = 'sine'; o.frequency.value = 440;
     o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.05, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    g.gain.setValueAtTime(0.05, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
     o.start(); o.stop(ctx.currentTime + 0.08);
   }
 };
@@ -609,7 +544,7 @@ const sounds = {
 let rteNums = new Set([2,3,4,5,6,7,8,9,10,11,12]);
 let rteOps  = new Set(['multiply']);
 
-// Pre-populate from URL params (passed from main app)
+// Pre-populate from URL params passed from main app
 (function() {
   const p = new URLSearchParams(window.location.search);
   if (p.get('nums')) {
@@ -617,13 +552,13 @@ let rteOps  = new Set(['multiply']);
     if (parsed.length >= 3) rteNums = new Set(parsed);
   }
   if (p.get('ops')) {
-    const valid = new Set(['multiply', 'divide', 'add', 'subtract']);
+    const valid = new Set(['multiply','divide','add','subtract']);
     const parsed = p.get('ops').split(',').filter(o => valid.has(o));
     if (parsed.length > 0) rteOps = new Set(parsed);
   }
 })();
 
-// Build number grid on page load
+// Build number grid
 (function() {
   const grid = document.getElementById('numGrid');
   for (let i = 0; i <= 13; i++) {
@@ -646,8 +581,7 @@ function syncOpButtons() {
 }
 function toggleRteOp(op) {
   if (rteOps.has(op)) rteOps.delete(op); else rteOps.add(op);
-  syncOpButtons();
-  sounds.navigate();
+  syncOpButtons(); sounds.navigate();
 }
 function rteSelectRange(a, b) {
   rteNums.clear();
@@ -665,49 +599,46 @@ function rteSelectNone() {
 }
 
 // ===== WORLD CONSTANTS =====
-const WORLD_W        = 2000;
-const WORLD_H        = 5600;
-const TOTAL_GATES    = 20;
-const SHIP_SPEED     = 4.2;
-const SHIP_RADIUS    = 14;
-const GATE_TRIGGER   = 68;   // proximity to trigger question (px)
-const GATE_RADIUS    = 52;   // visual ring radius (px)
-const BONUS_INDICES  = new Set([4, 9, 14]); // which gates (0-indexed) are bonus
-const N_ASTEROIDS    = 34;
-const N_ALIENS       = 12;
+const WORLD_W          = 2000;
+const WORLD_H          = 5600;
+const TOTAL_GATES      = 20;
+const SHIP_SPEED       = 4.2;
+const SHIP_RADIUS      = 14;
+const GATE_TRIGGER     = 68;    // proximity to trigger question (px)
+const GATE_RADIUS      = 52;    // visual ring radius (px)
+const BONUS_INDICES    = new Set([4, 9, 14]); // which gates are bonus (0-indexed)
+const THRUST_O2_RATE   = 0.013; // % oxygen burned per frame while thrusting (~0.78%/sec at 60fps)
+const N_ASTEROIDS      = 34;
+const N_ALIENS         = 11;
+const COMET_MAX        = 5;     // max comets on screen at once
+const COMET_INTERVAL   = 2800;  // ms between comet spawns
 
 // Operator gate colors
-const OP_COLOR = {
-  multiply: '#b94fff',
-  divide:   '#ffd700',
-  add:      '#39ff14',
-  subtract: '#ff2d55'
-};
+const OP_COLOR = { multiply:'#b94fff', divide:'#ffd700', add:'#39ff14', subtract:'#ff2d55' };
 
 // ===== GAME STATE =====
 let canvas, ctx;
 let gameState = 'setup'; // 'playing' | 'question' | 'gameover' | 'victory'
 let paused = false;
-let ship, camera, gates, obstacles, starField;
-let oxygen, lives, gatesCleared, currentGateIdx;
-let currentQuestion;   // { text, answer }
+let ship, camera;
+let gates, obstacles, starField;
+let particles, comets;
+let oxygen, lives, gatesCleared;
+let activatedGate;    // which gate is currently being questioned (null if none)
+let currentQuestion;  // { text, answer }
 let invincibleUntil;
-let animId;
+let screenShake;
+let animId, lastTs;
 let keys = {};
 let wrongFlashTimer = null;
 let rainbowAngle = 0;
-let lastTs = 0;
+let nextCometTime = 0;
+let hudUpdatePending = false;
 
-// ===== SETUP VALIDATION & LAUNCH =====
+// ===== VALIDATION & LAUNCH =====
 function launchGame() {
-  if (rteOps.size === 0) {
-    document.getElementById('rteError').textContent = '⚠ Select at least one operation';
-    return;
-  }
-  if (rteNums.size < 3) {
-    document.getElementById('rteError').textContent = '⚠ Select at least 3 numbers';
-    return;
-  }
+  if (rteOps.size === 0) { document.getElementById('rteError').textContent = '⚠ Select at least one operation'; return; }
+  if (rteNums.size < 3)  { document.getElementById('rteError').textContent = '⚠ Select at least 3 numbers'; return; }
   document.getElementById('rteError').textContent = '';
   initGame();
 }
@@ -719,25 +650,26 @@ function initGame() {
   canvas.height = window.innerHeight;
   ctx = canvas.getContext('2d');
 
-  // Show game UI, hide setup
   document.getElementById('setupScreen').style.display = 'none';
   document.getElementById('endScreen').style.display   = 'none';
   canvas.style.display = 'block';
-  document.getElementById('hud').style.display      = 'block';
+  document.getElementById('hud').style.display     = 'block';
   document.getElementById('keyHint').style.display  = 'block';
 
-  // Reset state
   oxygen        = 100;
   lives         = 5;
   gatesCleared  = 0;
-  currentGateIdx = 0;
+  activatedGate = null;
   invincibleUntil = 0;
+  screenShake   = 0;
   paused        = false;
   keys          = {};
   gameState     = 'playing';
   rainbowAngle  = 0;
+  particles     = [];
+  comets        = [];
+  nextCometTime = Date.now() + 3000;
 
-  // Generate world
   starField  = generateStars();
   gates      = generateGates();
   obstacles  = generateObstacles();
@@ -747,7 +679,6 @@ function initGame() {
 
   updateHUD();
 
-  // Input listeners
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup',   onKeyUp);
   window.addEventListener('resize',  onResize);
@@ -767,13 +698,7 @@ function onResize() {
 function generateStars() {
   const stars = [];
   for (let i = 0; i < 320; i++) {
-    stars.push({
-      x:         Math.random() * WORLD_W,
-      y:         Math.random() * WORLD_H,
-      r:         0.3 + Math.random() * 1.5,
-      brightness: 0.3 + Math.random() * 0.7,
-      twinkle:   Math.random() * Math.PI * 2,
-    });
+    stars.push({ x: Math.random()*WORLD_W, y: Math.random()*WORLD_H, r: 0.3+Math.random()*1.5, brightness: 0.3+Math.random()*0.7, twinkle: Math.random()*Math.PI*2 });
   }
   return stars;
 }
@@ -784,101 +709,57 @@ function generateGates() {
   const yTop   = 500;
   const yBot   = 5100;
   const yStep  = (yBot - yTop) / (TOTAL_GATES - 1);
-
   for (let i = 0; i < TOTAL_GATES; i++) {
-    const y      = yBot - i * yStep;
-    const x      = 1000 + Math.sin(i * 0.75 + 0.4) * 580;
+    const y       = yBot - i * yStep;
+    const x       = 1000 + Math.sin(i * 0.75 + 0.4) * 580;
     const isBonus = BONUS_INDICES.has(i);
-    const op     = isBonus ? null : opsArr[Math.floor(Math.random() * opsArr.length)];
-    list.push({
-      id:           i,
-      x, y,
-      op,
-      isBonus,
-      cleared:      false,
-      bonusProgress: 0,   // 0-3 for bonus gates
-      pulse:        Math.random() * Math.PI * 2,
-    });
+    const op      = isBonus ? null : opsArr[Math.floor(Math.random() * opsArr.length)];
+    list.push({ id: i, x, y, op, isBonus, cleared: false, bonusProgress: 0, pulse: Math.random()*Math.PI*2 });
   }
   return list;
 }
 
 function generateObstacles() {
-  const obs = [];
-  const gatePos = gates.map(g => ({ x: g.x, y: g.y }));
-  const shipStart = { x: 1000, y: 5300 };
-
+  const obs    = [];
+  const gatePt = gates.map(g => ({ x: g.x, y: g.y }));
   function tooClose(x, y) {
-    if (Math.hypot(x - shipStart.x, y - shipStart.y) < 220) return true;
-    return gatePos.some(g => Math.hypot(x - g.x, y - g.y) < 130);
+    if (Math.hypot(x-1000, y-5300) < 240) return true;
+    return gatePt.some(g => Math.hypot(x-g.x, y-g.y) < 140);
   }
-
   // Asteroids
-  for (let tries = 0; obs.filter(o => o.type === 'asteroid').length < N_ASTEROIDS && tries < 600; tries++) {
-    const x = 80 + Math.random() * (WORLD_W - 160);
-    const y = 400 + Math.random() * (WORLD_H - 600);
-    if (tooClose(x, y)) continue;
-    const numV   = 6 + Math.floor(Math.random() * 4);
-    const baseR  = 16 + Math.random() * 24;
-    const verts  = [];
+  for (let tries = 0; obs.filter(o=>o.type==='asteroid').length < N_ASTEROIDS && tries < 700; tries++) {
+    const x = 80 + Math.random()*(WORLD_W-160);
+    const y = 400 + Math.random()*(WORLD_H-600);
+    if (tooClose(x,y)) continue;
+    const numV  = 6 + Math.floor(Math.random()*4);
+    const baseR = 16 + Math.random()*24;
+    const verts = [];
     for (let v = 0; v < numV; v++) {
-      const a = (v / numV) * Math.PI * 2;
-      const r = baseR * (0.65 + Math.random() * 0.7);
-      verts.push({ x: Math.cos(a) * r, y: Math.sin(a) * r });
+      const a = (v/numV)*Math.PI*2;
+      verts.push({ x: Math.cos(a)*baseR*(0.65+Math.random()*0.7), y: Math.sin(a)*baseR*(0.65+Math.random()*0.7) });
     }
-    obs.push({
-      type:     'asteroid',
-      x, y,
-      radius:   baseR * 0.8,
-      verts,
-      vx:       (Math.random() - 0.5) * 0.45,
-      vy:       (Math.random() - 0.5) * 0.45,
-      rotation: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.012,
-    });
+    obs.push({ type:'asteroid', x, y, radius:baseR*0.8, verts, vx:(Math.random()-0.5)*0.45, vy:(Math.random()-0.5)*0.45, rotation:Math.random()*Math.PI*2, rotSpeed:(Math.random()-0.5)*0.012 });
   }
-
-  // Aliens (UFO saucers)
-  for (let tries = 0; obs.filter(o => o.type === 'alien').length < N_ALIENS && tries < 600; tries++) {
-    const x = 80 + Math.random() * (WORLD_W - 160);
-    const y = 400 + Math.random() * (WORLD_H - 600);
-    if (tooClose(x, y)) continue;
-    const a = Math.random() * Math.PI * 2;
-    obs.push({
-      type:   'alien',
-      x, y,
-      radius: 20,
-      vx:     Math.cos(a) * (0.55 + Math.random() * 0.6),
-      vy:     Math.sin(a) * (0.55 + Math.random() * 0.6),
-      wobble: Math.random() * Math.PI * 2,
-      color:  Math.random() < 0.5 ? '#39ff14' : '#b94fff',
-    });
+  // Aliens
+  for (let tries = 0; obs.filter(o=>o.type==='alien').length < N_ALIENS && tries < 700; tries++) {
+    const x = 80 + Math.random()*(WORLD_W-160);
+    const y = 400 + Math.random()*(WORLD_H-600);
+    if (tooClose(x,y)) continue;
+    const a = Math.random()*Math.PI*2;
+    obs.push({ type:'alien', x, y, radius:22, vx:Math.cos(a)*(0.6+Math.random()*0.65), vy:Math.sin(a)*(0.6+Math.random()*0.65), wobble:Math.random()*Math.PI*2, color:Math.random()<0.5?'#39ff14':'#b94fff' });
   }
-
   return obs;
 }
 
 // ===== QUESTION GENERATION =====
 function makeQuestion(op) {
   const arr  = [...rteNums];
-  const pick = () => arr[Math.floor(Math.random() * arr.length)];
+  const pick = () => arr[Math.floor(Math.random()*arr.length)];
   let a, b;
-  if (op === 'multiply') {
-    a = pick(); b = pick();
-    return { text: `${a} × ${b} = ?`, answer: a * b };
-  }
-  if (op === 'divide') {
-    a = pick(); b = pick(); if (b === 0) b = 1;
-    return { text: `${a * b} ÷ ${b} = ?`, answer: a };
-  }
-  if (op === 'add') {
-    a = pick(); b = pick();
-    return { text: `${a} + ${b} = ?`, answer: a + b };
-  }
-  // subtract
-  a = pick(); b = pick();
-  if (b > a) [a, b] = [b, a];
-  return { text: `${a} − ${b} = ?`, answer: a - b };
+  if (op === 'multiply') { a=pick(); b=pick(); return { text:`${a} × ${b} = ?`, answer:a*b }; }
+  if (op === 'divide')   { a=pick(); b=pick(); if(b===0)b=1; return { text:`${a*b} ÷ ${b} = ?`, answer:a }; }
+  if (op === 'add')      { a=pick(); b=pick(); return { text:`${a} + ${b} = ?`, answer:a+b }; }
+  a=pick(); b=pick(); if(b>a)[a,b]=[b,a]; return { text:`${a} − ${b} = ?`, answer:a-b };
 }
 
 // ===== INPUT =====
@@ -886,13 +767,12 @@ function onKeyDown(e) {
   keys[e.key] = true;
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
   if (e.key === 'Enter' && gameState === 'question') { e.preventDefault(); submitAnswer(); }
-  if (e.key === 'p' || e.key === 'P') togglePause();
+  if ((e.key === 'p' || e.key === 'P') && (gameState==='playing'||gameState==='question')) togglePause();
   if (e.key === 'Escape' && gameState === 'question') dismissQuestion();
 }
 function onKeyUp(e) { keys[e.key] = false; }
 
 function togglePause() {
-  if (gameState !== 'playing' && gameState !== 'question') return;
   paused = !paused;
   document.getElementById('pauseBanner').style.display = paused ? 'block' : 'none';
   if (!paused) { lastTs = 0; animId = requestAnimationFrame(gameLoop); }
@@ -904,7 +784,6 @@ function gameLoop(ts) {
   if (gameState !== 'playing' && gameState !== 'question') return;
   const dt = lastTs ? Math.min((ts - lastTs) / 16.67, 3) : 1;
   lastTs = ts;
-
   rainbowAngle = (rainbowAngle + 0.03) % (Math.PI * 2);
 
   if (gameState === 'playing') {
@@ -912,7 +791,11 @@ function gameLoop(ts) {
     updateObstacles(dt);
     checkGateTrigger();
     checkObstacleCollisions();
+    checkCometCollisions();
   }
+
+  updateParticles(dt);
+  updateComets(ts);
 
   render();
   animId = requestAnimationFrame(gameLoop);
@@ -928,20 +811,27 @@ function updateShip(dt) {
 
   if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
 
-  ship.x += dx * SHIP_SPEED * dt;
-  ship.y += dy * SHIP_SPEED * dt;
+  const thrusting = dx !== 0 || dy !== 0;
+  ship.moving = thrusting;
 
-  if (dx !== 0 || dy !== 0) {
+  if (thrusting) {
+    ship.x += dx * SHIP_SPEED * dt;
+    ship.y += dy * SHIP_SPEED * dt;
     ship.facing = Math.atan2(dy, dx) + Math.PI / 2;
-    ship.moving = true;
-  } else {
-    ship.moving = false;
+
+    // Oxygen burns while thrusting
+    oxygen = Math.max(0, oxygen - THRUST_O2_RATE * dt);
+    // Throttle HUD update to avoid excessive DOM writes
+    if (!hudUpdatePending) {
+      hudUpdatePending = true;
+      requestAnimationFrame(() => { updateHUD(); hudUpdatePending = false; });
+    }
+    if (oxygen <= 0) { endGame('gameover', '💨 OUT OF OXYGEN', `You cleared ${gatesCleared} of 20 gates.`); return; }
   }
 
   ship.x = Math.max(SHIP_RADIUS, Math.min(WORLD_W - SHIP_RADIUS, ship.x));
   ship.y = Math.max(SHIP_RADIUS, Math.min(WORLD_H - SHIP_RADIUS, ship.y));
 
-  // Smooth camera follow
   camera.x += (ship.x - camera.x) * 0.12;
   camera.y += (ship.y - camera.y) * 0.12;
 }
@@ -949,10 +839,9 @@ function updateShip(dt) {
 // ===== OBSTACLES =====
 function updateObstacles(dt) {
   obstacles.forEach(obs => {
-    obs.x += obs.vx * dt;
-    obs.y += obs.vy * dt;
-    if (obs.x < 60 || obs.x > WORLD_W - 60) obs.vx *= -1;
-    if (obs.y < 300 || obs.y > WORLD_H - 100) obs.vy *= -1;
+    obs.x += obs.vx * dt; obs.y += obs.vy * dt;
+    if (obs.x < 60 || obs.x > WORLD_W-60) obs.vx *= -1;
+    if (obs.y < 300 || obs.y > WORLD_H-100) obs.vy *= -1;
     if (obs.rotSpeed !== undefined) obs.rotation += obs.rotSpeed * dt;
     if (obs.wobble   !== undefined) obs.wobble   += 0.04 * dt;
   });
@@ -962,47 +851,61 @@ function checkObstacleCollisions() {
   if (Date.now() < invincibleUntil) return;
   for (const obs of obstacles) {
     if (Math.hypot(ship.x - obs.x, ship.y - obs.y) < SHIP_RADIUS + obs.radius * 0.65) {
-      hitObstacle(); break;
+      hitObstacle(obs); break;
     }
   }
 }
 
-function hitObstacle() {
+function hitObstacle(obs) {
   lives--;
   invincibleUntil = Date.now() + 2500;
-  sounds.hit();
+
+  if (obs.type === 'alien') {
+    sounds.alienCrash();
+    // Big colorful explosion from the alien's world position
+    spawnParticles(obs.x, obs.y, 30, ['#ff8800','#ff4400','#ffdd00','#ffffff','#ff0044','#ffaa00'], 2, 7.5, 0.01, 0.022, 3, 9);
+    // Secondary flash from ship
+    spawnParticles(ship.x, ship.y, 14, ['#00d4ff','#ffffff','#b94fff'], 1.5, 5, 0.018, 0.03, 2, 6);
+    screenShake = 7;
+  } else {
+    // Asteroid impact — debris + shake + blink
+    sounds.asteroidHit();
+    spawnParticles(ship.x, ship.y, 14, ['#8d6e63','#6d4c41','#bcaaa4','#aaaaaa','#bca08a'], 1, 4, 0.02, 0.04, 2, 5);
+    screenShake = 4;
+  }
+
   updateHUD();
   if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `You cleared ${gatesCleared} of 20 gates.`);
 }
 
 // ===== GATE TRIGGER =====
+// Gates can be attempted in any order — find the closest uncleaned gate within trigger radius
 function checkGateTrigger() {
-  if (currentGateIdx >= TOTAL_GATES) return;
-  const gate = gates[currentGateIdx];
-  if (gate.cleared) return;
-  if (Math.hypot(ship.x - gate.x, ship.y - gate.y) < GATE_TRIGGER) openGateQuestion(gate);
+  let closest = null, closestDist = Infinity;
+  for (const gate of gates) {
+    if (gate.cleared) continue;
+    const d = Math.hypot(ship.x - gate.x, ship.y - gate.y);
+    if (d < GATE_TRIGGER && d < closestDist) { closestDist = d; closest = gate; }
+  }
+  if (closest) openGateQuestion(closest);
 }
 
 function openGateQuestion(gate) {
+  activatedGate = gate;
   gameState = 'question';
-  const op = gate.isBonus
-    ? [...rteOps][Math.floor(Math.random() * rteOps.size)]
-    : gate.op;
-
+  const op = gate.isBonus ? [...rteOps][Math.floor(Math.random()*rteOps.size)] : gate.op;
   currentQuestion = makeQuestion(op);
 
   document.getElementById('gateOpLabel').textContent = gate.isBonus
-    ? `🌟 BONUS GATE ${gate.id + 1} — ${opLabel(op)}`
-    : `GATE ${gate.id + 1} / ${TOTAL_GATES} — ${opLabel(op)}`;
+    ? `🌟 BONUS GATE — ${opLabel(op)}`
+    : `GATE ${gate.id + 1} — ${opLabel(op)}`;
 
   document.getElementById('questionText').textContent = currentQuestion.text;
   document.getElementById('answerInput').value = '';
 
-  // Bonus progress dots
   const bp = document.getElementById('bonusProgress');
   if (gate.isBonus) {
-    bp.style.display = 'flex';
-    bp.innerHTML = '';
+    bp.style.display = 'flex'; bp.innerHTML = '';
     for (let i = 0; i < 3; i++) {
       const dot = document.createElement('div');
       dot.className = 'bonus-dot' + (i < gate.bonusProgress ? ' filled' : '');
@@ -1017,28 +920,26 @@ function openGateQuestion(gate) {
 }
 
 function opLabel(op) {
-  return { multiply: 'MULTIPLY', divide: 'DIVIDE', add: 'ADD', subtract: 'SUBTRACT' }[op] || '';
+  return { multiply:'MULTIPLY', divide:'DIVIDE', add:'ADD', subtract:'SUBTRACT' }[op] || '';
 }
 
 // ===== ANSWER SUBMISSION =====
 function submitAnswer() {
   const raw = parseInt(document.getElementById('answerInput').value);
   if (isNaN(raw)) return;
-
-  const gate = gates[currentGateIdx];
+  const gate = activatedGate;
+  if (!gate) return;
 
   if (raw === currentQuestion.answer) {
     sounds.correct();
     if (gate.isBonus) {
       gate.bonusProgress++;
       if (gate.bonusProgress >= 3) {
-        // Bonus gate complete — refuel
         oxygen = Math.min(100, oxygen + 10);
         sounds.bonusComplete();
         clearGate(gate);
       } else {
-        // Need more answers — show next question immediately
-        openGateQuestion(gate);
+        openGateQuestion(gate); // Next question for this bonus gate
       }
     } else {
       clearGate(gate);
@@ -1048,22 +949,20 @@ function submitAnswer() {
     oxygen = Math.max(0, oxygen - 5);
     updateHUD();
     flashWrong();
-
-    // Push ship back away from gate, then resume play so they must re-approach
+    // Push ship away from gate so they must re-approach
     const angle = Math.atan2(ship.y - gate.y, ship.x - gate.x);
-    ship.x = Math.max(SHIP_RADIUS, Math.min(WORLD_W - SHIP_RADIUS, ship.x + Math.cos(angle) * 110));
-    ship.y = Math.max(SHIP_RADIUS, Math.min(WORLD_H - SHIP_RADIUS, ship.y + Math.sin(angle) * 110));
-
+    ship.x = Math.max(SHIP_RADIUS, Math.min(WORLD_W-SHIP_RADIUS, ship.x + Math.cos(angle)*115));
+    ship.y = Math.max(SHIP_RADIUS, Math.min(WORLD_H-SHIP_RADIUS, ship.y + Math.sin(angle)*115));
     document.getElementById('questionOverlay').style.display = 'none';
+    activatedGate = null;
     gameState = 'playing';
-
     if (oxygen <= 0) endGame('gameover', '💨 OUT OF OXYGEN', `You cleared ${gatesCleared} of 20 gates.`);
   }
 }
 
 function dismissQuestion() {
-  // Escape key — close overlay and resume (ship stays in place, gate still unclearable)
   document.getElementById('questionOverlay').style.display = 'none';
+  activatedGate = null;
   gameState = 'playing';
 }
 
@@ -1071,7 +970,7 @@ function clearGate(gate) {
   gate.cleared      = true;
   gate.bonusProgress = 0;
   gatesCleared++;
-  currentGateIdx++;
+  activatedGate = null;
   document.getElementById('questionOverlay').style.display = 'none';
   gameState = 'playing';
   updateHUD();
@@ -1082,20 +981,20 @@ function clearGate(gate) {
 function updateHUD() {
   const fill = document.getElementById('oxygenFill');
   const pct  = document.getElementById('oxygenPct');
-  fill.style.width = oxygen + '%';
-  fill.classList.toggle('low', oxygen <= 25);
-  pct.textContent = Math.round(oxygen) + '%';
-  pct.classList.toggle('low', oxygen <= 25);
+  const oxy  = Math.max(0, oxygen);
+  fill.style.width = oxy + '%';
+  fill.classList.toggle('low', oxy <= 25);
+  pct.textContent = Math.round(oxy) + '%';
+  pct.classList.toggle('low', oxy <= 25);
 
-  const livesEl = document.getElementById('livesDisplay');
-  livesEl.innerHTML = '';
+  const el = document.getElementById('livesDisplay');
+  el.innerHTML = '';
   for (let i = 0; i < 5; i++) {
-    const span = document.createElement('span');
-    span.className = 'life-icon' + (i >= lives ? ' lost' : '');
-    span.textContent = '🚀';
-    livesEl.appendChild(span);
+    const s = document.createElement('span');
+    s.className = 'life-icon' + (i >= lives ? ' lost' : '');
+    s.textContent = '🚀';
+    el.appendChild(s);
   }
-
   document.getElementById('gateCounter').textContent = `⬡ ${gatesCleared} / ${TOTAL_GATES}`;
 }
 
@@ -1104,7 +1003,149 @@ function flashWrong() {
   const el = document.getElementById('wrongFlash');
   el.classList.add('show');
   clearTimeout(wrongFlashTimer);
-  wrongFlashTimer = setTimeout(() => el.classList.remove('show'), 280);
+  wrongFlashTimer = setTimeout(() => el.classList.remove('show'), 250);
+}
+
+// ===== PARTICLES =====
+function spawnParticles(wx, wy, count, colors, minSpeed, maxSpeed, minDecay, maxDecay, minR, maxR) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = minSpeed + Math.random() * (maxSpeed - minSpeed);
+    particles.push({
+      wx, wy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1.0,
+      decay: minDecay + Math.random() * (maxDecay - minDecay),
+      r: minR + Math.random() * (maxR - minR),
+      color: colors[Math.floor(Math.random() * colors.length)],
+    });
+  }
+}
+
+function updateParticles(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.wx += p.vx * dt; p.wy += p.vy * dt;
+    p.vx *= 0.95; p.vy *= 0.95;
+    p.life -= p.decay * dt;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    const s = w2s(p.wx, p.wy);
+    if (!onScreen(s.x, s.y, 30)) return;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.fillStyle   = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur  = 8;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, p.r * p.life, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+// ===== COMETS =====
+const COMET_COLORS = ['#fffee0','#ffd700','#ff8844','#00d4ff','#ff66cc','#aaffdd'];
+
+function spawnComet() {
+  if (comets.length >= COMET_MAX) return;
+  // Pick a random screen edge to enter from
+  const edge  = Math.floor(Math.random() * 4);
+  let sx, sy;
+  const W = canvas.width, H = canvas.height;
+  switch (edge) {
+    case 0: sx = Math.random() * W; sy = -20;    break; // top
+    case 1: sx = W + 20;  sy = Math.random() * H; break; // right
+    case 2: sx = Math.random() * W; sy = H + 20;  break; // bottom
+    default: sx = -20;  sy = Math.random() * H;   break; // left
+  }
+  // Aim roughly across to the far side with some spread
+  const tx = W * 0.2 + Math.random() * W * 0.6;
+  const ty = H * 0.2 + Math.random() * H * 0.6;
+  const dist  = Math.hypot(tx - sx, ty - sy) || 1;
+  const speed = 6 + Math.random() * 7;
+  comets.push({
+    sx, sy,
+    vx: (tx - sx) / dist * speed,
+    vy: (ty - sy) / dist * speed,
+    radius: 5 + Math.random() * 5,
+    trail: [],
+    color: COMET_COLORS[Math.floor(Math.random() * COMET_COLORS.length)],
+  });
+}
+
+function updateComets(now) {
+  if (now > nextCometTime) {
+    spawnComet();
+    nextCometTime = now + COMET_INTERVAL + Math.random() * 2000;
+  }
+  for (let i = comets.length - 1; i >= 0; i--) {
+    const c = comets[i];
+    c.trail.unshift({ x: c.sx, y: c.sy });
+    if (c.trail.length > 32) c.trail.pop();
+    c.sx += c.vx;
+    c.sy += c.vy;
+    // Remove when well off screen
+    if (c.sx < -300 || c.sx > canvas.width+300 || c.sy < -300 || c.sy > canvas.height+300) {
+      comets.splice(i, 1);
+    }
+  }
+}
+
+function checkCometCollisions() {
+  if (Date.now() < invincibleUntil) return;
+  const sp = w2s(ship.x, ship.y);
+  for (const c of comets) {
+    if (Math.hypot(c.sx - sp.x, c.sy - sp.y) < SHIP_RADIUS + c.radius) {
+      hitComet(c); break;
+    }
+  }
+}
+
+function hitComet(c) {
+  lives--;
+  invincibleUntil = Date.now() + 2500;
+  sounds.asteroidHit();
+  spawnParticles(ship.x, ship.y, 16, [c.color, '#ffffff', '#ffdd00', '#ff8800'], 1.5, 5, 0.018, 0.04, 2, 6);
+  screenShake = 5;
+  updateHUD();
+  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `You cleared ${gatesCleared} of 20 gates.`);
+}
+
+function drawComets() {
+  comets.forEach(c => {
+    ctx.save();
+    ctx.shadowColor = c.color;
+    // Trail (drawn back-to-front, fading)
+    c.trail.forEach((pos, i) => {
+      const t = 1 - i / c.trail.length;
+      ctx.globalAlpha = t * 0.7;
+      ctx.shadowBlur  = 10 * t;
+      ctx.fillStyle   = c.color;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, c.radius * t * 0.65, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    // Bright head
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur  = 28;
+    ctx.fillStyle   = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(c.sx, c.sy, c.radius, 0, Math.PI * 2);
+    ctx.fill();
+    // Colored core
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle   = c.color;
+    ctx.beginPath();
+    ctx.arc(c.sx, c.sy, c.radius * 0.55, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
 }
 
 // ===== END GAME =====
@@ -1113,9 +1154,9 @@ function endGame(type, title, subtitle) {
   if (type === 'victory') sounds.victory(); else sounds.gameOver();
   cleanupListeners();
 
-  document.getElementById('hud').style.display            = 'none';
+  document.getElementById('hud').style.display             = 'none';
   document.getElementById('questionOverlay').style.display = 'none';
-  document.getElementById('keyHint').style.display        = 'none';
+  document.getElementById('keyHint').style.display         = 'none';
   canvas.style.display = 'none';
 
   document.getElementById('endIcon').textContent     = type === 'victory' ? '🌍' : '💥';
@@ -1123,8 +1164,8 @@ function endGame(type, title, subtitle) {
   document.getElementById('endTitle').className      = 'end-title ' + (type === 'victory' ? 'win' : 'loss');
   document.getElementById('endSubtitle').textContent = subtitle;
   document.getElementById('endGates').textContent    = gatesCleared;
-  document.getElementById('endOxygen').textContent   = Math.round(oxygen) + '%';
-  document.getElementById('endLives').textContent    = lives > 0 ? lives : 0;
+  document.getElementById('endOxygen').textContent   = Math.round(Math.max(0,oxygen)) + '%';
+  document.getElementById('endLives').textContent    = Math.max(0, lives);
   document.getElementById('endScreen').style.display = 'flex';
 }
 
@@ -1140,13 +1181,10 @@ function goHome()      { window.location.href = '../index.html'; }
 
 // ===== COORDINATE HELPERS =====
 function w2s(wx, wy) {
-  return {
-    x: Math.round(wx - camera.x + canvas.width  / 2),
-    y: Math.round(wy - camera.y + canvas.height / 2),
-  };
+  return { x: Math.round(wx - camera.x + canvas.width/2), y: Math.round(wy - camera.y + canvas.height/2) };
 }
 function onScreen(sx, sy, margin = 100) {
-  return sx > -margin && sx < canvas.width + margin && sy > -margin && sy < canvas.height + margin;
+  return sx > -margin && sx < canvas.width+margin && sy > -margin && sy < canvas.height+margin;
 }
 
 // ===== RENDERING =====
@@ -1154,21 +1192,27 @@ function render() {
   ctx.fillStyle = '#030712';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Subtle nebula
-  const ng = ctx.createRadialGradient(
-    canvas.width * 0.25, canvas.height * 0.25, 0,
-    canvas.width * 0.25, canvas.height * 0.25, canvas.width * 0.55
-  );
-  ng.addColorStop(0, 'rgba(26,39,68,0.12)');
-  ng.addColorStop(1, 'transparent');
-  ctx.fillStyle = ng;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Nebula wash
+  const ng = ctx.createRadialGradient(canvas.width*0.25, canvas.height*0.25, 0, canvas.width*0.25, canvas.height*0.25, canvas.width*0.55);
+  ng.addColorStop(0, 'rgba(26,39,68,0.12)'); ng.addColorStop(1, 'transparent');
+  ctx.fillStyle = ng; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // World-space drawing (may be screen-shaken)
+  ctx.save();
+  if (screenShake > 0) {
+    ctx.translate((Math.random()-0.5)*screenShake*7, (Math.random()-0.5)*screenShake*7);
+    screenShake = Math.max(0, screenShake - 0.18);
+  }
   drawStars();
   drawEarth();
   drawGates();
   drawObstacles();
+  drawParticles();
   drawShip();
+  ctx.restore();
+
+  // Screen-space drawing (not shaken)
+  drawComets();
   drawDirectionArrow();
 }
 
@@ -1177,50 +1221,33 @@ function drawStars() {
   starField.forEach(s => {
     const p = w2s(s.x, s.y);
     if (!onScreen(p.x, p.y, 2)) return;
-    const alpha = s.brightness * (0.65 + 0.35 * Math.sin(t * 1.3 + s.twinkle));
-    ctx.fillStyle = `rgba(232,244,255,${alpha.toFixed(2)})`;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, s.r, 0, Math.PI * 2);
-    ctx.fill();
+    const a = s.brightness * (0.65 + 0.35*Math.sin(t*1.3+s.twinkle));
+    ctx.fillStyle = `rgba(232,244,255,${a.toFixed(2)})`;
+    ctx.beginPath(); ctx.arc(p.x, p.y, s.r, 0, Math.PI*2); ctx.fill();
   });
 }
 
 function drawEarth() {
   const p = w2s(1000, 250);
   if (!onScreen(p.x, p.y, 130)) return;
-
-  // Atmospheric glow
-  const glow = ctx.createRadialGradient(p.x, p.y, 40, p.x, p.y, 130);
-  glow.addColorStop(0, 'rgba(0,212,255,0.12)');
-  glow.addColorStop(1, 'transparent');
-  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(p.x, p.y, 130, 0, Math.PI * 2); ctx.fill();
-
-  // Ocean + land body
-  const eg = ctx.createRadialGradient(p.x - 14, p.y - 16, 4, p.x, p.y, 56);
-  eg.addColorStop(0,   '#5cc8f8');
-  eg.addColorStop(0.35,'#1565c0');
-  eg.addColorStop(0.65,'#2e7d32');
-  eg.addColorStop(1,   '#1a237e');
-  ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(p.x, p.y, 56, 0, Math.PI * 2); ctx.fill();
-
-  // Cloud wisps
-  ctx.save();
-  ctx.beginPath(); ctx.arc(p.x, p.y, 56, 0, Math.PI * 2); ctx.clip();
-  ctx.fillStyle = 'rgba(255,255,255,0.22)';
-  ctx.beginPath(); ctx.ellipse(p.x - 8, p.y - 18, 24, 9, -0.3, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(p.x + 22, p.y + 14, 16, 7, 0.4, 0, Math.PI * 2); ctx.fill();
+  const glow = ctx.createRadialGradient(p.x,p.y,40,p.x,p.y,130);
+  glow.addColorStop(0,'rgba(0,212,255,0.12)'); glow.addColorStop(1,'transparent');
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(p.x,p.y,130,0,Math.PI*2); ctx.fill();
+  const eg = ctx.createRadialGradient(p.x-14,p.y-16,4,p.x,p.y,56);
+  eg.addColorStop(0,'#5cc8f8'); eg.addColorStop(0.35,'#1565c0'); eg.addColorStop(0.65,'#2e7d32'); eg.addColorStop(1,'#1a237e');
+  ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(p.x,p.y,56,0,Math.PI*2); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(p.x,p.y,56,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.beginPath(); ctx.ellipse(p.x-8,p.y-18,24,9,-0.3,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(p.x+22,p.y+14,16,7,0.4,0,Math.PI*2); ctx.fill();
   ctx.restore();
-
-  // Label
-  ctx.fillStyle = 'rgba(232,244,255,0.85)';
-  ctx.font = '700 11px Orbitron, monospace';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  ctx.fillText('EARTH', p.x, p.y + 80);
+  ctx.fillStyle='rgba(232,244,255,0.85)'; ctx.font='700 11px Orbitron,monospace'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+  ctx.fillText('EARTH', p.x, p.y+80);
 }
 
 function rainbowColor(offset) {
   const hue = ((rainbowAngle + offset) * 45) % 360;
-  return `hsl(${hue}, 100%, 62%)`;
+  return `hsl(${hue},100%,62%)`;
 }
 
 function drawGates() {
@@ -1228,166 +1255,191 @@ function drawGates() {
   gates.forEach((gate, i) => {
     const p = w2s(gate.x, gate.y);
     if (!onScreen(p.x, p.y, 120)) return;
-
-    const isNext = (i === currentGateIdx && !gate.cleared);
-    const pulse  = 0.7 + 0.3 * Math.sin(t * 2.2 + gate.pulse);
-    const color  = gate.isBonus ? rainbowColor(i * 0.8) : (OP_COLOR[gate.op] || '#00d4ff');
+    const isActive = (gate === activatedGate);
+    const pulse    = 0.72 + 0.28*Math.sin(t*2.2+gate.pulse);
+    const color    = gate.isBonus ? rainbowColor(i*0.8) : (OP_COLOR[gate.op]||'#00d4ff');
 
     ctx.save();
     ctx.translate(p.x, p.y);
-    ctx.globalAlpha = gate.cleared ? 0.18 : isNext ? pulse : 0.5;
+    ctx.globalAlpha = gate.cleared ? 0.16 : isActive ? 1 : pulse * 0.75;
     ctx.shadowColor = color;
-    ctx.shadowBlur  = isNext ? 28 * pulse : 12;
-
-    // Outer ring
+    ctx.shadowBlur  = isActive ? 36 : 14;
     ctx.strokeStyle = color;
-    ctx.lineWidth   = isNext ? 4 : 2.5;
-    ctx.beginPath(); ctx.arc(0, 0, GATE_RADIUS, 0, Math.PI * 2); ctx.stroke();
-
-    // Inner ring
+    ctx.lineWidth   = isActive ? 4.5 : 2.5;
+    ctx.beginPath(); ctx.arc(0, 0, GATE_RADIUS, 0, Math.PI*2); ctx.stroke();
     ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(0, 0, GATE_RADIUS - 11, 0, Math.PI * 2); ctx.stroke();
-
-    // Center symbol or checkmark
-    ctx.textAlign     = 'center';
-    ctx.textBaseline  = 'middle';
+    ctx.beginPath(); ctx.arc(0, 0, GATE_RADIUS-11, 0, Math.PI*2); ctx.stroke();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
     if (gate.cleared) {
-      ctx.globalAlpha = 0.45;
-      ctx.fillStyle   = '#39ff14';
-      ctx.font        = '700 22px sans-serif';
-      ctx.fillText('✓', 0, 0);
+      ctx.globalAlpha=0.45; ctx.fillStyle='#39ff14'; ctx.font='700 22px sans-serif'; ctx.fillText('✓',0,0);
     } else {
-      ctx.globalAlpha = 0.9;
-      ctx.fillStyle   = color;
-      ctx.font        = '700 ' + (gate.isBonus ? '18px' : '16px') + ' Orbitron, monospace';
-      const sym = gate.isBonus
-        ? '★'
-        : ({ multiply: '×', divide: '÷', add: '+', subtract: '−' }[gate.op] || '?');
-      ctx.fillText(sym, 0, 0);
+      ctx.globalAlpha=0.9; ctx.fillStyle=color;
+      ctx.font='700 '+(gate.isBonus?'18px':'16px')+' Orbitron,monospace';
+      ctx.fillText(gate.isBonus ? '★' : ({multiply:'×',divide:'÷',add:'+',subtract:'−'}[gate.op]||'?'), 0, 0);
     }
-
-    // Gate number (small, below)
     if (!gate.cleared) {
-      ctx.globalAlpha = 0.5;
-      ctx.fillStyle   = '#e8f4ff';
-      ctx.font        = '500 9px Orbitron, monospace';
-      ctx.fillText(gate.id + 1, 0, GATE_RADIUS + 12);
+      ctx.globalAlpha=0.45; ctx.fillStyle='#e8f4ff'; ctx.font='500 9px Orbitron,monospace';
+      ctx.fillText(gate.id+1, 0, GATE_RADIUS+12);
     }
-
     ctx.restore();
   });
 }
 
 function drawObstacles() {
-  const t = Date.now() / 1000;
+  const t = Date.now()/1000;
   obstacles.forEach(obs => {
     const p = w2s(obs.x, obs.y);
     if (!onScreen(p.x, p.y, 70)) return;
-    ctx.save();
-    ctx.translate(p.x, p.y);
-
+    ctx.save(); ctx.translate(p.x, p.y);
     if (obs.type === 'asteroid') {
       ctx.rotate(obs.rotation);
-      ctx.shadowColor = '#6d4c41';
-      ctx.shadowBlur  = 6;
-      ctx.fillStyle   = '#4e342e';
-      ctx.strokeStyle = '#8d6e63';
-      ctx.lineWidth   = 1.5;
+      ctx.shadowColor='#6d4c41'; ctx.shadowBlur=6;
+      ctx.fillStyle='#4e342e'; ctx.strokeStyle='#8d6e63'; ctx.lineWidth=1.5;
       ctx.beginPath();
-      obs.verts.forEach((v, i) => i === 0 ? ctx.moveTo(v.x, v.y) : ctx.lineTo(v.x, v.y));
-      ctx.closePath();
-      ctx.fill(); ctx.stroke();
+      obs.verts.forEach((v,i) => i===0 ? ctx.moveTo(v.x,v.y) : ctx.lineTo(v.x,v.y));
+      ctx.closePath(); ctx.fill(); ctx.stroke();
     } else {
-      // Alien UFO saucer
-      const hover = Math.sin(t * 1.9 + obs.wobble) * 3;
-      ctx.shadowColor = obs.color;
-      ctx.shadowBlur  = 14;
-      ctx.globalAlpha = 0.88;
-      // Disc body
-      ctx.fillStyle = obs.color;
-      ctx.beginPath(); ctx.ellipse(0, hover + 5, 22, 7, 0, 0, Math.PI * 2); ctx.fill();
-      // Dome
-      ctx.beginPath(); ctx.ellipse(0, hover - 3, 11, 9, 0, Math.PI, 0); ctx.fill();
-      // Dark portholes
-      ctx.fillStyle   = '#030712';
-      ctx.globalAlpha = 0.5;
-      [-7, 0, 7].forEach(px => { ctx.beginPath(); ctx.arc(px, hover + 4, 2.5, 0, Math.PI * 2); ctx.fill(); });
+      const hover = Math.sin(t*1.9+obs.wobble)*3;
+      ctx.shadowColor=obs.color; ctx.shadowBlur=14; ctx.globalAlpha=0.88;
+      ctx.fillStyle=obs.color;
+      ctx.beginPath(); ctx.ellipse(0, hover+5, 22, 7, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0, hover-3, 11, 9, 0, Math.PI, 0); ctx.fill();
+      ctx.fillStyle='#030712'; ctx.globalAlpha=0.5;
+      [-7,0,7].forEach(px => { ctx.beginPath(); ctx.arc(px,hover+4,2.5,0,Math.PI*2); ctx.fill(); });
     }
     ctx.restore();
   });
 }
 
+// ===== SHIP (ROCKET) =====
 function drawShip() {
-  const p = w2s(ship.x, ship.y);
-  const invincible = Date.now() < invincibleUntil;
-  // Blink when invincible
-  if (invincible && Math.floor(Date.now() / 140) % 2 === 0) return;
+  const p   = w2s(ship.x, ship.y);
+  const inv = Date.now() < invincibleUntil;
+  // Faster blink when invincible (100ms on/off)
+  if (inv && Math.floor(Date.now()/100) % 2 === 0) return;
 
   ctx.save();
   ctx.translate(p.x, p.y);
   ctx.rotate(ship.facing);
 
-  // Thruster flame
+  const bodyColor   = inv ? '#ff6680' : '#ddeefa';
+  const accentColor = inv ? '#ff0044' : '#00d4ff';
+  const finColor    = inv ? '#bb3355' : '#5a8aaa';
+  const darkColor   = inv ? '#660022' : '#1a2a3a';
+
+  // ── Thruster flame (drawn before hull so it appears behind) ──
   if (ship.moving) {
-    const fg = ctx.createRadialGradient(0, 20, 0, 0, 24, 14);
-    fg.addColorStop(0, 'rgba(0,212,255,0.9)');
-    fg.addColorStop(0.5, 'rgba(0,150,255,0.4)');
-    fg.addColorStop(1, 'transparent');
-    ctx.fillStyle = fg;
-    ctx.beginPath(); ctx.ellipse(0, 24, 7, 15, 0, 0, Math.PI * 2); ctx.fill();
+    const fl = 18 + Math.random() * 14;
+    // Outer orange flame cone
+    const ofg = ctx.createLinearGradient(0, 22, 0, 22+fl);
+    ofg.addColorStop(0, 'rgba(255,140,20,1)');
+    ofg.addColorStop(0.45, 'rgba(255,50,0,0.65)');
+    ofg.addColorStop(1, 'transparent');
+    ctx.fillStyle = ofg;
+    ctx.beginPath();
+    ctx.moveTo(-6.5, 22); ctx.lineTo(6.5, 22); ctx.lineTo(3, 22+fl); ctx.lineTo(-3, 22+fl);
+    ctx.closePath(); ctx.fill();
+    // Inner blue-white hot core
+    const ifg = ctx.createLinearGradient(0, 22, 0, 34);
+    ifg.addColorStop(0, 'rgba(255,255,255,0.95)');
+    ifg.addColorStop(0.5, 'rgba(80,200,255,0.7)');
+    ifg.addColorStop(1, 'transparent');
+    ctx.fillStyle = ifg;
+    ctx.beginPath();
+    ctx.moveTo(-3, 22); ctx.lineTo(3, 22); ctx.lineTo(1, 32); ctx.lineTo(-1, 32);
+    ctx.closePath(); ctx.fill();
   }
 
-  // Hull
-  const shipColor = invincible ? '#ff6680' : '#00d4ff';
-  ctx.shadowColor = invincible ? '#ff2d55' : '#00d4ff';
+  ctx.shadowColor = inv ? '#ff2d55' : '#00d4ff';
   ctx.shadowBlur  = 16;
-  ctx.fillStyle   = shipColor;
-  ctx.beginPath();
-  ctx.moveTo(0, -18);   // nose
-  ctx.lineTo(-11, 14);  // bottom-left wing
-  ctx.lineTo(-3, 7);    // inner-left
-  ctx.lineTo(0, 10);    // tail center
-  ctx.lineTo(3, 7);     // inner-right
-  ctx.lineTo(11, 14);   // bottom-right wing
-  ctx.closePath();
-  ctx.fill();
 
-  // Cockpit highlight
-  ctx.fillStyle = 'rgba(232,244,255,0.55)';
-  ctx.beginPath(); ctx.ellipse(0, -6, 4, 5, 0, 0, Math.PI * 2); ctx.fill();
+  // ── Engine bell (dark trapezoid at bottom) ──
+  ctx.fillStyle = darkColor;
+  ctx.beginPath();
+  ctx.moveTo(-9, 14); ctx.lineTo(9, 14); ctx.lineTo(6.5, 22); ctx.lineTo(-6.5, 22);
+  ctx.closePath(); ctx.fill();
+
+  // ── Left swept fin ──
+  ctx.fillStyle = finColor;
+  ctx.beginPath();
+  ctx.moveTo(-9, 2); ctx.lineTo(-21, 17); ctx.lineTo(-9, 18);
+  ctx.closePath(); ctx.fill();
+
+  // ── Right swept fin ──
+  ctx.beginPath();
+  ctx.moveTo(9, 2); ctx.lineTo(21, 17); ctx.lineTo(9, 18);
+  ctx.closePath(); ctx.fill();
+
+  // ── Main rocket body (nose + cylindrical tube) ──
+  ctx.fillStyle = bodyColor;
+  ctx.beginPath();
+  ctx.moveTo(0, -28);   // nose tip
+  ctx.lineTo(-9, -12);  // left shoulder
+  ctx.lineTo(-9, 14);   // left bottom
+  ctx.lineTo(9, 14);    // right bottom
+  ctx.lineTo(9, -12);   // right shoulder
+  ctx.closePath(); ctx.fill();
+
+  // Body outline (subtle)
+  ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(-9,-12); ctx.lineTo(-9,14); ctx.moveTo(9,-12); ctx.lineTo(9,14); ctx.stroke();
+
+  // ── Colored accent band across mid-body ──
+  ctx.fillStyle   = accentColor;
+  ctx.globalAlpha = 0.82;
+  ctx.fillRect(-9, -4, 18, 6);
+  ctx.globalAlpha = 1;
+
+  // Panel seam line
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 0.6;
+  ctx.beginPath(); ctx.moveTo(-9, 6); ctx.lineTo(9, 6); ctx.stroke();
+
+  // ── Porthole window ──
+  ctx.fillStyle = darkColor;
+  ctx.beginPath(); ctx.arc(0, -17, 6, 0, Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = inv ? 'rgba(255,80,130,0.85)' : 'rgba(0,190,255,0.85)';
+  ctx.beginPath(); ctx.arc(0, -17, 4.5, 0, Math.PI*2); ctx.fill();
+
+  // Window glare highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.beginPath(); ctx.arc(-1.5, -18.5, 1.8, 0, Math.PI*2); ctx.fill();
 
   ctx.restore();
 }
 
+// ===== DIRECTION ARROW (to nearest uncleaned gate) =====
 function drawDirectionArrow() {
-  // Pulsing arrow pointing toward the next unclearded gate when off-screen
-  if (currentGateIdx >= TOTAL_GATES) return;
-  const gate  = gates[currentGateIdx];
-  const gp    = w2s(gate.x, gate.y);
-  if (onScreen(gp.x, gp.y, -30)) return; // gate is visible — no arrow needed
+  // Find nearest uncleaned gate
+  let target = null, targetDist = Infinity;
+  for (const gate of gates) {
+    if (gate.cleared) continue;
+    const sp = w2s(ship.x, ship.y);
+    const gp = w2s(gate.x, gate.y);
+    if (onScreen(gp.x, gp.y, -40)) continue; // visible gates don't need arrow
+    const d = Math.hypot(gp.x - sp.x, gp.y - sp.y);
+    if (d < targetDist) { targetDist = d; target = gate; }
+  }
+  if (!target) return;
 
-  const sp    = w2s(ship.x, ship.y); // always center
-  const angle = Math.atan2(gp.y - sp.y, gp.x - sp.x);
-  const radius = Math.min(canvas.width, canvas.height) * 0.37;
-  const ax    = canvas.width  / 2 + Math.cos(angle) * radius;
-  const ay    = canvas.height / 2 + Math.sin(angle) * radius;
-  const color = gate.isBonus ? rainbowColor(0) : (OP_COLOR[gate.op] || '#00d4ff');
-  const alpha = 0.65 + 0.35 * Math.sin(Date.now() / 280);
+  const gp    = w2s(target.x, target.y);
+  const angle = Math.atan2(gp.y - canvas.height/2, gp.x - canvas.width/2);
+  const r     = Math.min(canvas.width, canvas.height) * 0.37;
+  const ax    = canvas.width/2  + Math.cos(angle) * r;
+  const ay    = canvas.height/2 + Math.sin(angle) * r;
+  const color = target.isBonus ? rainbowColor(0) : (OP_COLOR[target.op]||'#00d4ff');
+  const alpha = 0.65 + 0.35*Math.sin(Date.now()/280);
 
   ctx.save();
   ctx.translate(ax, ay);
-  ctx.rotate(angle + Math.PI / 2);
+  ctx.rotate(angle + Math.PI/2);
   ctx.globalAlpha  = alpha;
   ctx.fillStyle    = color;
   ctx.shadowColor  = color;
-  ctx.shadowBlur   = 14;
+  ctx.shadowBlur   = 16;
   ctx.beginPath();
-  ctx.moveTo(0, -13);
-  ctx.lineTo(-8, 7);
-  ctx.lineTo(0, 1);
-  ctx.lineTo(8, 7);
-  ctx.closePath();
-  ctx.fill();
+  ctx.moveTo(0, -14); ctx.lineTo(-9, 7); ctx.lineTo(0, 1); ctx.lineTo(9, 7);
+  ctx.closePath(); ctx.fill();
   ctx.restore();
 }
 </script>
