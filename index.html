@@ -335,8 +335,7 @@
   /* Game mode tiles */
   .game-mode-tiles {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
+    gap: 10px;
   }
   .game-mode-tile-wrap {
     flex: 1;
@@ -344,6 +343,28 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+  }
+  /* Race to Earth dev-mode link */
+  .rte-dev-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px dashed rgba(57,255,20,0.25);
+    border-radius: 8px;
+    color: rgba(57,255,20,0.6);
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+  }
+  .rte-dev-link:hover {
+    border-color: rgba(57,255,20,0.55);
+    color: rgba(57,255,20,0.9);
+    background: rgba(57,255,20,0.04);
   }
   .game-mode-tile-btn {
     width: 100%;
@@ -424,11 +445,6 @@
     color: var(--saber-green);
     filter: drop-shadow(0 0 4px var(--saber-green));
   }
-  @media (max-width: 480px) {
-    .game-mode-tiles { flex-direction: column; align-items: center; }
-    .game-mode-tile-wrap { width: 100%; }
-  }
-
   /* ===== MOBILE LAYOUT ===== */
   @media (max-width: 600px) {
     /* Push content below the fixed history/theme buttons */
@@ -1554,7 +1570,7 @@
       </div>
 
       <div class="saber-divider" style="margin: 20px 0 16px;"></div>
-      <span class="setup-label">▸ Play Time Based Modes (Optional)</span>
+      <span class="setup-label">▸ Timed Challenge Modes (Optional)</span>
       <div class="game-mode-tiles">
         <div class="game-mode-tile-wrap">
           <button class="game-mode-tile-btn" id="hyperspaceToggle" onclick="toggleHyperspace()">
@@ -1602,6 +1618,7 @@
       <button class="btn-primary" onclick="startQuiz()" id="startBtn">
         <span>🚀 BEGIN TRAINING MISSION</span>
       </button>
+      <button class="rte-dev-link" onclick="launchRaceToEarth()">🌍 Try Race to Earth — new mode in development</button>
     </div>
   </div>
 
@@ -2490,6 +2507,21 @@ function toggleKesselRun() {
   } else {
     sounds.navigate();
   }
+}
+
+// ===== RACE TO EARTH MODE =====
+function launchRaceToEarth() {
+  if (selectedOps.size === 0) {
+    document.getElementById('setupError').textContent = '⚠ Select at least one operation to begin';
+    return;
+  }
+  if (selectedNums.size < 3) {
+    document.getElementById('setupError').textContent = '⚠ Select at least 3 numbers';
+    return;
+  }
+  const nums = [...selectedNums].join(',');
+  const ops = [...selectedOps].join(',');
+  window.location.href = `pages/race-to-earth.html?nums=${encodeURIComponent(nums)}&ops=${encodeURIComponent(ops)}`;
 }
 
 function startKesselTimer() {

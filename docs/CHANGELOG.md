@@ -5,6 +5,11 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-04-13 (2)
+
+### IDT-101 — Race to Earth game mode (PR #74)
+New canvas-based game at `pages/race-to-earth.html`. The player pilots a detailed rocket ship (nose cone, swept fins, engine bell, porthole, animated flame) through 20 math gates in any order to reach home. Thrusting burns oxygen continuously; wrong answers cost an additional 5%. Three bonus rainbow gates require 3 correct answers each and refuel +10% O₂ on completion. Five lives are lost by colliding with drifting asteroids (screen shake + debris particles), alien UFO saucers (multi-layered explosion sound with boom, noise burst, and alien screech + colorful particle explosion), or comets that streak across the screen from random directions with glowing color trails. A pulsing directional arrow always points toward the nearest uncleaned gate when it is off-screen. Gates can be tackled in any order. A "Race to Earth" tile in the main setup screen's Special Modes section passes current number and operator selections into the game as URL params.
+
 ## 2026-04-13
 
 ### IDT-100 — GitHub repo link in footer and developer docs TOC in README (PR #72)
