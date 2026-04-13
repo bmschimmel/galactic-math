@@ -5,6 +5,11 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-04-13 (3)
+
+### IDT-103 — Show "Skipped" instead of "null" for unanswered questions (PR #TBD)
+Unanswered questions in the missed-problems review showed "You: null". The fix checks whether the recorded answer is null and displays "Skipped" instead, keeping the language friendly for kids.
+
 ## 2026-04-13 (2)
 
 ### IDT-101 — Race to Earth game mode (PR #74)

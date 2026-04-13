@@ -2847,7 +2847,7 @@ function showResults() {
     list.innerHTML = missed.map(m =>
       `<div class="missed-item">
         <span class="missed-q">${m.q}</span>
-        <span class="missed-yours">You: ${m.yours}</span>
+        <span class="missed-yours">You: ${m.yours === null ? 'Skipped' : m.yours}</span>
         <span class="missed-correct">✓ ${m.correct}</span>
       </div>`
     ).join('');
