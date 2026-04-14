@@ -821,6 +821,7 @@ let particles, comets, lasers;
 let oxygen, lives, gatesCleared;
 let allGatesCleared = false; // set true when all gates done; then fly to Earth
 let lowFuelWarningPlayed = false;
+let lowFuelTickInterval = null;
 let activatedGate;    // which gate is currently being questioned (null if none)
 let currentQuestion;  // { text, answer }
 let invincibleUntil;
@@ -864,6 +865,7 @@ function initGame() {
   gatesCleared  = 0;
   allGatesCleared = false;
   lowFuelWarningPlayed = false;
+  stopLowFuelTicks();
   activatedGate = null;
   invincibleUntil = 0;
   screenShake   = 0;
@@ -1299,9 +1301,12 @@ function updateHUD() {
   pct.textContent = Math.round(oxy) + '%';
   pct.classList.toggle('low', oxy <= 25);
 
-  if (oxy <= 10 && !lowFuelWarningPlayed && gameState === 'playing') {
+  if (oxy > 10) {
+    if (lowFuelWarningPlayed) { lowFuelWarningPlayed = false; stopLowFuelTicks(); }
+  } else if (!lowFuelWarningPlayed && gameState === 'playing') {
     lowFuelWarningPlayed = true;
     sounds.lowFuelWarning();
+    startLowFuelTicks();
   }
 
   const el = document.getElementById('livesDisplay');
@@ -1486,10 +1491,31 @@ function drawComets() {
   });
 }
 
+// ===== LOW FUEL TICKS =====
+function startLowFuelTicks() {
+  if (lowFuelTickInterval) return;
+  lowFuelTickInterval = setInterval(() => {
+    if (oxygen > 10 || gameState !== 'playing') { stopLowFuelTicks(); return; }
+    const ctx = getAudio();
+    const freq = 440 + (10 - Math.max(0, oxygen)) * 40; // 440Hz at 10%, 840Hz at 0%
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'square'; o.frequency.value = freq;
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.07, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.09);
+    o.start(); o.stop(ctx.currentTime + 0.09);
+  }, 1000);
+}
+function stopLowFuelTicks() {
+  clearInterval(lowFuelTickInterval);
+  lowFuelTickInterval = null;
+}
+
 // ===== END GAME =====
 function endGame(type, title, subtitle) {
   gameState = type;
   sounds.thrustStop();
+  stopLowFuelTicks();
   if (type === 'victory') sounds.landing(); else sounds.gameOver();
   cleanupListeners();
 
