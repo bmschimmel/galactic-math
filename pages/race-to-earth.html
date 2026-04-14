@@ -322,14 +322,15 @@
 <body>
 
 <!-- ===== COUNTDOWN OVERLAY ===== -->
-<div id="countdownOverlay" style="display:none; position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:40; pointer-events:none;">
+<div id="countdownOverlay" style="display:none; position:fixed; inset:0; display:none; align-items:flex-start; justify-content:center; padding-top:18%; z-index:40; pointer-events:none;">
   <div id="countdownNum" style="font-family:'Orbitron',monospace; font-size:120px; font-weight:900; color:#00d4ff; text-shadow:0 0 40px #00d4ff,0 0 80px #00d4ff; opacity:0; transition:opacity 0.15s;"></div>
 </div>
 
 <!-- ===== PLANET FACT POPUP ===== -->
-<div id="planetPopup" style="display:none; position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(3,7,18,0.92); border:1px solid #00d4ff; border-radius:10px; padding:14px 22px; max-width:480px; text-align:center; z-index:30; pointer-events:none;">
-  <div style="font-family:'Orbitron',monospace; font-size:11px; color:#6b7fa3; letter-spacing:3px; margin-bottom:6px;" id="planetPopupTitle">MARS</div>
-  <div style="font-family:'Exo 2',sans-serif; font-size:15px; color:#e8f4ff;" id="planetPopupFact"></div>
+<div id="planetPopup" style="display:none; position:fixed; background:rgba(3,7,18,0.95); border:1.5px solid #00d4ff; border-radius:12px; padding:16px 22px; max-width:360px; text-align:center; z-index:30; box-shadow:0 0 24px rgba(0,212,255,0.25);">
+  <div style="font-family:'Orbitron',monospace; font-size:10px; color:#6b7fa3; letter-spacing:3px; margin-bottom:6px;" id="planetPopupTitle">MARS</div>
+  <div style="font-family:'Exo 2',sans-serif; font-size:15px; color:#e8f4ff; line-height:1.5; margin-bottom:12px;" id="planetPopupFact"></div>
+  <div style="font-family:'Orbitron',monospace; font-size:10px; color:#6b7fa3; letter-spacing:2px;">ENTER / ESC to continue</div>
 </div>
 
 <!-- ===== SETUP SCREEN ===== -->
@@ -386,7 +387,7 @@
     <div class="hud-sep"></div>
     <span class="hud-gates" id="gateCounter">⬡ 0 / 10</span>
     <div class="hud-sep"></div>
-    <span class="hud-label">🚀</span>
+    <span class="hud-label">⚡</span>
     <span class="hud-missiles" id="missileCount">0</span>
     <div class="hud-sep"></div>
     <button class="hud-abort" onclick="abortMission()">✕ ABORT</button>
@@ -847,8 +848,6 @@ const THRUST_FUEL_RATE = 0.013; // % fuel burned per frame while thrusting (~0.7
 const N_ASTEROIDS      = 28;
 const N_ALIENS         = 8;
 const N_FUEL_PICKUPS   = 6;
-const N_MISSILE_PICKUPS = 3;    // missile ammo crates in the world
-const MISSILE_AMMO      = 3;    // ammo gained per pickup
 const MISSILE_SPEED     = 14;   // px/frame player missile speed
 const COMET_MAX        = 6;     // max comets on screen at once
 const COMET_INTERVAL   = 1800;  // ms between comet spawns
@@ -871,7 +870,7 @@ let canvas, ctx;
 let gameState = 'setup'; // 'playing' | 'question' | 'gameover' | 'victory'
 let paused = false;
 let ship, camera;
-let gates, obstacles, starField, planets, fuelPickups, missilePowerups;
+let gates, obstacles, starField, planets, fuelPickups;
 let particles, comets, lasers, playerMissiles;
 let missiles;           // ammo count
 let planetFactShown;    // Set of planet types already shown this game
@@ -945,7 +944,6 @@ function initGame() {
   gates      = generateGates();
   obstacles  = generateObstacles();
   fuelPickups = generateFuelPickups();
-  missilePowerups = generateMissilePowerups();
 
   ship   = { x: 1000, y: 5300, facing: 0, moving: false };
   camera = { x: 1000, y: 5300 };
@@ -1121,6 +1119,7 @@ function onKeyDown(e) {
   if (e.key === 'Enter' && gameState === 'question') { e.preventDefault(); submitAnswer(); }
   if ((e.key === 'p' || e.key === 'P') && (gameState==='playing'||gameState==='question')) togglePause();
   if (e.key === 'Escape' && gameState === 'question') dismissQuestion();
+  if ((e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') && gameState === 'planet_fact') { e.preventDefault(); dismissPlanetFact(); }
 }
 function onKeyUp(e) {
   keys[e.key] = false;
@@ -1149,7 +1148,7 @@ function gameLoop(ts) {
     animId = requestAnimationFrame(gameLoop);
     return;
   }
-  if (gameState !== 'playing' && gameState !== 'question') return;
+  if (gameState !== 'playing' && gameState !== 'question' && gameState !== 'planet_fact') return;
   const dt = lastTs ? Math.min((ts - lastTs) / 16.67, 3) : 1;
   lastTs = ts;
   rainbowAngle = (rainbowAngle + 0.03) % (Math.PI * 2);
@@ -1160,7 +1159,6 @@ function gameLoop(ts) {
     updateAlienLasers();
     checkGateTrigger();
     checkFuelPickups();
-    checkMissilePowerups();
     checkObstacleCollisions();
     checkLaserCollisions();
     checkCometCollisions();
@@ -1397,10 +1395,12 @@ function dismissQuestion() {
 function clearGate(gate) {
   gate.cleared  = true;
   gatesCleared++;
+  missiles++;
   activatedGate = null;
   document.getElementById('questionOverlay').style.display = 'none';
   gameState = 'playing';
   updateHUD();
+  sounds.missilePickup();
   if (gatesCleared >= TOTAL_GATES && !allGatesCleared) {
     allGatesCleared = true;
     showFlightBanner('🌍 ALL GATES CLEAR — FLY TO EARTH!', 3200);
@@ -1602,65 +1602,6 @@ function drawComets() {
 }
 
 // ===== MISSILE POWERUPS =====
-function generateMissilePowerups() {
-  const pickups = [];
-  const gatePts = gates.map(g => ({ x: g.x, y: g.y }));
-  function tooClose(x, y) {
-    if (Math.hypot(x-1000, y-5300) < 240) return true;
-    if (Math.hypot(x-1000, y-200)  < 260) return true;
-    return gatePts.some(g => Math.hypot(x-g.x, y-g.y) < 120);
-  }
-  let tries = 0;
-  while (pickups.length < N_MISSILE_PICKUPS && tries < 600) {
-    tries++;
-    const x = 150 + Math.random() * (WORLD_W - 300);
-    const y = 600 + Math.random() * (WORLD_H - 900);
-    if (!tooClose(x, y)) pickups.push({ x, y, collected: false, bobPhase: Math.random()*Math.PI*2 });
-  }
-  return pickups;
-}
-
-function checkMissilePowerups() {
-  if (!missilePowerups) return;
-  for (const p of missilePowerups) {
-    if (p.collected) continue;
-    if (Math.hypot(ship.x - p.x, ship.y - p.y) < 30) {
-      p.collected = true;
-      missiles += MISSILE_AMMO;
-      updateHUD();
-      sounds.missilePickup();
-      spawnParticles(p.x, p.y, 14, ['#39ff14','#00d4ff','#ffffff'], 1.5, 4, 0.015, 0.03, 2, 5);
-    }
-  }
-}
-
-function drawMissilePowerups() {
-  if (!missilePowerups) return;
-  const t = Date.now() / 1000;
-  for (const p of missilePowerups) {
-    if (p.collected) continue;
-    const sc = w2s(p.x, p.y + Math.sin(t * 1.6 + p.bobPhase) * 6);
-    if (!onScreen(sc.x, sc.y, 50)) continue;
-    ctx.save();
-    ctx.translate(sc.x, sc.y);
-    // Glow
-    ctx.shadowColor = '#39ff14'; ctx.shadowBlur = 18;
-    // Draw a small missile shape
-    ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 2;
-    ctx.fillStyle = 'rgba(57,255,20,0.15)';
-    ctx.beginPath();
-    ctx.moveTo(0, -14); ctx.lineTo(5, -4); ctx.lineTo(5, 8);
-    ctx.lineTo(8, 14);  ctx.lineTo(0, 10); ctx.lineTo(-8, 14);
-    ctx.lineTo(-5, 8);  ctx.lineTo(-5, -4); ctx.closePath();
-    ctx.fill(); ctx.stroke();
-    // Label
-    ctx.shadowBlur = 0; ctx.fillStyle = '#39ff14';
-    ctx.font = 'bold 9px Orbitron, monospace'; ctx.textAlign = 'center';
-    ctx.fillText('×' + MISSILE_AMMO, 0, 26);
-    ctx.restore();
-  }
-}
-
 // ===== PLAYER MISSILES =====
 function firePlayerMissile() {
   if (!missiles || missiles <= 0) return;
@@ -1727,24 +1668,47 @@ function drawPlayerMissiles() {
 
 // ===== PLANET PROXIMITY =====
 function checkPlanetProximity() {
-  if (!planets) return;
+  if (!planets || gameState !== 'playing') return;
   for (const planet of planets) {
     if (planetFactShown.has(planet.type)) continue;
     if (Math.hypot(ship.x - planet.x, ship.y - planet.y) < planet.r + 140) {
       planetFactShown.add(planet.type);
       showPlanetFact(planet);
+      return; // one at a time
     }
   }
 }
 
 function showPlanetFact(planet) {
+  gameState = 'planet_fact';
+  sounds.thrustStop();
+
+  // Position popup near the planet on screen, clamped to viewport
+  const sc    = w2s(planet.x, planet.y);
   const popup = document.getElementById('planetPopup');
-  const title = document.getElementById('planetPopupTitle');
-  const fact  = document.getElementById('planetPopupFact');
-  title.textContent = planet.type.toUpperCase();
-  fact.textContent  = PLANET_FACTS[planet.type] || '';
   popup.style.display = 'block';
-  setTimeout(() => { popup.style.display = 'none'; }, 5000);
+  // Let browser compute size, then reposition
+  requestAnimationFrame(() => {
+    const pw = popup.offsetWidth  || 360;
+    const ph = popup.offsetHeight || 120;
+    const margin = 18;
+    // Prefer placing popup above the planet
+    let left = sc.x - pw / 2;
+    let top  = sc.y - planet.r * (canvas.height / (camera._zoom || 1)) - ph - 20;
+    if (top < margin + 60) top = sc.y + planet.r * (canvas.height / (camera._zoom || 1)) + 20;
+    left = Math.max(margin, Math.min(window.innerWidth  - pw - margin, left));
+    top  = Math.max(margin + 60, Math.min(window.innerHeight - ph - margin, top));
+    popup.style.left = left + 'px';
+    popup.style.top  = top  + 'px';
+  });
+
+  document.getElementById('planetPopupTitle').textContent = planet.type.toUpperCase();
+  document.getElementById('planetPopupFact').textContent  = PLANET_FACTS[planet.type] || '';
+}
+
+function dismissPlanetFact() {
+  document.getElementById('planetPopup').style.display = 'none';
+  gameState = 'playing';
 }
 
 // ===== LOW FUEL TICKS =====
@@ -1772,6 +1736,7 @@ function endGame(type, title, subtitle) {
   gameState = type;
   sounds.thrustStop();
   stopLowFuelTicks();
+  document.getElementById('planetPopup').style.display = 'none';
   if (type === 'victory') sounds.landing(); else sounds.gameOver();
   cleanupListeners();
 
@@ -1830,7 +1795,6 @@ function render() {
   drawPlanets();
   drawEarth();
   drawFuelPickups();
-  drawMissilePowerups();
   drawPlayerMissiles();
   drawGates();
   drawObstacles();
