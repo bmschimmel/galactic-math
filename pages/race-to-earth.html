@@ -301,6 +301,8 @@
 
   /* ===== PAUSE BANNER ===== */
   #pauseBanner { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); display: none; font-family: 'Orbitron', monospace; font-size: 22px; color: var(--saber-blue); text-shadow: 0 0 20px var(--saber-blue); letter-spacing: 4px; pointer-events: none; z-index: 25; }
+  #flightBanner { position: fixed; top: 72px; left: 50%; transform: translateX(-50%); display: none; font-family: 'Orbitron', monospace; font-size: 18px; color: var(--saber-green); text-shadow: 0 0 16px var(--saber-green); letter-spacing: 3px; pointer-events: none; z-index: 25; white-space: nowrap; }
+  .hud-missiles { font-family: 'Orbitron', monospace; font-size: 15px; color: var(--saber-green); min-width: 24px; text-align: center; }
 
   /* ===== KEY HINT ===== */
   #keyHint { position: fixed; bottom: 10px; right: 14px; font-size: 10px; color: rgba(107,127,163,0.4); pointer-events: none; z-index: 5; }
@@ -318,6 +320,17 @@
 </style>
 </head>
 <body>
+
+<!-- ===== COUNTDOWN OVERLAY ===== -->
+<div id="countdownOverlay" style="display:none; position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:40; pointer-events:none;">
+  <div id="countdownNum" style="font-family:'Orbitron',monospace; font-size:120px; font-weight:900; color:#00d4ff; text-shadow:0 0 40px #00d4ff,0 0 80px #00d4ff; opacity:0; transition:opacity 0.15s;"></div>
+</div>
+
+<!-- ===== PLANET FACT POPUP ===== -->
+<div id="planetPopup" style="display:none; position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:rgba(3,7,18,0.92); border:1px solid #00d4ff; border-radius:10px; padding:14px 22px; max-width:480px; text-align:center; z-index:30; pointer-events:none;">
+  <div style="font-family:'Orbitron',monospace; font-size:11px; color:#6b7fa3; letter-spacing:3px; margin-bottom:6px;" id="planetPopupTitle">MARS</div>
+  <div style="font-family:'Exo 2',sans-serif; font-size:15px; color:#e8f4ff;" id="planetPopupFact"></div>
+</div>
 
 <!-- ===== SETUP SCREEN ===== -->
 <div id="setupScreen">
@@ -373,6 +386,9 @@
     <div class="hud-sep"></div>
     <span class="hud-gates" id="gateCounter">⬡ 0 / 10</span>
     <div class="hud-sep"></div>
+    <span class="hud-label">🚀</span>
+    <span class="hud-missiles" id="missileCount">0</span>
+    <div class="hud-sep"></div>
     <button class="hud-abort" onclick="abortMission()">✕ ABORT</button>
   </div>
 </div>
@@ -394,6 +410,7 @@
 
 <!-- ===== PAUSE BANNER ===== -->
 <div id="pauseBanner">⏸ PAUSED</div>
+<div id="flightBanner"></div>
 
 <!-- ===== END SCREEN ===== -->
 <div id="endScreen">
@@ -618,6 +635,46 @@ const sounds = {
     });
   },
 
+  // Player missile fire — short sharp whoosh
+  missileFire() {
+    const ctx = getAudio();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(600, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.18);
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.18, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+    o.start(); o.stop(ctx.currentTime + 0.2);
+  },
+
+  // Missile hit — satisfying crunch
+  missileHit() {
+    const ctx = getAudio();
+    [1,2,3].forEach(i => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = 180 / i;
+      o.connect(g); g.connect(ctx.destination);
+      const t = ctx.currentTime + i * 0.04;
+      g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      o.start(t); o.stop(t + 0.25);
+    });
+  },
+
+  // Missile pickup — bright ascending arp
+  missilePickup() {
+    const ctx = getAudio();
+    [392, 523, 659, 880].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = f;
+      o.connect(g); g.connect(ctx.destination);
+      const t = ctx.currentTime + i * 0.07;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.1, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      o.start(t); o.stop(t + 0.25);
+    });
+  },
+
   // Fuel pickup — bright rising chime
   fuelPickup() {
     const ctx = getAudio();
@@ -630,53 +687,38 @@ const sounds = {
     });
   },
 
-  // Rocket thruster — detuned oscillator chord through waveshaper distortion
+  // Rocket thruster — filtered noise + low rumble, smooth and non-harsh
   thrustStart() {
     if (thrustOscNode) return;
     const ctx = getAudio();
     if (ctx.state === 'suspended') ctx.resume();
 
-    // Soft-clipping distortion curve — adds harmonics like a real motor
-    const curve = new Float32Array(512);
-    for (let i = 0; i < 512; i++) {
-      const x = (i * 2) / 512 - 1;
-      curve[i] = (Math.PI + 80) * x / (Math.PI + 80 * Math.abs(x));
-    }
-    const dist = ctx.createWaveShaper();
-    dist.curve = curve; dist.oversample = '2x';
+    // White noise buffer — looped for continuous roar
+    const bufLen = ctx.sampleRate * 2;
+    const noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const data = noiseBuf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+    const noise = ctx.createBufferSource(); noise.buffer = noiseBuf; noise.loop = true;
 
-    // Three detuned sawtooth oscillators — beating against each other = gritty motor texture
-    const freqs = [130, 138, 196]; // root, slight detune, perfect 5th above
-    const oscs  = freqs.map(f => {
-      const o = ctx.createOscillator();
-      o.type = 'sawtooth'; o.frequency.value = f; return o;
-    });
-    const mix = ctx.createGain(); mix.gain.value = 0.33;
-    oscs.forEach(o => o.connect(mix));
+    // Bandpass centres the roar, lowpass removes high-frequency harshness
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 260; bp.Q.value = 0.65;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass';  lp.frequency.value = 680;
 
-    // Low-pass keeps it warm, not shrill
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass'; lp.frequency.value = 1400; lp.Q.value = 0.8;
-
-    // Slow LFO tremolo (6Hz) — "engine under load" breathing
-    const lfo    = ctx.createOscillator();
-    const lfoAmt = ctx.createGain();
-    lfo.type = 'sine'; lfo.frequency.value = 6;
-    lfoAmt.gain.value = 0.06;
-    lfo.connect(lfoAmt);
+    // Deep sub-rumble for physical sensation
+    const rumble = ctx.createOscillator(); rumble.type = 'sine'; rumble.frequency.value = 58;
+    const rg = ctx.createGain(); rg.gain.value = 0.22; rumble.connect(rg);
 
     const master = ctx.createGain();
     master.gain.setValueAtTime(0, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0.28, ctx.currentTime + 0.18);
-    lfoAmt.connect(master.gain); // tremolo into master gain
+    master.gain.linearRampToValueAtTime(0.14, ctx.currentTime + 0.35);
 
-    mix.connect(dist); dist.connect(lp); lp.connect(master); master.connect(ctx.destination);
-    oscs.forEach(o => o.start());
-    lfo.start();
+    noise.connect(bp); bp.connect(lp); lp.connect(master);
+    rg.connect(master); master.connect(ctx.destination);
+    noise.start(); rumble.start();
 
-    thrustOscNode  = oscs[0];
+    thrustOscNode  = noise;
     thrustGainNode = master;
-    master._allOscs = [...oscs, lfo];
+    master._allOscs = [noise, rumble];
   },
 
   thrustStop() {
@@ -805,8 +847,21 @@ const THRUST_FUEL_RATE = 0.013; // % fuel burned per frame while thrusting (~0.7
 const N_ASTEROIDS      = 28;
 const N_ALIENS         = 8;
 const N_FUEL_PICKUPS   = 6;
+const N_MISSILE_PICKUPS = 3;    // missile ammo crates in the world
+const MISSILE_AMMO      = 3;    // ammo gained per pickup
+const MISSILE_SPEED     = 14;   // px/frame player missile speed
 const COMET_MAX        = 6;     // max comets on screen at once
 const COMET_INTERVAL   = 1800;  // ms between comet spawns
+
+// ===== PLANET FACTS =====
+const PLANET_FACTS = {
+  mars:    "Mars is called the Red Planet because of iron oxide on its surface!",
+  jupiter: "Jupiter is so big that 1,300 Earths could fit inside it!",
+  saturn:  "Saturn's rings are made of ice and rock — they stretch 282,000 km wide!",
+  uranus:  "Uranus spins on its side — one pole gets 42 years of sunlight, then 42 of darkness!",
+  neptune: "Neptune has the strongest winds in the solar system — over 2,100 km/h!",
+  moon:    "The Moon drifts about 3.8 cm further from Earth every single year!",
+};
 
 // Operator gate colors
 const OP_COLOR = { multiply:'#b94fff', divide:'#ffd700', add:'#39ff14', subtract:'#ff2d55' };
@@ -816,8 +871,10 @@ let canvas, ctx;
 let gameState = 'setup'; // 'playing' | 'question' | 'gameover' | 'victory'
 let paused = false;
 let ship, camera;
-let gates, obstacles, starField, planets, fuelPickups;
-let particles, comets, lasers;
+let gates, obstacles, starField, planets, fuelPickups, missilePowerups;
+let particles, comets, lasers, playerMissiles;
+let missiles;           // ammo count
+let planetFactShown;    // Set of planet types already shown this game
 let oxygen, lives, gatesCleared;
 let allGatesCleared = false; // set true when all gates done; then fly to Earth
 let lowFuelWarningPlayed = false;
@@ -862,6 +919,7 @@ function initGame() {
 
   oxygen        = 100;
   lives         = 5;
+  missiles      = 0;
   gatesCleared  = 0;
   allGatesCleared = false;
   lowFuelWarningPlayed = false;
@@ -871,12 +929,14 @@ function initGame() {
   screenShake   = 0;
   paused        = false;
   keys          = {};
-  gameState     = 'playing';
+  gameState     = 'countdown';
   rainbowAngle  = 0;
   particles     = [];
   comets        = [];
   lasers        = [];
-  nextCometTime = Date.now() + 1500;
+  playerMissiles = [];
+  planetFactShown = new Set();
+  nextCometTime = Date.now() + 5000; // give countdown time before comets start
   thrustOscNode = null;
   thrustGainNode = null;
 
@@ -885,6 +945,7 @@ function initGame() {
   gates      = generateGates();
   obstacles  = generateObstacles();
   fuelPickups = generateFuelPickups();
+  missilePowerups = generateMissilePowerups();
 
   ship   = { x: 1000, y: 5300, facing: 0, moving: false };
   camera = { x: 1000, y: 5300 };
@@ -898,6 +959,47 @@ function initGame() {
   if (animId) cancelAnimationFrame(animId);
   lastTs = 0;
   animId = requestAnimationFrame(gameLoop);
+
+  runCountdown();
+}
+
+function runCountdown() {
+  const overlay = document.getElementById('countdownOverlay');
+  const numEl   = document.getElementById('countdownNum');
+  overlay.style.display = 'flex';
+
+  const steps = ['3','2','1','GO!'];
+  const colors = ['#00d4ff','#ffd700','#ff2d55','#39ff14'];
+  const freqs  = [440, 523, 659, 880];
+  let i = 0;
+
+  function showStep() {
+    numEl.textContent  = steps[i];
+    numEl.style.color      = colors[i];
+    numEl.style.textShadow = `0 0 40px ${colors[i]}, 0 0 80px ${colors[i]}`;
+    numEl.style.opacity    = '1';
+
+    // Tick sound
+    const ctx = getAudio();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'square'; o.frequency.value = freqs[i];
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.12, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (i === 3 ? 0.5 : 0.18));
+    o.start(); o.stop(ctx.currentTime + 0.5);
+
+    setTimeout(() => {
+      numEl.style.opacity = '0';
+      i++;
+      if (i < steps.length) {
+        setTimeout(showStep, 180);
+      } else {
+        overlay.style.display = 'none';
+        gameState = 'playing';
+      }
+    }, i < 3 ? 820 : 600);
+  }
+  showStep();
 }
 
 function onResize() {
@@ -1015,6 +1117,7 @@ function onKeyDown(e) {
     if (gameState === 'playing' && !paused) sounds.thrustStart();
   }
   if (['a','A','d','D','w','W','s','S'].includes(e.key) && gameState === 'playing' && !paused) sounds.thrustStart();
+  if (e.key === ' ' && gameState === 'playing' && !paused) { e.preventDefault(); firePlayerMissile(); }
   if (e.key === 'Enter' && gameState === 'question') { e.preventDefault(); submitAnswer(); }
   if ((e.key === 'p' || e.key === 'P') && (gameState==='playing'||gameState==='question')) togglePause();
   if (e.key === 'Escape' && gameState === 'question') dismissQuestion();
@@ -1036,6 +1139,16 @@ function togglePause() {
 // ===== GAME LOOP =====
 function gameLoop(ts) {
   if (paused) return;
+  if (gameState === 'countdown') {
+    // Render background during countdown but skip physics
+    const dt2 = lastTs ? Math.min((ts - lastTs) / 16.67, 3) : 1;
+    lastTs = ts;
+    rainbowAngle = (rainbowAngle + 0.03) % (Math.PI * 2);
+    updateParticles(dt2);
+    render();
+    animId = requestAnimationFrame(gameLoop);
+    return;
+  }
   if (gameState !== 'playing' && gameState !== 'question') return;
   const dt = lastTs ? Math.min((ts - lastTs) / 16.67, 3) : 1;
   lastTs = ts;
@@ -1047,9 +1160,12 @@ function gameLoop(ts) {
     updateAlienLasers();
     checkGateTrigger();
     checkFuelPickups();
+    checkMissilePowerups();
     checkObstacleCollisions();
     checkLaserCollisions();
     checkCometCollisions();
+    updatePlayerMissiles(dt);
+    checkPlanetProximity();
   }
 
   updateParticles(dt);
@@ -1319,20 +1435,14 @@ function updateHUD() {
   }
   const label = allGatesCleared ? `🌍 FLY HOME!` : `⬡ ${gatesCleared} / ${TOTAL_GATES}`;
   document.getElementById('gateCounter').textContent = label;
+  document.getElementById('missileCount').textContent = missiles || 0;
 }
 
 function showFlightBanner(msg, duration) {
-  const b = document.getElementById('pauseBanner');
-  const prev = b.textContent;
+  const b = document.getElementById('flightBanner');
   b.textContent = msg;
   b.style.display = 'block';
-  setTimeout(() => {
-    // Only hide if it's still showing our message (not pause)
-    if (b.textContent === msg) {
-      b.style.display = paused ? 'block' : 'none';
-      if (paused) b.textContent = '⏸ PAUSED';
-    }
-  }, duration);
+  setTimeout(() => { if (b.textContent === msg) b.style.display = 'none'; }, duration);
 }
 
 function abortMission() {
@@ -1491,6 +1601,152 @@ function drawComets() {
   });
 }
 
+// ===== MISSILE POWERUPS =====
+function generateMissilePowerups() {
+  const pickups = [];
+  const gatePts = gates.map(g => ({ x: g.x, y: g.y }));
+  function tooClose(x, y) {
+    if (Math.hypot(x-1000, y-5300) < 240) return true;
+    if (Math.hypot(x-1000, y-200)  < 260) return true;
+    return gatePts.some(g => Math.hypot(x-g.x, y-g.y) < 120);
+  }
+  let tries = 0;
+  while (pickups.length < N_MISSILE_PICKUPS && tries < 600) {
+    tries++;
+    const x = 150 + Math.random() * (WORLD_W - 300);
+    const y = 600 + Math.random() * (WORLD_H - 900);
+    if (!tooClose(x, y)) pickups.push({ x, y, collected: false, bobPhase: Math.random()*Math.PI*2 });
+  }
+  return pickups;
+}
+
+function checkMissilePowerups() {
+  if (!missilePowerups) return;
+  for (const p of missilePowerups) {
+    if (p.collected) continue;
+    if (Math.hypot(ship.x - p.x, ship.y - p.y) < 30) {
+      p.collected = true;
+      missiles += MISSILE_AMMO;
+      updateHUD();
+      sounds.missilePickup();
+      spawnParticles(p.x, p.y, 14, ['#39ff14','#00d4ff','#ffffff'], 1.5, 4, 0.015, 0.03, 2, 5);
+    }
+  }
+}
+
+function drawMissilePowerups() {
+  if (!missilePowerups) return;
+  const t = Date.now() / 1000;
+  for (const p of missilePowerups) {
+    if (p.collected) continue;
+    const sc = w2s(p.x, p.y + Math.sin(t * 1.6 + p.bobPhase) * 6);
+    if (!onScreen(sc.x, sc.y, 50)) continue;
+    ctx.save();
+    ctx.translate(sc.x, sc.y);
+    // Glow
+    ctx.shadowColor = '#39ff14'; ctx.shadowBlur = 18;
+    // Draw a small missile shape
+    ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 2;
+    ctx.fillStyle = 'rgba(57,255,20,0.15)';
+    ctx.beginPath();
+    ctx.moveTo(0, -14); ctx.lineTo(5, -4); ctx.lineTo(5, 8);
+    ctx.lineTo(8, 14);  ctx.lineTo(0, 10); ctx.lineTo(-8, 14);
+    ctx.lineTo(-5, 8);  ctx.lineTo(-5, -4); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // Label
+    ctx.shadowBlur = 0; ctx.fillStyle = '#39ff14';
+    ctx.font = 'bold 9px Orbitron, monospace'; ctx.textAlign = 'center';
+    ctx.fillText('×' + MISSILE_AMMO, 0, 26);
+    ctx.restore();
+  }
+}
+
+// ===== PLAYER MISSILES =====
+function firePlayerMissile() {
+  if (!missiles || missiles <= 0) return;
+  missiles--;
+  updateHUD();
+  const vx = Math.sin(ship.facing) * MISSILE_SPEED;
+  const vy = -Math.cos(ship.facing) * MISSILE_SPEED;
+  playerMissiles.push({ x: ship.x, y: ship.y, vx, vy, life: 1.0 });
+  sounds.missileFire();
+}
+
+function updatePlayerMissiles(dt) {
+  for (let i = playerMissiles.length - 1; i >= 0; i--) {
+    const m = playerMissiles[i];
+    m.x += m.vx * dt; m.y += m.vy * dt;
+    m.life -= 0.008 * dt;
+    if (m.life <= 0 || m.x < -200 || m.x > WORLD_W+200 || m.y < -200 || m.y > WORLD_H+200) {
+      playerMissiles.splice(i, 1); continue;
+    }
+    // Check hits against obstacles
+    let hit = false;
+    for (let j = obstacles.length - 1; j >= 0; j--) {
+      const obs = obstacles[j];
+      const hr = (obs.type === 'alien' ? 18 : obs.r || 16);
+      if (Math.hypot(m.x - obs.x, m.y - obs.y) < hr + 8) {
+        spawnParticles(obs.x, obs.y, 20, ['#ff8800','#ffdd00','#ff2d55','#ffffff'], 2, 6, 0.015, 0.03, 2, 6);
+        sounds.missileHit();
+        obstacles.splice(j, 1);
+        playerMissiles.splice(i, 1);
+        hit = true; break;
+      }
+    }
+    if (hit) continue;
+    // Check hit against comets
+    for (let j = comets.length - 1; j >= 0; j--) {
+      const co = comets[j];
+      if (Math.hypot(m.x - co.x, m.y - co.y) < 22) {
+        spawnParticles(co.x, co.y, 16, ['#aaaaff','#ffffff','#00d4ff'], 2, 5, 0.015, 0.03, 2, 5);
+        sounds.missileHit();
+        comets.splice(j, 1);
+        playerMissiles.splice(i, 1);
+        break;
+      }
+    }
+  }
+}
+
+function drawPlayerMissiles() {
+  for (const m of playerMissiles) {
+    const p = w2s(m.x, m.y);
+    if (!onScreen(p.x, p.y, 30)) continue;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(Math.atan2(m.vx, -m.vy));
+    ctx.globalAlpha = Math.min(1, m.life * 1.5);
+    ctx.shadowColor = '#39ff14'; ctx.shadowBlur = 12;
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(0, 8); ctx.stroke();
+    ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 4; ctx.globalAlpha *= 0.5;
+    ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(0, 8); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// ===== PLANET PROXIMITY =====
+function checkPlanetProximity() {
+  if (!planets) return;
+  for (const planet of planets) {
+    if (planetFactShown.has(planet.type)) continue;
+    if (Math.hypot(ship.x - planet.x, ship.y - planet.y) < planet.r + 140) {
+      planetFactShown.add(planet.type);
+      showPlanetFact(planet);
+    }
+  }
+}
+
+function showPlanetFact(planet) {
+  const popup = document.getElementById('planetPopup');
+  const title = document.getElementById('planetPopupTitle');
+  const fact  = document.getElementById('planetPopupFact');
+  title.textContent = planet.type.toUpperCase();
+  fact.textContent  = PLANET_FACTS[planet.type] || '';
+  popup.style.display = 'block';
+  setTimeout(() => { popup.style.display = 'none'; }, 5000);
+}
+
 // ===== LOW FUEL TICKS =====
 function startLowFuelTicks() {
   if (lowFuelTickInterval) return;
@@ -1574,6 +1830,8 @@ function render() {
   drawPlanets();
   drawEarth();
   drawFuelPickups();
+  drawMissilePowerups();
+  drawPlayerMissiles();
   drawGates();
   drawObstacles();
   drawLasers();
