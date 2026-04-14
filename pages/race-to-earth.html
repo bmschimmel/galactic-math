@@ -424,6 +424,14 @@ function getAudio() {
   return audioCtx;
 }
 
+// Pre-load the "low fuel" voice clip; falls back gracefully if file is absent
+let lowFuelAudioBuffer = null;
+fetch('../assets/audio/low-fuel.m4a')
+  .then(r => { if (!r.ok) throw new Error('not found'); return r.arrayBuffer(); })
+  .then(ab => getAudio().decodeAudioData(ab))
+  .then(buf => { lowFuelAudioBuffer = buf; })
+  .catch(() => { /* file not present — synthesized fallback will be used */ });
+
 const sounds = {
   correct() {
     const ctx = getAudio();
@@ -582,9 +590,17 @@ const sounds = {
     o.start(); o.stop(ctx.currentTime + 0.08);
   },
 
-  // Low fuel warning — urgent two-pulse alarm at 10%
+  // Low fuel warning — plays voice clip if loaded, otherwise synthesized alarm
   lowFuelWarning() {
     const ctx = getAudio();
+    if (lowFuelAudioBuffer) {
+      const src = ctx.createBufferSource();
+      src.buffer = lowFuelAudioBuffer;
+      src.connect(ctx.destination);
+      src.start();
+      return;
+    }
+    // Synthesized fallback: urgent two-pulse descending alarm
     [0, 0.35].forEach(delay => {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.connect(g); g.connect(ctx.destination);
