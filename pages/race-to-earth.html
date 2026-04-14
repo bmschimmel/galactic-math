@@ -424,13 +424,16 @@ function getAudio() {
   return audioCtx;
 }
 
-// Pre-load the "low fuel" voice clip; falls back gracefully if file is absent
+// Voice clip for low-fuel warning; loaded in startGame() after user gesture
 let lowFuelAudioBuffer = null;
-fetch('../assets/audio/low-fuel.m4a')
-  .then(r => { if (!r.ok) throw new Error('not found'); return r.arrayBuffer(); })
-  .then(ab => getAudio().decodeAudioData(ab))
-  .then(buf => { lowFuelAudioBuffer = buf; })
-  .catch(() => { /* file not present — synthesized fallback will be used */ });
+function loadLowFuelClip() {
+  if (lowFuelAudioBuffer) return; // already loaded
+  fetch('../assets/audio/low-fuel.m4a')
+    .then(r => { if (!r.ok) throw new Error('not found'); return r.arrayBuffer(); })
+    .then(ab => getAudio().decodeAudioData(ab))
+    .then(buf => { lowFuelAudioBuffer = buf; })
+    .catch(() => { /* file absent or file:// context — synthesized fallback used */ });
+}
 
 const sounds = {
   correct() {
@@ -852,6 +855,8 @@ function initGame() {
   document.getElementById('hud').style.display       = 'block';
   document.getElementById('keyHint').style.display   = 'block';
   document.getElementById('devBanner').style.display = 'block';
+
+  loadLowFuelClip(); // load after user gesture so AudioContext starts cleanly
 
   oxygen        = 100;
   lives         = 5;
