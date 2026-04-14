@@ -582,6 +582,22 @@ const sounds = {
     o.start(); o.stop(ctx.currentTime + 0.08);
   },
 
+  // Low fuel warning — urgent two-pulse alarm at 10%
+  lowFuelWarning() {
+    const ctx = getAudio();
+    [0, 0.35].forEach(delay => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sawtooth'; o.frequency.value = 320;
+      o.frequency.setValueAtTime(320, ctx.currentTime + delay);
+      o.frequency.linearRampToValueAtTime(200, ctx.currentTime + delay + 0.25);
+      const t = ctx.currentTime + delay;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.3, t + 0.03);
+      g.gain.setValueAtTime(0.3, t + 0.18); g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      o.start(t); o.stop(t + 0.35);
+    });
+  },
+
   // Fuel pickup — bright rising chime
   fuelPickup() {
     const ctx = getAudio();
@@ -784,6 +800,7 @@ let gates, obstacles, starField, planets, fuelPickups;
 let particles, comets, lasers;
 let oxygen, lives, gatesCleared;
 let allGatesCleared = false; // set true when all gates done; then fly to Earth
+let lowFuelWarningPlayed = false;
 let activatedGate;    // which gate is currently being questioned (null if none)
 let currentQuestion;  // { text, answer }
 let invincibleUntil;
@@ -824,6 +841,7 @@ function initGame() {
   lives         = 5;
   gatesCleared  = 0;
   allGatesCleared = false;
+  lowFuelWarningPlayed = false;
   activatedGate = null;
   invincibleUntil = 0;
   screenShake   = 0;
@@ -1258,6 +1276,11 @@ function updateHUD() {
   fill.classList.toggle('low', oxy <= 25);
   pct.textContent = Math.round(oxy) + '%';
   pct.classList.toggle('low', oxy <= 25);
+
+  if (oxy <= 10 && !lowFuelWarningPlayed && gameState === 'playing') {
+    lowFuelWarningPlayed = true;
+    sounds.lowFuelWarning();
+  }
 
   const el = document.getElementById('livesDisplay');
   el.innerHTML = '';
