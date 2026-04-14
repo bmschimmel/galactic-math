@@ -1956,6 +1956,11 @@ const sounds = {
     setTimeout(() => playFreqSweep(400, 60, 'square', 0.4, 0.1), 350);
     setTimeout(() => playTone(120, 'square', 0.4, 0.12), 700);
   },
+  hyperspaceCountdownTick(secondsLeft) {
+    // Tense tick — pitch rises as time runs out
+    const freq = 440 + (10 - secondsLeft) * 40;
+    playTone(freq, 'square', 0.07, 0.09);
+  },
   hyperspaceActivate() {
     // Hyperdrive charging up — low rumble builds to a high-energy peak
     playFreqSweep(60, 300, 'sawtooth', 0.4, 0.1);
@@ -2448,6 +2453,10 @@ function startHyperspaceTimer() {
       document.getElementById('hyperspaceStatusMsg').textContent = '▸ COORDINATES CHECKED, ALMOST READY';
     }
 
+    if (hyperspaceTimeRemaining > 0 && hyperspaceTimeRemaining <= 10) {
+      sounds.hyperspaceCountdownTick(hyperspaceTimeRemaining);
+    }
+
     if (hyperspaceTimeRemaining <= 0) {
       stopHyperspaceTimer();
       hyperspaceFailure();
@@ -2479,6 +2488,10 @@ function hyperspaceSuccess() {
 
 function hyperspaceFailure() {
   hyperspaceHandled = true;
+  const input = document.getElementById('answerInput');
+  if (input) input.setAttribute('disabled', '');
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) submitBtn.disabled = true;
   sounds.hyperspaceTimeout();
 
   const banner = document.getElementById('hyperFailBanner');
@@ -2693,10 +2706,12 @@ function loadQuestion(idx) {
   const input = document.getElementById('answerInput');
   input.value = answers[idx] !== null ? answers[idx] : '';
   input.className = 'answer-input';
-  input.removeAttribute('disabled');
-  document.getElementById('quizError').textContent = '';
-  const submitBtn = document.getElementById('submitBtn');
-  if (submitBtn) submitBtn.disabled = false;
+  if (!hyperspaceHandled) {
+    input.removeAttribute('disabled');
+    document.getElementById('quizError').textContent = '';
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) submitBtn.disabled = false;
+  }
 
   // recolor if already answered
   if (answers[idx] !== null) {

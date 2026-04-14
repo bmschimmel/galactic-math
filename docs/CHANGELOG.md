@@ -5,9 +5,14 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-04-13 (4)
+
+### IDT-102 — Block input after hyperspace timer completes (PR #TBD)
+When the hyperspace countdown reached zero, a brief animation window before the results screen allowed players to sneak in one more answer. The fix disables the answer input and submit button immediately in `hyperspaceFailure()`, and guards `loadQuestion()` from re-enabling them once `hyperspaceHandled` is set. A ticking sound also plays each second for the final 10 seconds, rising in pitch as time runs out.
+
 ## 2026-04-13 (3)
 
-### IDT-103 — Show "Skipped" instead of "null" for unanswered questions (PR #TBD)
+### IDT-103 — Show "Skipped" instead of "null" for unanswered questions (PR #78)
 Unanswered questions in the missed-problems review showed "You: null". The fix checks whether the recorded answer is null and displays "Skipped" instead, keeping the language friendly for kids.
 
 ## 2026-04-13 (2)
