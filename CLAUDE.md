@@ -16,7 +16,7 @@ The main app lives in `index.html`. Auxiliary pages (e.g. feedback form) live un
 - **One file for the app:** The game itself stays in `index.html` — HTML, CSS, and JS together. Auxiliary pages (feedback form, etc.) go in `pages/` only when an issue explicitly requires it.
 - **No external dependencies:** No npm, no frameworks, no CDN libraries except Google Fonts. The game must work offline after first load.
 - **No localStorage or cookies:** Don't persist data between sessions.
-- **Web Audio API only:** All sound effects are synthesized via Web Audio API. Do not add audio files.
+- **Audio:** All sound effects are synthesized via Web Audio API by default. Do not fetch audio from external URLs. However, local audio files (e.g. `.m4a`, `.mp3`, `.wav`, `.ogg`) may be used when a file is explicitly provided in the repo (e.g. under `assets/audio/`). Load them with the Web Audio API (`fetch` + `decodeAudioData`) so playback is consistent with the rest of the audio system.
 - **No `<form>` tags:** Use button `onClick` handlers instead.
 - **Browser support:** Modern browsers only (Chrome, Firefox, Safari, Edge). No IE.
 
