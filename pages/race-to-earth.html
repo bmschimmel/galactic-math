@@ -387,7 +387,7 @@
     <div class="hud-sep"></div>
     <span class="hud-gates" id="gateCounter">⬡ 0 / 10</span>
     <div class="hud-sep"></div>
-    <span class="hud-label">⚡</span>
+    <span class="hud-label">🚀</span>
     <span class="hud-missiles" id="missileCount">0</span>
     <div class="hud-sep"></div>
     <button class="hud-abort" onclick="abortMission()">✕ ABORT</button>
@@ -674,6 +674,17 @@ const sounds = {
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
       o.start(t); o.stop(t + 0.25);
     });
+  },
+
+  // No ammo click — dry click when firing with 0 missiles
+  missileEmpty() {
+    const ctx = getAudio();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'square'; o.frequency.value = 180;
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.08, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+    o.start(); o.stop(ctx.currentTime + 0.07);
   },
 
   // Fuel pickup — bright rising chime
@@ -1430,7 +1441,7 @@ function updateHUD() {
   for (let i = 0; i < 5; i++) {
     const s = document.createElement('span');
     s.className = 'life-icon' + (i >= lives ? ' lost' : '');
-    s.textContent = '🚀';
+    s.textContent = '❤️';
     el.appendChild(s);
   }
   const label = allGatesCleared ? `🌍 FLY HOME!` : `⬡ ${gatesCleared} / ${TOTAL_GATES}`;
@@ -1604,7 +1615,7 @@ function drawComets() {
 // ===== MISSILE POWERUPS =====
 // ===== PLAYER MISSILES =====
 function firePlayerMissile() {
-  if (!missiles || missiles <= 0) return;
+  if (!missiles || missiles <= 0) { sounds.missileEmpty(); return; }
   missiles--;
   updateHUD();
   const vx = Math.sin(ship.facing) * MISSILE_SPEED;
@@ -1671,7 +1682,7 @@ function checkPlanetProximity() {
   if (!planets || gameState !== 'playing') return;
   for (const planet of planets) {
     if (planetFactShown.has(planet.type)) continue;
-    if (Math.hypot(ship.x - planet.x, ship.y - planet.y) < planet.r + 140) {
+    if (Math.hypot(ship.x - planet.x, ship.y - planet.y) < planet.r + 50) {
       planetFactShown.add(planet.type);
       showPlanetFact(planet);
       return; // one at a time
