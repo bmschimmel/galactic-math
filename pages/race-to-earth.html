@@ -317,6 +317,116 @@
   }
   #devBanner a { color: rgba(0,212,255,0.55); text-decoration: none; }
   #devBanner a:hover { color: var(--saber-blue); }
+
+  /* ===== VIRTUAL JOYSTICK (mobile touch) ===== */
+  #vjoy {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    width: 148px;
+    height: 148px;
+    border-radius: 50%;
+    background: rgba(0,212,255,0.05);
+    border: 2px solid rgba(0,212,255,0.22);
+    box-shadow: 0 0 24px rgba(0,212,255,0.08), inset 0 0 20px rgba(0,0,0,0.4);
+    z-index: 50;
+    display: none;
+    touch-action: none;
+    pointer-events: all;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    /* subtle cross-hair dividers */
+    background-image:
+      linear-gradient(rgba(0,212,255,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.07) 1px, transparent 1px);
+    background-size: 100% 50%, 50% 100%;
+    background-position: 0 50%, 50% 0;
+  }
+  .vjoy-arrow {
+    position: absolute;
+    color: rgba(0,212,255,0.28);
+    font-size: 13px;
+    line-height: 1;
+    pointer-events: none;
+    transition: color 0.08s, text-shadow 0.08s;
+  }
+  .vjoy-arrow.active {
+    color: var(--saber-blue);
+    text-shadow: 0 0 10px var(--saber-blue);
+  }
+  #vjoy-arrow-up    { top: 8px;    left: 50%; transform: translateX(-50%); }
+  #vjoy-arrow-down  { bottom: 8px; left: 50%; transform: translateX(-50%); }
+  #vjoy-arrow-left  { left: 8px;   top: 50%;  transform: translateY(-50%); }
+  #vjoy-arrow-right { right: 8px;  top: 50%;  transform: translateY(-50%); }
+  #vjoy-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(0,212,255,0.07);
+    border: 1px solid rgba(0,212,255,0.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    pointer-events: none;
+    transition: background 0.12s, box-shadow 0.12s;
+  }
+  #vjoy-center.flash {
+    background: rgba(0,212,255,0.3);
+    box-shadow: 0 0 14px rgba(0,212,255,0.5);
+  }
+  #vjoy-thumb {
+    position: absolute;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: rgba(0,212,255,0.14);
+    border: 2px solid rgba(0,212,255,0.7);
+    box-shadow: 0 0 14px rgba(0,212,255,0.35);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  #vpause {
+    position: fixed;
+    bottom: 60px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0,212,255,0.07);
+    border: 1px solid rgba(0,212,255,0.22);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 16px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: all;
+  }
+  #vpause:active { background: rgba(0,212,255,0.18); }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 600px) {
+    .hud-bar { padding: 6px 10px; gap: 8px; }
+    .hud-label { font-size: 7px; letter-spacing: 1px; }
+    .fuel-bar-outer { height: 8px; }
+    .fuel-pct { font-size: 11px; min-width: 34px; }
+    .hud-gates { font-size: 10px; }
+    .hud-missiles { font-size: 13px; }
+    .hud-abort { font-size: 8px; padding: 4px 8px; }
+    .life-icon { font-size: 11px; }
+    .question-text { font-size: 26px; }
+    .answer-input { width: 120px; font-size: 22px; padding: 8px 12px; }
+    #keyHint { display: none !important; }
+    .end-title { font-size: 22px; }
+    .end-stat-val { font-size: 24px; }
+    .end-btns { flex-direction: column; align-items: center; }
+    .end-btn { width: 200px; text-align: center; }
+  }
 </style>
 </head>
 <body>
@@ -327,10 +437,10 @@
 </div>
 
 <!-- ===== PLANET FACT POPUP ===== -->
-<div id="planetPopup" style="display:none; position:fixed; background:rgba(3,7,18,0.95); border:1.5px solid #00d4ff; border-radius:12px; padding:16px 22px; max-width:360px; text-align:center; z-index:30; box-shadow:0 0 24px rgba(0,212,255,0.25);">
+<div id="planetPopup" style="display:none; position:fixed; background:rgba(3,7,18,0.95); border:1.5px solid #00d4ff; border-radius:12px; padding:16px 22px; max-width:360px; text-align:center; z-index:30; box-shadow:0 0 24px rgba(0,212,255,0.25); cursor:pointer;" onclick="if(typeof dismissPlanetFact==='function')dismissPlanetFact()">
   <div style="font-family:'Orbitron',monospace; font-size:10px; color:#6b7fa3; letter-spacing:3px; margin-bottom:6px;" id="planetPopupTitle">MARS</div>
   <div style="font-family:'Exo 2',sans-serif; font-size:15px; color:#e8f4ff; line-height:1.5; margin-bottom:12px;" id="planetPopupFact"></div>
-  <div style="font-family:'Orbitron',monospace; font-size:10px; color:#6b7fa3; letter-spacing:2px;">ENTER / ESC to continue</div>
+  <div style="font-family:'Orbitron',monospace; font-size:10px; color:#6b7fa3; letter-spacing:2px;">Tap or press ENTER / ESC to continue</div>
 </div>
 
 <!-- ===== SETUP SCREEN ===== -->
@@ -360,7 +470,7 @@
     </div>
 
     <div class="how-to-play">
-      <b>Arrow keys</b> to thrust &nbsp;·&nbsp; <b>Enter</b> to submit answer &nbsp;·&nbsp; <b>P</b> to pause<br>
+      <b>Arrow keys / D-pad</b> to thrust &nbsp;·&nbsp; <b>Enter / Submit button</b> to answer &nbsp;·&nbsp; <b>P / ⏸</b> to pause<br>
       <b>Gates</b> can be tackled in any order — fly to any glowing ring &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> float in space — collect for +10% fuel<br>
       <b>Clear all 10 gates</b>, then fly to Earth &nbsp;·&nbsp; <b>Watch out</b> for comets, asteroids, and alien ships
     </div>
@@ -403,7 +513,7 @@
     <input class="answer-input" id="answerInput" type="number" inputmode="numeric" autocomplete="off" placeholder="?">
     <button class="submit-btn" onclick="submitAnswer()">ENTER</button>
   </div>
-  <div class="question-hint">Type your answer and press Enter</div>
+  <div class="question-hint">Type your answer and tap Submit or press Enter</div>
 </div>
 
 <!-- ===== WRONG FLASH ===== -->
@@ -432,6 +542,17 @@
 <!-- ===== KEY HINT ===== -->
 <div id="keyHint">Arrow keys to thrust · Enter to submit · P to pause</div>
 <div id="devBanner">🚧 Still in development — <a href="feedback.html" target="_blank">submit ideas here</a></div>
+
+<!-- ===== VIRTUAL JOYSTICK (mobile touch) ===== -->
+<div id="vjoy">
+  <div class="vjoy-arrow" id="vjoy-arrow-up">▲</div>
+  <div class="vjoy-arrow" id="vjoy-arrow-down">▼</div>
+  <div class="vjoy-arrow" id="vjoy-arrow-left">◄</div>
+  <div class="vjoy-arrow" id="vjoy-arrow-right">►</div>
+  <div id="vjoy-center">🚀</div>
+  <div id="vjoy-thumb"></div>
+</div>
+<button id="vpause">⏸</button>
 
 <script>
 // ===== AUDIO ENGINE =====
@@ -924,6 +1045,7 @@ function initGame() {
   document.getElementById('hud').style.display       = 'block';
   document.getElementById('keyHint').style.display   = 'block';
   document.getElementById('devBanner').style.display = 'block';
+  if (isTouchDevice) showVpad();
 
   loadLowFuelClip(); // load after user gesture so AudioContext starts cleanly
 
@@ -1137,6 +1259,101 @@ function onKeyUp(e) {
   if (!MOVE_KEYS.has(e.key)) return;
   const anyMoveHeld = [...MOVE_KEYS].some(k => keys[k]);
   if (!anyMoveHeld) sounds.thrustStop();
+}
+
+// ===== VIRTUAL JOYSTICK (MOBILE TOUCH) =====
+function showVpad() {
+  document.getElementById('vjoy').style.display   = 'block';
+  document.getElementById('vpause').style.display = 'flex';
+}
+function hideVpad() {
+  document.getElementById('vjoy').style.display   = 'none';
+  document.getElementById('vpause').style.display = 'none';
+}
+
+function setupVpadEvents() {
+  const joyEl      = document.getElementById('vjoy');
+  const thumbEl    = document.getElementById('vjoy-thumb');
+  const centerEl   = document.getElementById('vjoy-center');
+  const arrowUp    = document.getElementById('vjoy-arrow-up');
+  const arrowDown  = document.getElementById('vjoy-arrow-down');
+  const arrowLeft  = document.getElementById('vjoy-arrow-left');
+  const arrowRight = document.getElementById('vjoy-arrow-right');
+
+  const OUTER_R   = 74;  // half of 148px circle
+  const DEAD_ZONE = 18;  // px from center = fire zone, no thrust
+
+  function clearDirKeys() {
+    keys['ArrowUp'] = keys['ArrowDown'] = keys['ArrowLeft'] = keys['ArrowRight'] = false;
+    arrowUp.classList.remove('active');
+    arrowDown.classList.remove('active');
+    arrowLeft.classList.remove('active');
+    arrowRight.classList.remove('active');
+  }
+
+  function applyDir(dx, dy) {
+    clearDirKeys();
+    const ax = Math.abs(dx), ay = Math.abs(dy);
+    // Allow diagonal: both axes fire when neither dominates by >2.5x
+    if (ax > ay * 0.4) {
+      if (dx > 0) { keys['ArrowRight'] = true; arrowRight.classList.add('active'); }
+      else        { keys['ArrowLeft']  = true; arrowLeft.classList.add('active'); }
+    }
+    if (ay > ax * 0.4) {
+      if (dy > 0) { keys['ArrowDown'] = true; arrowDown.classList.add('active'); }
+      else        { keys['ArrowUp']   = true; arrowUp.classList.add('active'); }
+    }
+    if (gameState === 'playing' && !paused) sounds.thrustStart();
+  }
+
+  function moveThumb(dx, dy, dist) {
+    const clamp = Math.min(dist, OUTER_R - 16);
+    const angle = Math.atan2(dy, dx);
+    const tx = Math.cos(angle) * clamp;
+    const ty = Math.sin(angle) * clamp;
+    thumbEl.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
+  }
+
+  function handleJoyTouch(e) {
+    e.preventDefault();
+    if (e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const rect = joyEl.getBoundingClientRect();
+    const dx = touch.clientX - (rect.left + rect.width  / 2);
+    const dy = touch.clientY - (rect.top  + rect.height / 2);
+    const dist = Math.hypot(dx, dy);
+
+    moveThumb(dx, dy, dist);
+
+    if (dist < DEAD_ZONE) {
+      clearDirKeys();
+      sounds.thrustStop();
+      if (e.type === 'touchstart' && gameState === 'playing' && !paused) {
+        firePlayerMissile();
+        centerEl.classList.add('flash');
+        setTimeout(() => centerEl.classList.remove('flash'), 150);
+      }
+    } else {
+      applyDir(dx, dy);
+    }
+  }
+
+  function handleJoyRelease(e) {
+    e.preventDefault();
+    clearDirKeys();
+    sounds.thrustStop();
+    thumbEl.style.transform = 'translate(-50%, -50%)';
+  }
+
+  joyEl.addEventListener('touchstart',  handleJoyTouch,   { passive: false });
+  joyEl.addEventListener('touchmove',   handleJoyTouch,   { passive: false });
+  joyEl.addEventListener('touchend',    handleJoyRelease, { passive: false });
+  joyEl.addEventListener('touchcancel', handleJoyRelease, { passive: false });
+
+  document.getElementById('vpause').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (gameState === 'playing' || gameState === 'question') togglePause();
+  }, { passive: false });
 }
 
 function togglePause() {
@@ -1773,6 +1990,7 @@ function cleanupListeners() {
   window.removeEventListener('keyup',   onKeyUp);
   window.removeEventListener('resize',  onResize);
   if (animId) { cancelAnimationFrame(animId); animId = null; }
+  hideVpad();
 }
 
 function restartGame() { document.getElementById('endScreen').style.display = 'none'; initGame(); }
@@ -2247,6 +2465,10 @@ function drawDirectionArrow() {
 // ===== AUTO-LAUNCH =====
 // If valid number + op selections were passed from the main app, skip the
 // setup screen and go straight into the game.
+
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+setupVpadEvents();
+
 if (autoLaunch) {
   document.getElementById('setupScreen').style.display = 'none';
   initGame();

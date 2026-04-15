@@ -5,6 +5,13 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-04-15
+
+### IDT-108 — Mobile support for Race to Earth mode (PR #TBD)
+Added full touch-device support for `pages/race-to-earth.html`. A virtual D-pad (four directional buttons, bottom-left) and a fire button (bottom-right) appear automatically on touch devices, wiring into the same `keys[]` state used by keyboard input so all existing physics and thrust audio remain unchanged. A pause button is also overlaid on-screen. Responsive CSS media queries (≤600px) shrink the HUD bar, question text, and answer input to fit small phone screens, and the end screen buttons stack vertically. The planet fact popup now dismisses on tap. Hint text in the how-to-play section, question overlay, and planet popup was updated to reference both keyboard and touch controls.
+
+---
+
 ## 2026-04-13 (4)
 
 ### IDT-102 — Block input after hyperspace timer completes (PR #TBD)
