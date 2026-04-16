@@ -4,8 +4,11 @@
 //   [ai] binding = "AI" — Cloudflare Workers AI for title generation
 
 const GITHUB_REPO = 'bmschimmel/galactic-math';
+const ALLOWED_ORIGIN = 'https://galactic-math.pages.dev';
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_NAME_LENGTH = 80;
+const MAX_MESSAGE_LENGTH = 500;
 
 // In-memory rate limit store: IP → [timestamp, ...]
 const rateLimitStore = new Map();
@@ -20,9 +23,9 @@ function isRateLimited(ip) {
   return false;
 }
 
-function corsHeaders(origin) {
+function corsHeaders() {
   return {
-    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
@@ -54,17 +57,15 @@ async function generateTitle(message, ai) {
 
 export default {
   async fetch(request, env) {
-    const origin = request.headers.get('Origin') || '*';
-
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders(origin) });
+      return new Response(null, { status: 204, headers: corsHeaders() });
     }
 
     if (request.method !== 'POST') {
       return new Response('Method not allowed', {
         status: 405,
-        headers: corsHeaders(origin),
+        headers: corsHeaders(),
       });
     }
 
@@ -74,7 +75,7 @@ export default {
       console.log(`Rate limited: ${ip}`);
       return new Response(JSON.stringify({ error: 'Too many requests. Try again later.' }), {
         status: 429,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
       });
     }
 
@@ -84,7 +85,7 @@ export default {
     } catch {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
       });
     }
 
@@ -93,7 +94,7 @@ export default {
       console.log(`Honeypot triggered from ${ip}`);
       return new Response(JSON.stringify({ ok: true }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
       });
     }
 
@@ -101,7 +102,19 @@ export default {
     if (!name || !message) {
       return new Response(JSON.stringify({ error: 'Missing name or message' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+      });
+    }
+    if (name.length > MAX_NAME_LENGTH) {
+      return new Response(JSON.stringify({ error: `Name must be ${MAX_NAME_LENGTH} characters or fewer` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+      });
+    }
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return new Response(JSON.stringify({ error: `Message must be ${MAX_MESSAGE_LENGTH} characters or fewer` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
       });
     }
 
@@ -128,7 +141,7 @@ export default {
       console.error('GitHub API error:', response.status, err);
       return new Response(JSON.stringify({ error: 'Failed to create issue' }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders() },
       });
     }
 
@@ -136,7 +149,7 @@ export default {
     console.log(`Issue created: ${issue.html_url} from ${ip} (category: ${category}, title: ${title})`);
     return new Response(JSON.stringify({ ok: true, url: issue.html_url }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders() },
     });
   },
 };
