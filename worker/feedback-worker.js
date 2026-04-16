@@ -4,8 +4,14 @@
 //   [ai] binding = "AI" — Cloudflare Workers AI for title generation
 
 const GITHUB_REPO = 'bmschimmel/galactic-math';
+const ALLOWED_ORIGINS = [
+  'https://galactic-math.pages.dev',       // production
+  /^https:\/\/[a-z0-9-]+\.galactic-math\.pages\.dev$/, // branch/preview deployments
+];
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_NAME_LENGTH = 80;
+const MAX_MESSAGE_LENGTH = 500;
 
 // In-memory rate limit store: IP → [timestamp, ...]
 const rateLimitStore = new Map();
@@ -20,9 +26,13 @@ function isRateLimited(ip) {
   return false;
 }
 
+function isAllowedOrigin(origin) {
+  return ALLOWED_ORIGINS.some(o => o instanceof RegExp ? o.test(origin) : o === origin);
+}
+
 function corsHeaders(origin) {
   return {
-    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Origin': isAllowedOrigin(origin) ? origin : ALLOWED_ORIGINS[0],
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
@@ -54,7 +64,7 @@ async function generateTitle(message, ai) {
 
 export default {
   async fetch(request, env) {
-    const origin = request.headers.get('Origin') || '*';
+    const origin = request.headers.get('Origin') || '';
 
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
@@ -100,6 +110,18 @@ export default {
     const { name, message, category } = body;
     if (!name || !message) {
       return new Response(JSON.stringify({ error: 'Missing name or message' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+      });
+    }
+    if (name.length > MAX_NAME_LENGTH) {
+      return new Response(JSON.stringify({ error: `Name must be ${MAX_NAME_LENGTH} characters or fewer` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+      });
+    }
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return new Response(JSON.stringify({ error: `Message must be ${MAX_MESSAGE_LENGTH} characters or fewer` }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
       });
