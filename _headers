@@ -1,2 +1,2 @@
 /*
-  Content-Security-Policy: default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com
+  Content-Security-Policy: default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://galactic-math-feedback.bmschimmel.workers.dev
