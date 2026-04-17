@@ -1501,9 +1501,59 @@
   .page-footer a:hover {
     color: var(--saber-blue);
   }
+
+  /* ===== COMPAT WARNING BANNER ===== */
+  #compatBanner {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 9999;
+    background: rgba(3, 7, 18, 0.97);
+    border-bottom: 2px solid var(--saber-red);
+    padding: 10px 16px;
+    text-align: center;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 13px;
+    color: var(--star-white);
+    box-shadow: 0 0 24px rgba(255, 45, 85, 0.25);
+    line-height: 1.5;
+  }
+
+  #compatBanner strong {
+    color: var(--saber-red);
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+
+  #compatDismiss {
+    margin-left: 12px;
+    background: none;
+    border: 1px solid var(--muted);
+    border-radius: 4px;
+    color: var(--muted);
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  #compatDismiss:hover { color: var(--star-white); border-color: var(--star-white); }
 </style>
 </head>
 <body>
+
+<div id="compatBanner">
+  <strong>⚠ Browser Warning</strong>
+  Your browser may not support all features. For the best experience, use
+  <strong>Chrome</strong>, <strong>Safari</strong>, <strong>Firefox</strong>, or <strong>Edge</strong>
+  on Android, iPhone/iPad, or Windows.
+  <button id="compatDismiss" onclick="document.getElementById('compatBanner').style.display='none'">DISMISS</button>
+</div>
 
 <canvas id="starfield"></canvas>
 <canvas id="shipCanvas"></canvas>
@@ -1725,6 +1775,23 @@
 </div>
 
 <script>
+// ===== BROWSER COMPATIBILITY CHECK =====
+(function() {
+  const missing = [];
+  try {
+    const testCanvas = document.createElement('canvas');
+    if (!testCanvas.getContext || !testCanvas.getContext('2d')) missing.push('Canvas');
+  } catch(e) { missing.push('Canvas'); }
+  if (!(window.AudioContext || window.webkitAudioContext)) missing.push('Web Audio');
+  if (!window.requestAnimationFrame) missing.push('Animation');
+  if (!window.fetch) missing.push('Fetch');
+  if (missing.length > 0) {
+    const banner = document.getElementById('compatBanner');
+    if (banner) banner.style.display = 'block';
+    console.warn('[Galactic Math] Unsupported browser features:', missing.join(', '));
+  }
+})();
+
 // ===== STARS =====
 let currentStarColor = '220, 240, 255';
 
