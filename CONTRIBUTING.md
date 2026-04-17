@@ -102,6 +102,8 @@ Before opening a PR verify:
 - [ ] Session history shows scores with correct mode labels
 - [ ] Footer link opens `pages/feedback.html` and feedback form submits correctly
 - [ ] Page is usable on mobile (resize browser to ~375px wide)
+- [ ] Browser compatibility banner does **not** appear in Chrome, Safari, Firefox, and Edge
+- [ ] Race to Earth mode tested on at least one touch device (Android or iOS) or Chrome DevTools mobile emulation
 
 ---
 
@@ -122,6 +124,7 @@ the user-facing or developer-facing impact, not just what lines changed.
 ```
 
 Rules:
+
 - One `### IDT-XX` entry per Linear issue, not per commit
 - Use the merge date as the date heading
 - If multiple issues merge on the same date, group them under a single `## YYYY-MM-DD` heading
