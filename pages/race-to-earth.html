@@ -428,6 +428,87 @@
     .end-btn { width: 200px; text-align: center; }
   }
 
+  /* ===== ALIEN COUNTER (prominent, center-top) ===== */
+  #alienCounter {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+    background: rgba(3,7,18,0.72);
+    border: 1px solid rgba(255,45,85,0.35);
+    border-radius: 10px;
+    padding: 6px 22px 8px;
+    backdrop-filter: blur(4px);
+  }
+  #alienCounterNum {
+    font-family: 'Orbitron', monospace;
+    font-size: 38px;
+    font-weight: 900;
+    color: var(--saber-red);
+    text-shadow: 0 0 24px var(--saber-red);
+    line-height: 1;
+  }
+  #alienCounterLabel {
+    font-family: 'Orbitron', monospace;
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  /* ===== INTRO EXPLAINER OVERLAY ===== */
+  #introOverlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(3,7,18,0.92);
+    z-index: 35;
+    text-align: center;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+  }
+  .intro-icon { font-size: 64px; margin-bottom: 16px; }
+  .intro-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    color: var(--saber-red);
+    text-shadow: 0 0 24px var(--saber-red);
+    letter-spacing: 3px;
+    margin-bottom: 18px;
+  }
+  .intro-body {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 18px;
+    color: var(--star-white);
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 32px;
+  }
+  .intro-body strong { color: var(--saber-green); }
+  .intro-start-btn {
+    padding: 14px 40px;
+    background: linear-gradient(135deg, var(--saber-red), #aa1133);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 2px;
+    pointer-events: all;
+    transition: filter 0.15s;
+  }
+  .intro-start-btn:hover { filter: brightness(1.15); }
+
   /* ===== COMPAT WARNING BANNER ===== */
   #compatBanner {
     display: none;
@@ -475,7 +556,7 @@
 <div id="setupScreen">
   <div class="setup-panel">
     <div class="setup-title">🌍 RACE TO EARTH</div>
-    <div class="setup-subtitle">Clear the solar system of alien invaders! Fly through math rings to earn missiles, then blast every alien ship before you run out of fuel. Fuel drains constantly — wrong answers drain it faster. Dodge comets and asteroids. You have 5 lives.</div>
+    <div class="setup-subtitle">Clear the solar system of alien invaders! Fly through math rings to earn missiles, then blast every alien ship before you run out of fuel. Wrong answers drain fuel. Dodge comets and asteroids. You have 5 lives.</div>
 
     <div class="divider"></div>
 
@@ -509,6 +590,23 @@
   </div>
 </div>
 
+<!-- ===== ALIEN COUNTER ===== -->
+<div id="alienCounter">
+  <div id="alienCounterNum">10</div>
+  <div id="alienCounterLabel">👾 ALIENS REMAINING</div>
+</div>
+
+<!-- ===== INTRO EXPLAINER ===== -->
+<div id="introOverlay">
+  <div class="intro-icon">👾</div>
+  <div class="intro-title">⚠ ALIEN INVASION!</div>
+  <div class="intro-body">
+    The solar system is under attack by aliens!<br>
+    Visit the <strong>math rings</strong> and answer the question correctly to get <strong>missiles</strong> to take them out!
+  </div>
+  <button class="intro-start-btn" onclick="dismissIntro()">🚀 LAUNCH MISSION</button>
+</div>
+
 <!-- ===== CANVAS ===== -->
 <canvas id="gameCanvas"></canvas>
 
@@ -522,8 +620,6 @@
     <span class="fuel-pct" id="fuelPct">100%</span>
     <div class="hud-sep"></div>
     <div class="hud-lives" id="livesDisplay"></div>
-    <div class="hud-sep"></div>
-    <span class="hud-gates" id="gateCounter">⬡ 0 / 10</span>
     <div class="hud-sep"></div>
     <span class="hud-label">🚀</span>
     <span class="hud-missiles" id="missileCount">0</span>
@@ -1015,7 +1111,7 @@ function rteSelectNone() {
 // ===== WORLD CONSTANTS =====
 const WORLD_W          = 2000;
 const WORLD_H          = 5600;
-const TOTAL_GATES      = 10;
+const TOTAL_GATES      = 18;
 const SHIP_SPEED       = 4.2;
 const SHIP_RADIUS      = 14;
 const GATE_TRIGGER     = 68;    // proximity to trigger question (px)
@@ -1023,7 +1119,6 @@ const GATE_RADIUS      = 60;    // visual ring radius (px)
 const EARTH_RADIUS     = 130;   // large Earth destination radius
 const EARTH_LAND_DIST  = 155;   // how close to land (ship center to Earth center)
 const THRUST_FUEL_RATE  = 0.013; // % fuel burned per frame while thrusting (~0.78%/sec at 60fps)
-const PASSIVE_FUEL_RATE = 0.005; // % fuel burned per frame always (~0.3%/sec at 60fps)
 const N_ASTEROIDS      = 28;
 const N_ALIENS         = 10;
 const N_FUEL_PICKUPS   = 6;
@@ -1095,9 +1190,10 @@ function initGame() {
   document.getElementById('setupScreen').style.display = 'none';
   document.getElementById('endScreen').style.display   = 'none';
   canvas.style.display = 'block';
-  document.getElementById('hud').style.display       = 'block';
-  document.getElementById('keyHint').style.display   = 'block';
-  document.getElementById('devBanner').style.display = 'block';
+  document.getElementById('hud').style.display            = 'block';
+  document.getElementById('alienCounter').style.display   = 'flex';
+  document.getElementById('keyHint').style.display        = 'block';
+  document.getElementById('devBanner').style.display      = 'block';
   if (isTouchDevice) showVpad();
 
   loadLowFuelClip(); // load after user gesture so AudioContext starts cleanly
@@ -1150,6 +1246,25 @@ function initGame() {
   lastTs = 0;
   animId = requestAnimationFrame(gameLoop);
 
+  showIntroExplainer();
+}
+
+function showIntroExplainer() {
+  const overlay = document.getElementById('introOverlay');
+  overlay.style.display = 'flex';
+  // Any keypress also dismisses the intro
+  function keyDismiss(e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+      e.preventDefault();
+      dismissIntro();
+      window.removeEventListener('keydown', keyDismiss);
+    }
+  }
+  window.addEventListener('keydown', keyDismiss);
+}
+
+function dismissIntro() {
+  document.getElementById('introOverlay').style.display = 'none';
   runCountdown();
 }
 
@@ -1482,13 +1597,11 @@ function updateShip(dt) {
     oxygen = Math.max(0, oxygen - THRUST_FUEL_RATE * dt);
   }
 
-  // Passive fuel drain (always, even while not thrusting)
-  oxygen = Math.max(0, oxygen - PASSIVE_FUEL_RATE * dt);
   if (!hudUpdatePending) {
     hudUpdatePending = true;
     requestAnimationFrame(() => { updateHUD(); hudUpdatePending = false; });
   }
-  if (oxygen <= 0) { endGame('gameover', '💨 OUT OF FUEL', `${aliensRemaining} alien ship${aliensRemaining !== 1 ? 's' : ''} still out there.`); return; }
+  if (oxygen <= 0) { endGame('gameover', '💨 OUT OF FUEL', 'The aliens have taken over! Try again to save the solar system.'); return; }
 
   ship.x = Math.max(SHIP_RADIUS, Math.min(WORLD_W - SHIP_RADIUS, ship.x));
   ship.y = Math.max(SHIP_RADIUS, Math.min(WORLD_H - SHIP_RADIUS, ship.y));
@@ -1536,7 +1649,7 @@ function hitObstacle(obs) {
   }
 
   updateHUD();
-  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `${aliensRemaining} alien ship${aliensRemaining !== 1 ? 's' : ''} still out there.`);
+  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', 'The aliens have taken over! Try again to save the solar system.');
 }
 
 // ===== ALIEN LASERS =====
@@ -1587,7 +1700,7 @@ function hitByLaser(l) {
   spawnParticles(ship.x, ship.y, 12, [l.color, '#ff2d55', '#ffffff', '#ffdd00'], 1.5, 4, 0.02, 0.04, 2, 5);
   screenShake = 3;
   updateHUD();
-  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `${aliensRemaining} alien ship${aliensRemaining !== 1 ? 's' : ''} still out there.`);
+  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', 'The aliens have taken over! Try again to save the solar system.');
 }
 
 function drawLasers() {
@@ -1666,7 +1779,7 @@ function submitAnswer() {
     document.getElementById('questionOverlay').style.display = 'none';
     activatedGate = null;
     gameState = 'playing';
-    if (oxygen <= 0) endGame('gameover', '💨 OUT OF FUEL', `${aliensRemaining} alien ship${aliensRemaining !== 1 ? 's' : ''} still out there.`);
+    if (oxygen <= 0) endGame('gameover', '💨 OUT OF FUEL', 'The aliens have taken over! Try again to save the solar system.');
   }
 }
 
@@ -1678,13 +1791,13 @@ function dismissQuestion() {
 
 function clearGate(gate) {
   lastUsedGateId = gate.id;
-  missiles++;
+  missiles += 3;
   activatedGate = null;
   document.getElementById('questionOverlay').style.display = 'none';
   gameState = 'playing';
   updateHUD();
   sounds.missilePickup();
-  showFlightBanner('🚀 AMMO +1', 900);
+  showFlightBanner('🚀 AMMO +3', 900);
 }
 
 // ===== HUD =====
@@ -1713,7 +1826,7 @@ function updateHUD() {
     s.textContent = '❤️';
     el.appendChild(s);
   }
-  document.getElementById('gateCounter').textContent = `👾 ${aliensRemaining}`;
+  document.getElementById('alienCounterNum').textContent = aliensRemaining;
   document.getElementById('missileCount').textContent = missiles || 0;
 }
 
@@ -1846,7 +1959,7 @@ function hitComet(c) {
   spawnParticles(ship.x, ship.y, 16, [c.color, '#ffffff', '#ffdd00', '#ff8800'], 1.5, 5, 0.018, 0.04, 2, 6);
   screenShake = 5;
   updateHUD();
-  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `${aliensRemaining} alien ship${aliensRemaining !== 1 ? 's' : ''} still out there.`);
+  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', 'The aliens have taken over! Try again to save the solar system.');
 }
 
 function drawComets() {
@@ -1917,7 +2030,7 @@ function updatePlayerMissiles(dt) {
           if (aliensRemaining <= 0) {
             obstacles.splice(j, 1);
             playerMissiles.splice(i, 1);
-            endGame('victory', '🌍 SOLAR SYSTEM CLEARED!', 'All alien ships destroyed! Earth is safe.');
+            endGame('victory', '🌍 SOLAR SYSTEM CLEARED!', 'The solar system is safe from alien attack, thanks to you!');
             return;
           }
         } else {
@@ -2041,6 +2154,7 @@ function endGame(type, title, subtitle) {
   const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
 
   document.getElementById('hud').style.display             = 'none';
+  document.getElementById('alienCounter').style.display    = 'none';
   document.getElementById('questionOverlay').style.display = 'none';
   document.getElementById('keyHint').style.display         = 'none';
   document.getElementById('devBanner').style.display       = 'none';
