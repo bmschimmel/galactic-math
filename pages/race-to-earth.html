@@ -428,6 +428,86 @@
     .end-btn { width: 200px; text-align: center; }
   }
 
+  /* ===== ALIEN COUNTER (prominent, center-top) ===== */
+  #alienCounter {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+    background: rgba(3,7,18,0.72);
+    border: 1px solid rgba(255,45,85,0.35);
+    border-radius: 10px;
+    padding: 6px 22px 8px;
+    backdrop-filter: blur(4px);
+  }
+  #alienCounterNum {
+    font-family: 'Orbitron', monospace;
+    font-size: 38px;
+    font-weight: 900;
+    color: var(--saber-red);
+    text-shadow: 0 0 24px var(--saber-red);
+    line-height: 1;
+  }
+  #alienCounterLabel {
+    font-family: 'Orbitron', monospace;
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  /* ===== INTRO EXPLAINER OVERLAY ===== */
+  #introOverlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(3,7,18,0.92);
+    z-index: 35;
+    text-align: center;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+  }
+  .intro-icon { font-size: 64px; margin-bottom: 16px; }
+  .intro-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    color: var(--saber-red);
+    text-shadow: 0 0 24px var(--saber-red);
+    letter-spacing: 3px;
+    margin-bottom: 18px;
+  }
+  .intro-body {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 18px;
+    color: var(--star-white);
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 32px;
+  }
+  .intro-body strong { color: var(--saber-green); }
+  .intro-start-btn {
+    padding: 14px 40px;
+    background: linear-gradient(135deg, var(--saber-red), #aa1133);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 2px;
+    pointer-events: all;
+    transition: filter 0.15s;
+  }
+  .intro-start-btn:hover { filter: brightness(1.15); }
+
   /* ===== COMPAT WARNING BANNER ===== */
   #compatBanner {
     display: none;
@@ -475,7 +555,7 @@
 <div id="setupScreen">
   <div class="setup-panel">
     <div class="setup-title">🌍 RACE TO EARTH</div>
-    <div class="setup-subtitle">Fly your rocket through 10 math gates, then navigate to Earth to get home. Thrusting burns fuel. Wrong answers cost fuel too. Dodge comets, asteroids, and aliens — each crash costs a life. You have 5 lives.</div>
+    <div class="setup-subtitle">Clear the solar system of alien invaders! Fly through math rings to earn missiles, then blast every alien ship before you run out of fuel. Wrong answers drain fuel. Dodge comets and asteroids. You have 5 lives.</div>
 
     <div class="divider"></div>
 
@@ -498,15 +578,32 @@
     </div>
 
     <div class="how-to-play">
-      <b>Arrow keys / D-pad</b> to thrust &nbsp;·&nbsp; <b>Enter / Submit button</b> to answer &nbsp;·&nbsp; <b>P / ⏸</b> to pause<br>
-      <b>Gates</b> can be tackled in any order — fly to any glowing ring &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> float in space — collect for +10% fuel<br>
-      <b>Clear all 10 gates</b>, then fly to Earth &nbsp;·&nbsp; <b>Watch out</b> for comets, asteroids, and alien ships
+      <b>Arrow keys / D-pad</b> to thrust &nbsp;·&nbsp; <b>Space / D-pad center</b> to fire &nbsp;·&nbsp; <b>P / ⏸</b> to pause<br>
+      <b>Fly through a ring</b> and answer correctly to earn a missile — you can reuse rings, just not the same one twice in a row<br>
+      <b>Shoot all alien ships</b> to win &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> restore +10% &nbsp;·&nbsp; Watch out for comets and asteroids
     </div>
 
     <div class="error-msg" id="rteError"></div>
     <button class="launch-btn" onclick="launchGame()">🚀 LAUNCH MISSION</button>
     <a class="back-link" href="../index.html">← Back to Galactic Math</a>
   </div>
+</div>
+
+<!-- ===== ALIEN COUNTER ===== -->
+<div id="alienCounter">
+  <div id="alienCounterNum">10</div>
+  <div id="alienCounterLabel">👾 ALIENS REMAINING</div>
+</div>
+
+<!-- ===== INTRO EXPLAINER ===== -->
+<div id="introOverlay">
+  <div class="intro-icon">👾</div>
+  <div class="intro-title">⚠ ALIEN INVASION!</div>
+  <div class="intro-body">
+    The solar system is under attack by aliens!<br>
+    Visit the <strong>math rings</strong> and answer the question correctly to get <strong>missiles</strong> to take them out!
+  </div>
+  <button class="intro-start-btn" onclick="dismissIntro()">🚀 LAUNCH MISSION</button>
 </div>
 
 <!-- ===== CANVAS ===== -->
@@ -522,8 +619,6 @@
     <span class="fuel-pct" id="fuelPct">100%</span>
     <div class="hud-sep"></div>
     <div class="hud-lives" id="livesDisplay"></div>
-    <div class="hud-sep"></div>
-    <span class="hud-gates" id="gateCounter">⬡ 0 / 10</span>
     <div class="hud-sep"></div>
     <span class="hud-label">🚀</span>
     <span class="hud-missiles" id="missileCount">0</span>
@@ -557,9 +652,10 @@
   <div class="end-title"    id="endTitle"></div>
   <div class="end-subtitle" id="endSubtitle"></div>
   <div class="end-stats">
-    <div class="end-stat"><div class="end-stat-val" id="endGates">0</div><div class="end-stat-label">GATES CLEARED</div></div>
+    <div class="end-stat"><div class="end-stat-val" id="endTime">0:00</div><div class="end-stat-label">TOTAL TIME</div></div>
     <div class="end-stat"><div class="end-stat-val" id="endOxygen">0%</div><div class="end-stat-label">FUEL LEFT</div></div>
-    <div class="end-stat"><div class="end-stat-val" id="endLives">0</div><div class="end-stat-label">LIVES LEFT</div></div>
+    <div class="end-stat"><div class="end-stat-val" id="endAccuracy">0/0</div><div class="end-stat-label">SHOT ACCURACY</div></div>
+    <div class="end-stat"><div class="end-stat-val" id="endMathScore">0/0</div><div class="end-stat-label">MATH SCORE</div></div>
   </div>
   <div class="end-btns">
     <button class="end-btn"         onclick="goHome()">MAIN MENU</button>
@@ -1014,16 +1110,16 @@ function rteSelectNone() {
 // ===== WORLD CONSTANTS =====
 const WORLD_W          = 2000;
 const WORLD_H          = 5600;
-const TOTAL_GATES      = 10;
+const TOTAL_GATES      = 18;
 const SHIP_SPEED       = 4.2;
 const SHIP_RADIUS      = 14;
 const GATE_TRIGGER     = 68;    // proximity to trigger question (px)
 const GATE_RADIUS      = 60;    // visual ring radius (px)
 const EARTH_RADIUS     = 130;   // large Earth destination radius
 const EARTH_LAND_DIST  = 155;   // how close to land (ship center to Earth center)
-const THRUST_FUEL_RATE = 0.013; // % fuel burned per frame while thrusting (~0.78%/sec at 60fps)
+const THRUST_FUEL_RATE  = 0.013; // % fuel burned per frame while thrusting (~0.78%/sec at 60fps)
 const N_ASTEROIDS      = 28;
-const N_ALIENS         = 8;
+const N_ALIENS         = 10;
 const N_FUEL_PICKUPS   = 6;
 const MISSILE_SPEED     = 14;   // px/frame player missile speed
 const COMET_MAX        = 6;     // max comets on screen at once
@@ -1051,8 +1147,14 @@ let gates, obstacles, starField, planets, fuelPickups;
 let particles, comets, lasers, playerMissiles;
 let missiles;           // ammo count
 let planetFactShown;    // Set of planet types already shown this game
-let oxygen, lives, gatesCleared;
-let allGatesCleared = false; // set true when all gates done; then fly to Earth
+let oxygen, lives;
+let aliensRemaining = 0;
+let gameStartTime = 0;
+let missilesFireTotal = 0;
+let missilesHitAliens = 0;
+let questionsTotal = 0;
+let questionsCorrect = 0;
+let lastUsedGateId = -1;
 let lowFuelWarningPlayed = false;
 let lowFuelTickInterval = null;
 let activatedGate;    // which gate is currently being questioned (null if none)
@@ -1087,18 +1189,24 @@ function initGame() {
   document.getElementById('setupScreen').style.display = 'none';
   document.getElementById('endScreen').style.display   = 'none';
   canvas.style.display = 'block';
-  document.getElementById('hud').style.display       = 'block';
-  document.getElementById('keyHint').style.display   = 'block';
-  document.getElementById('devBanner').style.display = 'block';
+  document.getElementById('hud').style.display            = 'block';
+  document.getElementById('alienCounter').style.display   = 'flex';
+  document.getElementById('keyHint').style.display        = 'block';
+  document.getElementById('devBanner').style.display      = 'block';
   if (isTouchDevice) showVpad();
 
   loadLowFuelClip(); // load after user gesture so AudioContext starts cleanly
 
-  oxygen        = 100;
-  lives         = 5;
-  missiles      = 0;
-  gatesCleared  = 0;
-  allGatesCleared = false;
+  oxygen            = 100;
+  lives             = 5;
+  missiles          = 0;
+  aliensRemaining   = 0;
+  gameStartTime     = Date.now();
+  missilesFireTotal = 0;
+  missilesHitAliens = 0;
+  questionsTotal    = 0;
+  questionsCorrect  = 0;
+  lastUsedGateId    = -1;
   lowFuelWarningPlayed = false;
   stopLowFuelTicks();
   activatedGate = null;
@@ -1122,6 +1230,7 @@ function initGame() {
   gates      = generateGates();
   obstacles  = generateObstacles();
   fuelPickups = generateFuelPickups();
+  aliensRemaining = obstacles.filter(o => o.type === 'alien').length;
 
   ship   = { x: 1000, y: 5300, facing: 0, moving: false };
   camera = { x: 1000, y: 5300 };
@@ -1136,6 +1245,28 @@ function initGame() {
   lastTs = 0;
   animId = requestAnimationFrame(gameLoop);
 
+  showIntroExplainer();
+}
+
+let _introDismissListener = null;
+
+function showIntroExplainer() {
+  document.getElementById('introOverlay').style.display = 'flex';
+  _introDismissListener = function(e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+      e.preventDefault();
+      dismissIntro();
+    }
+  };
+  window.addEventListener('keydown', _introDismissListener);
+}
+
+function dismissIntro() {
+  if (_introDismissListener) {
+    window.removeEventListener('keydown', _introDismissListener);
+    _introDismissListener = null;
+  }
+  document.getElementById('introOverlay').style.display = 'none';
   runCountdown();
 }
 
@@ -1260,14 +1391,15 @@ function generateObstacles() {
     }
     obs.push({ type:'asteroid', x, y, radius:baseR*0.8, verts, vx:(Math.random()-0.5)*0.45, vy:(Math.random()-0.5)*0.45, rotation:Math.random()*Math.PI*2, rotSpeed:(Math.random()-0.5)*0.012 });
   }
-  // Aliens
+  // Aliens — exactly half are shooters, half are not
   for (let tries = 0; obs.filter(o=>o.type==='alien').length < N_ALIENS && tries < 700; tries++) {
     const x = 80 + Math.random()*(WORLD_W-160);
     const y = 400 + Math.random()*(WORLD_H-600);
     if (tooClose(x,y)) continue;
     const a = Math.random()*Math.PI*2;
-    const isShooter = Math.random() < 0.45;
-    obs.push({ type:'alien', x, y, radius:22, vx:Math.cos(a)*(0.6+Math.random()*0.65), vy:Math.sin(a)*(0.6+Math.random()*0.65), wobble:Math.random()*Math.PI*2, color:Math.random()<0.5?'#39ff14':'#b94fff', isShooter, nextShot: Date.now() + 4000 + Math.random() * 5000 });
+    const alienIndex = obs.filter(o=>o.type==='alien').length;
+    const isShooter = alienIndex < N_ALIENS / 2; // first half are shooters
+    obs.push({ type:'alien', x, y, radius:22, vx:Math.cos(a)*(0.6+Math.random()*0.65), vy:Math.sin(a)*(0.6+Math.random()*0.65), wobble:Math.random()*Math.PI*2, color:isShooter?'#ff2d55':'#39ff14', isShooter, nextShot: Date.now() + 4000 + Math.random() * 5000 });
   }
   return obs;
 }
@@ -1464,22 +1596,14 @@ function updateShip(dt) {
     ship.x += dx * SHIP_SPEED * dt;
     ship.y += dy * SHIP_SPEED * dt;
     ship.facing = Math.atan2(dy, dx) + Math.PI / 2;
-
-    // Fuel burns while thrusting
     oxygen = Math.max(0, oxygen - THRUST_FUEL_RATE * dt);
-    // Throttle HUD update to avoid excessive DOM writes
-    if (!hudUpdatePending) {
-      hudUpdatePending = true;
-      requestAnimationFrame(() => { updateHUD(); hudUpdatePending = false; });
-    }
-    if (oxygen <= 0) { endGame('gameover', '💨 OUT OF FUEL', `You cleared ${gatesCleared} of ${TOTAL_GATES} gates.`); return; }
   }
 
-  // Check if player reached Earth (only after all gates cleared)
-  if (allGatesCleared && Math.hypot(ship.x - 1000, ship.y - 200) < EARTH_LAND_DIST) {
-    endGame('victory', '🌍 YOU REACHED EARTH!', `All ${TOTAL_GATES} gates cleared. Mission accomplished!`);
-    return;
+  if (!hudUpdatePending) {
+    hudUpdatePending = true;
+    requestAnimationFrame(() => { updateHUD(); hudUpdatePending = false; });
   }
+  if (oxygen <= 0) { endGame('gameover', '💨 OUT OF FUEL', 'The aliens have taken over! Try again to save the solar system.'); return; }
 
   ship.x = Math.max(SHIP_RADIUS, Math.min(WORLD_W - SHIP_RADIUS, ship.x));
   ship.y = Math.max(SHIP_RADIUS, Math.min(WORLD_H - SHIP_RADIUS, ship.y));
@@ -1527,7 +1651,7 @@ function hitObstacle(obs) {
   }
 
   updateHUD();
-  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `You cleared ${gatesCleared} of ${TOTAL_GATES} gates.`);
+  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', 'The aliens have taken over! Try again to save the solar system.');
 }
 
 // ===== ALIEN LASERS =====
@@ -1578,7 +1702,7 @@ function hitByLaser(l) {
   spawnParticles(ship.x, ship.y, 12, [l.color, '#ff2d55', '#ffffff', '#ffdd00'], 1.5, 4, 0.02, 0.04, 2, 5);
   screenShake = 3;
   updateHUD();
-  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `You cleared ${gatesCleared} of ${TOTAL_GATES} gates.`);
+  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', 'The aliens have taken over! Try again to save the solar system.');
 }
 
 function drawLasers() {
@@ -1603,11 +1727,11 @@ function drawLasers() {
 }
 
 // ===== GATE TRIGGER =====
-// Gates can be attempted in any order — find the closest uncleaned gate within trigger radius
+// Fly into any ring to earn ammo — can't reuse the same ring twice in a row
 function checkGateTrigger() {
   let closest = null, closestDist = Infinity;
   for (const gate of gates) {
-    if (gate.cleared) continue;
+    if (gate.id === lastUsedGateId) continue; // must use a different ring first
     const d = Math.hypot(ship.x - gate.x, ship.y - gate.y);
     if (d < GATE_TRIGGER && d < closestDist) { closestDist = d; closest = gate; }
   }
@@ -1640,7 +1764,9 @@ function submitAnswer() {
   const gate = activatedGate;
   if (!gate) return;
 
+  questionsTotal++;
   if (raw === currentQuestion.answer) {
+    questionsCorrect++;
     sounds.correct();
     clearGate(gate);
   } else {
@@ -1655,7 +1781,7 @@ function submitAnswer() {
     document.getElementById('questionOverlay').style.display = 'none';
     activatedGate = null;
     gameState = 'playing';
-    if (oxygen <= 0) endGame('gameover', '💨 OUT OF FUEL', `You cleared ${gatesCleared} of ${TOTAL_GATES} gates.`);
+    if (oxygen <= 0) endGame('gameover', '💨 OUT OF FUEL', 'The aliens have taken over! Try again to save the solar system.');
   }
 }
 
@@ -1666,18 +1792,14 @@ function dismissQuestion() {
 }
 
 function clearGate(gate) {
-  gate.cleared  = true;
-  gatesCleared++;
-  missiles++;
+  lastUsedGateId = gate.id;
+  missiles += 3;
   activatedGate = null;
   document.getElementById('questionOverlay').style.display = 'none';
   gameState = 'playing';
   updateHUD();
   sounds.missilePickup();
-  if (gatesCleared >= TOTAL_GATES && !allGatesCleared) {
-    allGatesCleared = true;
-    showFlightBanner('🌍 ALL GATES CLEAR — FLY TO EARTH!', 3200);
-  }
+  showFlightBanner('🚀 AMMO +3', 900);
 }
 
 // ===== HUD =====
@@ -1706,8 +1828,7 @@ function updateHUD() {
     s.textContent = '❤️';
     el.appendChild(s);
   }
-  const label = allGatesCleared ? `🌍 FLY HOME!` : `⬡ ${gatesCleared} / ${TOTAL_GATES}`;
-  document.getElementById('gateCounter').textContent = label;
+  document.getElementById('alienCounterNum').textContent = aliensRemaining;
   document.getElementById('missileCount').textContent = missiles || 0;
 }
 
@@ -1840,7 +1961,7 @@ function hitComet(c) {
   spawnParticles(ship.x, ship.y, 16, [c.color, '#ffffff', '#ffdd00', '#ff8800'], 1.5, 5, 0.018, 0.04, 2, 6);
   screenShake = 5;
   updateHUD();
-  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', `You cleared ${gatesCleared} of ${TOTAL_GATES} gates.`);
+  if (lives <= 0) endGame('gameover', '💥 OUT OF LIVES', 'The aliens have taken over! Try again to save the solar system.');
 }
 
 function drawComets() {
@@ -1879,6 +2000,7 @@ function drawComets() {
 function firePlayerMissile() {
   if (!missiles || missiles <= 0) { sounds.missileEmpty(); return; }
   missiles--;
+  missilesFireTotal++;
   updateHUD();
   const vx = Math.sin(ship.facing) * MISSILE_SPEED;
   const vy = -Math.cos(ship.facing) * MISSILE_SPEED;
@@ -1900,8 +2022,23 @@ function updatePlayerMissiles(dt) {
       const obs = obstacles[j];
       const hr = (obs.type === 'alien' ? 18 : obs.r || 16);
       if (Math.hypot(m.x - obs.x, m.y - obs.y) < hr + 8) {
-        spawnParticles(obs.x, obs.y, 20, ['#ff8800','#ffdd00','#ff2d55','#ffffff'], 2, 6, 0.015, 0.03, 2, 6);
-        sounds.missileHit();
+        if (obs.type === 'alien') {
+          missilesHitAliens++;
+          aliensRemaining--;
+          updateHUD();
+          spawnParticles(obs.x, obs.y, 30, ['#ff8800','#ff4400','#ffdd00','#ffffff','#ff0044','#ffaa00'], 2, 7.5, 0.01, 0.022, 3, 9);
+          sounds.alienCrash();
+          screenShake = 5;
+          if (aliensRemaining <= 0) {
+            obstacles.splice(j, 1);
+            playerMissiles.splice(i, 1);
+            endGame('victory', '🌍 SOLAR SYSTEM CLEARED!', 'The solar system is safe from alien attack, thanks to you!');
+            return;
+          }
+        } else {
+          spawnParticles(obs.x, obs.y, 20, ['#ff8800','#ffdd00','#ff2d55','#ffffff'], 2, 6, 0.015, 0.03, 2, 6);
+          sounds.missileHit();
+        }
         obstacles.splice(j, 1);
         playerMissiles.splice(i, 1);
         hit = true; break;
@@ -2013,20 +2150,27 @@ function endGame(type, title, subtitle) {
   if (type === 'victory') sounds.landing(); else sounds.gameOver();
   cleanupListeners();
 
+  const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+  const mins    = Math.floor(elapsed / 60);
+  const secs    = elapsed % 60;
+  const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+
   document.getElementById('hud').style.display             = 'none';
+  document.getElementById('alienCounter').style.display    = 'none';
   document.getElementById('questionOverlay').style.display = 'none';
   document.getElementById('keyHint').style.display         = 'none';
   document.getElementById('devBanner').style.display       = 'none';
   canvas.style.display = 'none';
 
-  document.getElementById('endIcon').textContent     = type === 'victory' ? '🌍' : '💥';
-  document.getElementById('endTitle').textContent    = title;
-  document.getElementById('endTitle').className      = 'end-title ' + (type === 'victory' ? 'win' : 'loss');
-  document.getElementById('endSubtitle').textContent = subtitle;
-  document.getElementById('endGates').textContent    = gatesCleared;
-  document.getElementById('endOxygen').textContent   = Math.round(Math.max(0,oxygen)) + '%';
-  document.getElementById('endLives').textContent    = Math.max(0, lives);
-  document.getElementById('endScreen').style.display = 'flex';
+  document.getElementById('endIcon').textContent        = type === 'victory' ? '🌍' : '💥';
+  document.getElementById('endTitle').textContent       = title;
+  document.getElementById('endTitle').className         = 'end-title ' + (type === 'victory' ? 'win' : 'loss');
+  document.getElementById('endSubtitle').textContent    = subtitle;
+  document.getElementById('endTime').textContent        = timeStr;
+  document.getElementById('endOxygen').textContent      = Math.round(Math.max(0,oxygen)) + '%';
+  document.getElementById('endAccuracy').textContent    = `${missilesHitAliens}/${missilesFireTotal}`;
+  document.getElementById('endMathScore').textContent   = `${questionsCorrect}/${questionsTotal}`;
+  document.getElementById('endScreen').style.display    = 'flex';
 }
 
 function cleanupListeners() {
@@ -2142,8 +2286,8 @@ function drawEarth() {
   ctx.beginPath(); ctx.arc(p.x,p.y,R+2,0,Math.PI*2); ctx.stroke();
   ctx.restore();
 
-  // Landing zone indicator: pulsing ring (only when all gates cleared)
-  if (allGatesCleared) {
+  // Landing zone indicator: pulsing ring (only when all aliens destroyed)
+  if (aliensRemaining === 0) {
     const lpulse = 0.55 + 0.45*Math.sin(t*4);
     ctx.save();
     ctx.globalAlpha = lpulse;
@@ -2308,23 +2452,24 @@ function drawGates() {
   gates.forEach(gate => {
     const p = w2s(gate.x, gate.y);
     if (!onScreen(p.x, p.y, 120)) return;
-    const isActive = (gate === activatedGate);
-    const pulse    = 0.72 + 0.28*Math.sin(t*2.2+gate.pulse);
-    const color    = OP_COLOR[gate.op] || '#00d4ff';
+    const isActive   = (gate === activatedGate);
+    const isLastUsed = (gate.id === lastUsedGateId);
+    const pulse      = 0.72 + 0.28*Math.sin(t*2.2+gate.pulse);
+    const color      = OP_COLOR[gate.op] || '#00d4ff';
 
     ctx.save();
     ctx.translate(p.x, p.y);
-    ctx.globalAlpha = gate.cleared ? 0.16 : isActive ? 1 : pulse * 0.75;
-    ctx.shadowColor = color;
+    ctx.globalAlpha = isLastUsed ? 0.22 : isActive ? 1 : pulse * 0.75;
+    ctx.shadowColor = isLastUsed ? '#6b7fa3' : color;
     ctx.shadowBlur  = isActive ? 36 : 14;
-    ctx.strokeStyle = color;
+    ctx.strokeStyle = isLastUsed ? '#6b7fa3' : color;
     ctx.lineWidth   = isActive ? 4.5 : 2.5;
     ctx.beginPath(); ctx.arc(0, 0, GATE_RADIUS, 0, Math.PI*2); ctx.stroke();
     ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(0, 0, GATE_RADIUS-11, 0, Math.PI*2); ctx.stroke();
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    if (gate.cleared) {
-      ctx.globalAlpha=0.45; ctx.fillStyle='#39ff14'; ctx.font='700 26px sans-serif'; ctx.fillText('✓',0,0);
+    if (isLastUsed) {
+      ctx.globalAlpha=0.4; ctx.fillStyle='#6b7fa3'; ctx.font='700 24px sans-serif'; ctx.fillText('⟳',0,2);
     } else {
       ctx.globalAlpha=0.9; ctx.fillStyle=color;
       ctx.font='900 38px Orbitron,monospace';
@@ -2472,12 +2617,12 @@ function drawShip() {
   ctx.restore();
 }
 
-// ===== DIRECTION ARROW (to nearest uncleaned gate) =====
+// ===== DIRECTION ARROW (to nearest usable gate) =====
 function drawDirectionArrow() {
-  // Find nearest uncleaned gate
+  // Find nearest gate that isn't the just-used one
   let target = null, targetDist = Infinity;
   for (const gate of gates) {
-    if (gate.cleared) continue;
+    if (gate.id === lastUsedGateId) continue;
     const sp = w2s(ship.x, ship.y);
     const gp = w2s(gate.x, gate.y);
     if (onScreen(gp.x, gp.y, -40)) continue; // visible gates don't need arrow
