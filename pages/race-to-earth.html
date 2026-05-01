@@ -1227,7 +1227,8 @@ let ship, camera;
 let gates, obstacles, starField, planets, fuelPickups;
 let particles, comets, lasers, playerMissiles;
 let missiles;           // ammo count
-let planetFactShown;    // Set of planet types already shown this game
+let planetFactShown;    // Map<type, cooldownUntil> — blocks re-trigger until cooldown passes
+let currentFactPlanetType = null;
 let oxygen, lives;
 let aliensRemaining = 0;
 let gameStartTime = 0;
@@ -1301,7 +1302,7 @@ function initGame() {
   comets        = [];
   lasers        = [];
   playerMissiles = [];
-  planetFactShown = new Set();
+  planetFactShown = new Map();
   nextCometTime = Date.now() + 5000; // give countdown time before comets start
   thrustOscNode = null;
   thrustGainNode = null;
@@ -2179,9 +2180,9 @@ function drawPlayerMissiles() {
 function checkPlanetProximity() {
   if (!planets || gameState !== 'playing') return;
   for (const planet of planets) {
-    if (planetFactShown.has(planet.type)) continue;
+    if ((planetFactShown.get(planet.type) || 0) > Date.now()) continue;
     if (Math.hypot(ship.x - planet.x, ship.y - planet.y) < planet.r + 50) {
-      planetFactShown.add(planet.type);
+      planetFactShown.set(planet.type, Infinity); // block while popup is open
       showPlanetFact(planet);
       return; // one at a time
     }
@@ -2190,21 +2191,22 @@ function checkPlanetProximity() {
 
 function showPlanetFact(planet) {
   gameState = 'planet_fact';
+  currentFactPlanetType = planet.type;
   sounds.thrustStop();
 
-  // Position popup near the planet on screen, clamped to viewport
+  // Position popup right next to the planet, clamped to viewport
   const sc    = w2s(planet.x, planet.y);
   const popup = document.getElementById('planetPopup');
   popup.style.display = 'block';
-  // Let browser compute size, then reposition
   requestAnimationFrame(() => {
     const pw = popup.offsetWidth  || 360;
     const ph = popup.offsetHeight || 120;
     const margin = 18;
-    // Prefer placing popup above the planet
+    const gap = planet.r + 14;  // just outside the planet sprite
+    // Prefer above; fall back to below if not enough room
     let left = sc.x - pw / 2;
-    let top  = sc.y - planet.r * (canvas.height / (camera._zoom || 1)) - ph - 20;
-    if (top < margin + 60) top = sc.y + planet.r * (canvas.height / (camera._zoom || 1)) + 20;
+    let top  = sc.y - gap - ph;
+    if (top < margin + 60) top = sc.y + gap;
     left = Math.max(margin, Math.min(window.innerWidth  - pw - margin, left));
     top  = Math.max(margin + 60, Math.min(window.innerHeight - ph - margin, top));
     popup.style.left = left + 'px';
@@ -2223,6 +2225,9 @@ function showPlanetFact(planet) {
 function dismissPlanetFact() {
   document.getElementById('planetPopup').style.display = 'none';
   gameState = 'playing';
+  // Allow revisiting after a short cooldown so the popup doesn't immediately re-trigger
+  if (currentFactPlanetType) planetFactShown.set(currentFactPlanetType, Date.now() + 8000);
+  currentFactPlanetType = null;
 }
 
 // ===== LOW FUEL TICKS =====
