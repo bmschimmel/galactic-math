@@ -974,6 +974,35 @@ const sounds = {
     });
   },
 
+  // Gate entry — mechanical clamp click + deep lock thud + shimmer
+  gateEnter() {
+    const ctx = getAudio();
+    const t = ctx.currentTime;
+    // Sharp mechanical click as clamp engages
+    const click = ctx.createOscillator(), cg = ctx.createGain();
+    click.type = 'square'; click.frequency.value = 280;
+    click.frequency.exponentialRampToValueAtTime(110, t + 0.045);
+    click.connect(cg); cg.connect(ctx.destination);
+    cg.gain.setValueAtTime(0.5, t); cg.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+    click.start(t); click.stop(t + 0.07);
+    // Deep magnetic lock thud settling into place
+    const thud = ctx.createOscillator(), tg = ctx.createGain();
+    thud.type = 'sine'; thud.frequency.value = 180;
+    thud.frequency.exponentialRampToValueAtTime(55, t + 0.28);
+    thud.connect(tg); tg.connect(ctx.destination);
+    tg.gain.setValueAtTime(0, t + 0.04); tg.gain.linearRampToValueAtTime(0.48, t + 0.07);
+    tg.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+    thud.start(t + 0.04); thud.stop(t + 0.33);
+    // Rising metallic shimmer — energy confirmation after lock
+    const shine = ctx.createOscillator(), sg = ctx.createGain();
+    shine.type = 'sine'; shine.frequency.value = 760;
+    shine.frequency.exponentialRampToValueAtTime(1180, t + 0.18);
+    shine.connect(sg); sg.connect(ctx.destination);
+    sg.gain.setValueAtTime(0, t + 0.05); sg.gain.linearRampToValueAtTime(0.13, t + 0.09);
+    sg.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    shine.start(t + 0.05); shine.stop(t + 0.29);
+  },
+
   // Rocket thruster — filtered noise + low rumble, smooth and non-harsh
   thrustStart() {
     if (thrustOscNode) return;
@@ -1823,6 +1852,7 @@ function openGateQuestion(gate) {
   activatedGate = gate;
   gameState = 'question';
   sounds.thrustStop();
+  sounds.gateEnter();
   currentQuestion = makeQuestion(gate.op);
 
   document.getElementById('gateOpLabel').textContent = `${opLabel(gate.op)} GATE`;
