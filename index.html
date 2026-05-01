@@ -2051,6 +2051,11 @@ const sounds = {
     setTimeout(() => playFreqSweep(300, 40, 'sine', 0.5, 0.1), 300);
     setTimeout(() => playNoise(0.3, 0.04, 80), 500);
     setTimeout(() => playFreqSweep(80, 20, 'sine', 0.4, 0.06), 700);
+  },
+  dock() {
+    // Descending approach pip + mid-range lock thud
+    playFreqSweep(720, 300, 'sine', 0.12, 0.22);
+    setTimeout(() => playTone(350, 'sine', 0.18, 0.28), 100);
   }
 };
 
@@ -2867,7 +2872,10 @@ function submitAnswer() {
           if (answers[i] === null) { next = i; break; }
         }
       }
-      if (next !== -1) loadQuestion(next);
+      if (next !== -1) {
+        sounds.dock();
+        loadQuestion(next);
+      }
     }, 600);
   }
 }
