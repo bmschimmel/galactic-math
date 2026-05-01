@@ -1140,13 +1140,81 @@ const COMET_INTERVAL   = 1800;  // ms between comet spawns
 
 // ===== PLANET FACTS =====
 const PLANET_FACTS = {
-  mars:    "Mars is called the Red Planet because of iron oxide on its surface!",
-  jupiter: "Jupiter is so big that 1,300 Earths could fit inside it!",
-  saturn:  "Saturn's rings are made of ice and rock — they stretch 282,000 km wide!",
-  uranus:  "Uranus spins on its side — one pole gets 42 years of sunlight, then 42 of darkness!",
-  neptune: "Neptune has the strongest winds in the solar system — over 2,100 km/h!",
-  moon:    "The Moon drifts about 3.8 cm further from Earth every single year!",
+  mars: [
+    "Mars is called the Red Planet because its soil is full of iron oxide — basically rust!",
+    "Olympus Mons on Mars is the tallest volcano in the solar system — nearly 3× taller than Mount Everest!",
+    "A day on Mars is only 37 minutes longer than a day on Earth.",
+    "Mars has two tiny moons named Phobos and Deimos — they look like lumpy potatoes!",
+    "Scientists have found evidence that liquid water once flowed across Mars billions of years ago.",
+    "Dust storms on Mars can cover the entire planet and last for months!",
+    "Gravity on Mars is only 38% of Earth's — you could jump almost three times higher there!",
+    "Mars has seasons just like Earth because it tilts on its axis at a similar angle.",
+    "Mars is about half the size of Earth, but it has roughly the same amount of dry land!",
+    "The first spacecraft to successfully land on Mars was Viking 1, way back in 1976.",
+  ],
+  jupiter: [
+    "Jupiter is so massive that 1,300 Earths could fit inside it!",
+    "The Great Red Spot is a storm on Jupiter that has been raging for at least 350 years!",
+    "Jupiter has at least 95 known moons — more than any other planet in the solar system!",
+    "One year on Jupiter lasts almost 12 Earth years.",
+    "Jupiter spins faster than any other planet — a single Jovian day is only about 10 hours!",
+    "Jupiter's moon Europa may have a liquid water ocean hidden under its thick icy crust.",
+    "Ganymede, one of Jupiter's moons, is the largest moon in the solar system — bigger than Mercury!",
+    "Jupiter's gravity acts like a giant shield, pulling in asteroids that might otherwise hit Earth.",
+    "Jupiter has a faint ring system, though it is much harder to see than Saturn's rings.",
+    "If Jupiter were about 80 times more massive, nuclear fusion would ignite and it would become a star!",
+  ],
+  saturn: [
+    "Saturn's rings stretch over 282,000 km wide but are often less than 1 km thick — like a cosmic sheet of paper!",
+    "Saturn is the least dense planet in the solar system — it would actually float in water!",
+    "Saturn has 146 known moons, including Titan, which has a thick atmosphere and lakes of liquid methane.",
+    "Winds on Saturn can reach 1,800 km/h — about five times stronger than the worst hurricanes on Earth!",
+    "A day on Saturn lasts just 10.5 hours, but one Saturnian year equals 29 Earth years.",
+    "Saturn's rings are made mostly of chunks of ice and rock, ranging from tiny grains to pieces as big as houses.",
+    "Saturn's moon Enceladus shoots giant geysers of water ice into space from its south pole!",
+    "Saturn has a permanent hexagonal storm swirling at its north pole — it's wider than the entire Earth!",
+    "The Cassini spacecraft orbited Saturn for 13 years and sent back thousands of breathtaking images.",
+    "Your weight on Saturn would only be about 7% more than on Earth, despite it being much larger.",
+  ],
+  uranus: [
+    "Uranus spins on its side — its axis tilts 98°, so one pole gets 42 years of sunlight, then 42 years of darkness!",
+    "Uranus is the coldest planet in the solar system, with temperatures dropping to −224 °C!",
+    "Uranus has 13 known rings, but they are very dark and difficult to see.",
+    "Uranus has 28 known moons, all named after characters from Shakespeare and Alexander Pope!",
+    "One year on Uranus equals 84 Earth years.",
+    "Uranus is an ice giant — its interior is a slushy mix of water, methane, and ammonia ices.",
+    "Uranus looks blue-green because methane in its atmosphere absorbs red light.",
+    "William Herschel discovered Uranus in 1781 — the first planet ever found using a telescope!",
+    "Winds on Uranus can reach 900 km/h.",
+    "Because of its extreme tilt, Uranus rotates in the opposite direction to most other planets.",
+  ],
+  neptune: [
+    "Neptune has the strongest winds in the solar system — reaching over 2,100 km/h!",
+    "One year on Neptune equals 165 Earth years. It only completed its first full orbit since discovery in 2011!",
+    "Neptune's largest moon, Triton, orbits backwards and is slowly spiraling inward — it will eventually break apart!",
+    "Neptune has a giant storm called the Great Dark Spot, similar to Jupiter's famous Great Red Spot.",
+    "Neptune was the first planet found through mathematical prediction before anyone spotted it through a telescope!",
+    "Neptune is about 17 times heavier than Earth, even though it is the smallest of the four giant planets.",
+    "A day on Neptune is about 16 hours long.",
+    "Neptune has 16 known moons and a faint ring system made of dark particles.",
+    "Temperatures on Neptune plunge to −218 °C — almost as cold as Uranus.",
+    "Voyager 2 is the only spacecraft ever to visit Neptune, flying past it in 1989.",
+  ],
+  moon: [
+    "The Moon drifts about 3.8 cm further from Earth every year!",
+    "The Moon has no atmosphere, so footprints left by Apollo astronauts could last for millions of years!",
+    "A total solar eclipse happens because the Moon is almost exactly the right size to cover the Sun from Earth.",
+    "The Moon always shows the same side to Earth because it spins at exactly the same rate it orbits.",
+    "Twelve humans have walked on the Moon, all during Apollo missions between 1969 and 1972.",
+    "Moonquakes happen! Earth's gravity squeezes and stretches the Moon, making it tremble.",
+    "The Moon formed about 4.5 billion years ago when a Mars-sized object smashed into the early Earth!",
+    "Surface temperatures on the Moon swing from 127 °C in sunlight to −173 °C in shadow.",
+    "The Moon is the fifth-largest moon in the entire solar system.",
+    "Without the Moon's gravitational pull stabilising Earth's tilt, our seasons would go wild!",
+  ],
 };
+// Track which fact index to show next for each planet
+const _planetFactIndex = {};
 
 // Operator gate colors
 const OP_COLOR = { multiply:'#b94fff', divide:'#ffd700', add:'#39ff14', subtract:'#ff2d55' };
@@ -2144,7 +2212,12 @@ function showPlanetFact(planet) {
   });
 
   document.getElementById('planetPopupTitle').textContent = planet.type.toUpperCase();
-  document.getElementById('planetPopupFact').textContent  = PLANET_FACTS[planet.type] || '';
+  const facts = PLANET_FACTS[planet.type] || [];
+  if (!_planetFactIndex[planet.type]) _planetFactIndex[planet.type] = [...facts.keys()].sort(() => Math.random() - 0.5);
+  const pool = _planetFactIndex[planet.type];
+  const idx  = pool.length ? pool.shift() : 0;
+  if (!pool.length && facts.length) _planetFactIndex[planet.type] = [...facts.keys()].sort(() => Math.random() - 0.5);
+  document.getElementById('planetPopupFact').textContent = facts[idx] || '';
 }
 
 function dismissPlanetFact() {
