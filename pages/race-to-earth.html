@@ -387,27 +387,7 @@
     pointer-events: none;
   }
 
-  #vpause {
-    position: fixed;
-    bottom: 168px;
-    left: 20px;
-    width: 40px;
-    height: 40px;
-    background: rgba(0,212,255,0.07);
-    border: 1px solid rgba(0,212,255,0.22);
-    border-radius: 8px;
-    color: var(--muted);
-    font-size: 16px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 50;
-    touch-action: none;
-    -webkit-tap-highlight-color: transparent;
-    pointer-events: all;
-  }
-  #vpause:active { background: rgba(0,212,255,0.18); }
+
 
   #vfire {
     position: fixed;
@@ -709,7 +689,6 @@
   <div id="vjoy-center">🚀</div>
   <div id="vjoy-thumb"></div>
 </div>
-<button id="vpause">⏸</button>
 <button id="vfire"><div id="vfire-icon">🚀</div><div id="vfire-label">FIRE</div></button>
 
 <script>
@@ -1474,20 +1453,17 @@ function onKeyUp(e) {
 
 // ===== VIRTUAL JOYSTICK (MOBILE TOUCH) =====
 function showVpad() {
-  document.getElementById('vjoy').style.display   = 'block';
-  document.getElementById('vpause').style.display = 'flex';
-  document.getElementById('vfire').style.display  = 'flex';
+  document.getElementById('vjoy').style.display  = 'block';
+  document.getElementById('vfire').style.display = 'flex';
 }
 function hideVpad() {
-  document.getElementById('vjoy').style.display   = 'none';
-  document.getElementById('vpause').style.display = 'none';
-  document.getElementById('vfire').style.display  = 'none';
+  document.getElementById('vjoy').style.display  = 'none';
+  document.getElementById('vfire').style.display = 'none';
 }
 
 function setupVpadEvents() {
   const joyEl      = document.getElementById('vjoy');
   const thumbEl    = document.getElementById('vjoy-thumb');
-  const centerEl   = document.getElementById('vjoy-center');
   const arrowUp    = document.getElementById('vjoy-arrow-up');
   const arrowDown  = document.getElementById('vjoy-arrow-down');
   const arrowLeft  = document.getElementById('vjoy-arrow-left');
@@ -1541,11 +1517,6 @@ function setupVpadEvents() {
     if (dist < DEAD_ZONE) {
       clearDirKeys();
       sounds.thrustStop();
-      if (e.type === 'touchstart' && gameState === 'playing' && !paused) {
-        firePlayerMissile();
-        centerEl.classList.add('flash');
-        setTimeout(() => centerEl.classList.remove('flash'), 150);
-      }
     } else {
       applyDir(dx, dy);
     }
@@ -1562,11 +1533,6 @@ function setupVpadEvents() {
   joyEl.addEventListener('touchmove',   handleJoyTouch,   { passive: false });
   joyEl.addEventListener('touchend',    handleJoyRelease, { passive: false });
   joyEl.addEventListener('touchcancel', handleJoyRelease, { passive: false });
-
-  document.getElementById('vpause').addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    if (gameState === 'playing' || gameState === 'question') togglePause();
-  }, { passive: false });
 
   const fireEl = document.getElementById('vfire');
   fireEl.addEventListener('touchstart', (e) => {
