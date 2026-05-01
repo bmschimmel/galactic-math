@@ -974,29 +974,33 @@ const sounds = {
     });
   },
 
-  // Gate entry — whoosh through the ring + metallic ping
+  // Gate entry — mechanical clamp click + deep lock thud + shimmer
   gateEnter() {
     const ctx = getAudio();
-    // Shaped noise burst: ship passing through the ring
-    const bufLen = Math.floor(ctx.sampleRate * 0.2);
-    const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / bufLen);
-    const ns = ctx.createBufferSource(); ns.buffer = buf;
-    const flt = ctx.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 1400; flt.Q.value = 0.7;
-    flt.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.2);
-    const ng = ctx.createGain(); ng.gain.value = 0.4;
-    ns.connect(flt); flt.connect(ng); ng.connect(ctx.destination);
-    ns.start(); ns.stop(ctx.currentTime + 0.2);
-    // Metallic ring resonance — the ring vibrating as the ship passes through
-    const ring = ctx.createOscillator(), rg = ctx.createGain();
-    ring.type = 'sine'; ring.frequency.value = 660;
-    ring.frequency.exponentialRampToValueAtTime(420, ctx.currentTime + 0.5);
-    ring.connect(rg); rg.connect(ctx.destination);
-    rg.gain.setValueAtTime(0, ctx.currentTime + 0.05);
-    rg.gain.linearRampToValueAtTime(0.28, ctx.currentTime + 0.1);
-    rg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
-    ring.start(ctx.currentTime + 0.05); ring.stop(ctx.currentTime + 0.55);
+    const t = ctx.currentTime;
+    // Sharp mechanical click as clamp engages
+    const click = ctx.createOscillator(), cg = ctx.createGain();
+    click.type = 'square'; click.frequency.value = 280;
+    click.frequency.exponentialRampToValueAtTime(110, t + 0.045);
+    click.connect(cg); cg.connect(ctx.destination);
+    cg.gain.setValueAtTime(0.5, t); cg.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+    click.start(t); click.stop(t + 0.07);
+    // Deep magnetic lock thud settling into place
+    const thud = ctx.createOscillator(), tg = ctx.createGain();
+    thud.type = 'sine'; thud.frequency.value = 180;
+    thud.frequency.exponentialRampToValueAtTime(55, t + 0.28);
+    thud.connect(tg); tg.connect(ctx.destination);
+    tg.gain.setValueAtTime(0, t + 0.04); tg.gain.linearRampToValueAtTime(0.48, t + 0.07);
+    tg.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+    thud.start(t + 0.04); thud.stop(t + 0.33);
+    // Rising metallic shimmer — energy confirmation after lock
+    const shine = ctx.createOscillator(), sg = ctx.createGain();
+    shine.type = 'sine'; shine.frequency.value = 760;
+    shine.frequency.exponentialRampToValueAtTime(1180, t + 0.18);
+    shine.connect(sg); sg.connect(ctx.destination);
+    sg.gain.setValueAtTime(0, t + 0.05); sg.gain.linearRampToValueAtTime(0.13, t + 0.09);
+    sg.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    shine.start(t + 0.05); shine.stop(t + 0.29);
   },
 
   // Rocket thruster — filtered noise + low rumble, smooth and non-harsh
