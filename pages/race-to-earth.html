@@ -974,6 +974,31 @@ const sounds = {
     });
   },
 
+  // Gate entry — whoosh through the ring + metallic ping
+  gateEnter() {
+    const ctx = getAudio();
+    // Shaped noise burst: ship passing through the ring
+    const bufLen = Math.floor(ctx.sampleRate * 0.2);
+    const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / bufLen);
+    const ns = ctx.createBufferSource(); ns.buffer = buf;
+    const flt = ctx.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 1400; flt.Q.value = 0.7;
+    flt.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.2);
+    const ng = ctx.createGain(); ng.gain.value = 0.4;
+    ns.connect(flt); flt.connect(ng); ng.connect(ctx.destination);
+    ns.start(); ns.stop(ctx.currentTime + 0.2);
+    // Metallic ring resonance — the ring vibrating as the ship passes through
+    const ring = ctx.createOscillator(), rg = ctx.createGain();
+    ring.type = 'sine'; ring.frequency.value = 660;
+    ring.frequency.exponentialRampToValueAtTime(420, ctx.currentTime + 0.5);
+    ring.connect(rg); rg.connect(ctx.destination);
+    rg.gain.setValueAtTime(0, ctx.currentTime + 0.05);
+    rg.gain.linearRampToValueAtTime(0.28, ctx.currentTime + 0.1);
+    rg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+    ring.start(ctx.currentTime + 0.05); ring.stop(ctx.currentTime + 0.55);
+  },
+
   // Rocket thruster — filtered noise + low rumble, smooth and non-harsh
   thrustStart() {
     if (thrustOscNode) return;
@@ -1823,6 +1848,7 @@ function openGateQuestion(gate) {
   activatedGate = gate;
   gameState = 'question';
   sounds.thrustStop();
+  sounds.gateEnter();
   currentQuestion = makeQuestion(gate.op);
 
   document.getElementById('gateOpLabel').textContent = `${opLabel(gate.op)} GATE`;
