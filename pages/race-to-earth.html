@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Race to Earth — Galactic Math Academy</title>
+<title>Alien Invasion — Galactic Math Academy</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23030712'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%231a2744' stroke='%2300d4ff' stroke-width='1.5'/%3E%3Cellipse cx='16' cy='16' rx='12' ry='4.5' fill='none' stroke='%23ffd700' stroke-width='1.5' opacity='0.9'/%3E%3Ccircle cx='7' cy='8' r='1.2' fill='%23e8f4ff' opacity='0.7'/%3E%3Ccircle cx='26' cy='7' r='1' fill='%23e8f4ff' opacity='0.5'/%3E%3Ccircle cx='27' cy='24' r='1.2' fill='%23e8f4ff' opacity='0.6'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
@@ -389,7 +389,7 @@
 
   #vpause {
     position: fixed;
-    bottom: 60px;
+    bottom: 168px;
     left: 20px;
     width: 40px;
     height: 40px;
@@ -408,6 +408,39 @@
     pointer-events: all;
   }
   #vpause:active { background: rgba(0,212,255,0.18); }
+
+  #vfire {
+    position: fixed;
+    bottom: 60px;
+    left: 20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255,45,85,0.12);
+    border: 2px solid rgba(255,45,85,0.5);
+    box-shadow: 0 0 20px rgba(255,45,85,0.15), inset 0 0 16px rgba(0,0,0,0.4);
+    color: var(--saber-red);
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    z-index: 50;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: all;
+    user-select: none;
+  }
+  #vfire:active, #vfire.flash {
+    background: rgba(255,45,85,0.35);
+    box-shadow: 0 0 30px rgba(255,45,85,0.5), inset 0 0 16px rgba(0,0,0,0.4);
+  }
+  #vfire-icon { font-size: 26px; line-height: 1; pointer-events: none; }
+  #vfire-label { pointer-events: none; }
 
   /* ===== MOBILE ===== */
   @media (max-width: 600px) {
@@ -428,10 +461,10 @@
     .end-btn { width: 200px; text-align: center; }
   }
 
-  /* ===== ALIEN COUNTER (prominent, center-top) ===== */
+  /* ===== ALIEN COUNTER (top-left, below HUD bar) ===== */
   #alienCounter {
     position: fixed;
-    bottom: 20px;
+    top: 54px;
     left: 20px;
     display: none;
     flex-direction: column;
@@ -441,20 +474,20 @@
     background: rgba(3,7,18,0.72);
     border: 1px solid rgba(255,45,85,0.35);
     border-radius: 10px;
-    padding: 6px 22px 8px;
+    padding: 4px 16px 6px;
     backdrop-filter: blur(4px);
   }
   #alienCounterNum {
     font-family: 'Orbitron', monospace;
-    font-size: 38px;
+    font-size: 26px;
     font-weight: 900;
     color: var(--saber-red);
-    text-shadow: 0 0 24px var(--saber-red);
+    text-shadow: 0 0 18px var(--saber-red);
     line-height: 1;
   }
   #alienCounterLabel {
     font-family: 'Orbitron', monospace;
-    font-size: 8px;
+    font-size: 7px;
     color: var(--muted);
     letter-spacing: 2px;
     margin-top: 2px;
@@ -554,7 +587,7 @@
 <!-- ===== SETUP SCREEN ===== -->
 <div id="setupScreen">
   <div class="setup-panel">
-    <div class="setup-title">🌍 RACE TO EARTH</div>
+    <div class="setup-title">👾 ALIEN INVASION</div>
     <div class="setup-subtitle">Clear the solar system of alien invaders! Fly through math rings to earn missiles, then blast every alien ship before you run out of fuel. Wrong answers drain fuel. Dodge comets and asteroids. You have 5 lives.</div>
 
     <div class="divider"></div>
@@ -677,6 +710,7 @@
   <div id="vjoy-thumb"></div>
 </div>
 <button id="vpause">⏸</button>
+<button id="vfire"><div id="vfire-icon">🚀</div><div id="vfire-label">FIRE</div></button>
 
 <script>
 // ===== BROWSER COMPATIBILITY CHECK =====
@@ -1442,10 +1476,12 @@ function onKeyUp(e) {
 function showVpad() {
   document.getElementById('vjoy').style.display   = 'block';
   document.getElementById('vpause').style.display = 'flex';
+  document.getElementById('vfire').style.display  = 'flex';
 }
 function hideVpad() {
   document.getElementById('vjoy').style.display   = 'none';
   document.getElementById('vpause').style.display = 'none';
+  document.getElementById('vfire').style.display  = 'none';
 }
 
 function setupVpadEvents() {
@@ -1530,6 +1566,16 @@ function setupVpadEvents() {
   document.getElementById('vpause').addEventListener('touchstart', (e) => {
     e.preventDefault();
     if (gameState === 'playing' || gameState === 'question') togglePause();
+  }, { passive: false });
+
+  const fireEl = document.getElementById('vfire');
+  fireEl.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (gameState === 'playing' && !paused) {
+      firePlayerMissile();
+      fireEl.classList.add('flash');
+      setTimeout(() => fireEl.classList.remove('flash'), 150);
+    }
   }, { passive: false });
 }
 
@@ -1793,13 +1839,13 @@ function dismissQuestion() {
 
 function clearGate(gate) {
   lastUsedGateId = gate.id;
-  missiles += 3;
+  missiles += 2;
   activatedGate = null;
   document.getElementById('questionOverlay').style.display = 'none';
   gameState = 'playing';
   updateHUD();
   sounds.missilePickup();
-  showFlightBanner('🚀 AMMO +3', 900);
+  showFlightBanner('🚀 AMMO +2', 900);
 }
 
 // ===== HUD =====
@@ -1841,8 +1887,21 @@ function showFlightBanner(msg, duration) {
 
 function abortMission() {
   sounds.thrustStop();
-  cleanupListeners();
-  window.location.href = '../index.html';
+  // Deflating power-down: engines losing thrust then silence
+  try {
+    const ac = getAudio();
+    const t = ac.currentTime;
+    const sweep = (freq0, freq1, type, vol, dur) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq0, t); o.frequency.linearRampToValueAtTime(freq1, t + dur);
+      g.gain.setValueAtTime(vol, t); g.gain.linearRampToValueAtTime(0, t + dur);
+      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + dur);
+    };
+    sweep(480, 60, 'sawtooth', 0.5, 0.18);
+    setTimeout(() => sweep(300, 40, 'sine', 0.4, 0.12), 300);
+    setTimeout(() => sweep(80, 20, 'sine', 0.3, 0.08), 700);
+  } catch(e) { /* audio not available */ }
+  setTimeout(() => { cleanupListeners(); window.location.href = '../index.html'; }, 50);
 }
 
 // ===== WRONG FLASH =====
@@ -1901,25 +1960,29 @@ const COMET_COLORS = ['#fffee0','#ffd700','#ff8844','#00d4ff','#ff66cc','#aaffdd
 
 function spawnComet() {
   if (comets.length >= COMET_MAX) return;
-  // Pick a random screen edge to enter from
-  const edge  = Math.floor(Math.random() * 4);
-  let sx, sy;
+  // Spawn at a world-space edge offset from the current camera view
   const W = canvas.width, H = canvas.height;
+  const edge = Math.floor(Math.random() * 4);
+  let sx, sy;
   switch (edge) {
-    case 0: sx = Math.random() * W; sy = -20;    break; // top
-    case 1: sx = W + 20;  sy = Math.random() * H; break; // right
-    case 2: sx = Math.random() * W; sy = H + 20;  break; // bottom
-    default: sx = -20;  sy = Math.random() * H;   break; // left
+    case 0: sx = Math.random() * W; sy = -40;    break; // top screen edge
+    case 1: sx = W + 40;  sy = Math.random() * H; break; // right
+    case 2: sx = Math.random() * W; sy = H + 40;  break; // bottom
+    default: sx = -40;  sy = Math.random() * H;   break; // left
   }
-  // Aim roughly across to the far side with some spread
-  const tx = W * 0.2 + Math.random() * W * 0.6;
-  const ty = H * 0.2 + Math.random() * H * 0.6;
-  const dist  = Math.hypot(tx - sx, ty - sy) || 1;
+  // Convert screen spawn position to world coordinates
+  const wx = sx + camera.x - W / 2;
+  const wy = sy + camera.y - H / 2;
+  // Aim toward a random point near the ship's current world position
+  const spread = 400;
+  const tx = ship.x + (Math.random() - 0.5) * spread;
+  const ty = ship.y + (Math.random() - 0.5) * spread;
+  const dist = Math.hypot(tx - wx, ty - wy) || 1;
   const speed = 6 + Math.random() * 7;
   comets.push({
-    sx, sy,
-    vx: (tx - sx) / dist * speed,
-    vy: (ty - sy) / dist * speed,
+    x: wx, y: wy,
+    vx: (tx - wx) / dist * speed,
+    vy: (ty - wy) / dist * speed,
     radius: 5 + Math.random() * 5,
     trail: [],
     color: COMET_COLORS[Math.floor(Math.random() * COMET_COLORS.length)],
@@ -1933,12 +1996,13 @@ function updateComets(now) {
   }
   for (let i = comets.length - 1; i >= 0; i--) {
     const c = comets[i];
-    c.trail.unshift({ x: c.sx, y: c.sy });
+    // Trail stores world positions
+    c.trail.unshift({ x: c.x, y: c.y });
     if (c.trail.length > 32) c.trail.pop();
-    c.sx += c.vx;
-    c.sy += c.vy;
-    // Remove when well off screen
-    if (c.sx < -300 || c.sx > canvas.width+300 || c.sy < -300 || c.sy > canvas.height+300) {
+    c.x += c.vx;
+    c.y += c.vy;
+    // Remove when far outside the world bounds
+    if (c.x < -400 || c.x > WORLD_W + 400 || c.y < -400 || c.y > WORLD_H + 400) {
       comets.splice(i, 1);
     }
   }
@@ -1946,9 +2010,8 @@ function updateComets(now) {
 
 function checkCometCollisions() {
   if (Date.now() < invincibleUntil) return;
-  const sp = w2s(ship.x, ship.y);
   for (const c of comets) {
-    if (Math.hypot(c.sx - sp.x, c.sy - sp.y) < SHIP_RADIUS + c.radius) {
+    if (Math.hypot(c.x - ship.x, c.y - ship.y) < SHIP_RADIUS + c.radius) {
       hitComet(c); break;
     }
   }
@@ -1966,16 +2029,18 @@ function hitComet(c) {
 
 function drawComets() {
   comets.forEach(c => {
+    const head = w2s(c.x, c.y);
     ctx.save();
     ctx.shadowColor = c.color;
-    // Trail (drawn back-to-front, fading)
+    // Trail (drawn back-to-front, fading) — convert each world position to screen
     c.trail.forEach((pos, i) => {
+      const sp = w2s(pos.x, pos.y);
       const t = 1 - i / c.trail.length;
       ctx.globalAlpha = t * 0.7;
       ctx.shadowBlur  = 10 * t;
       ctx.fillStyle   = c.color;
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, c.radius * t * 0.65, 0, Math.PI * 2);
+      ctx.arc(sp.x, sp.y, c.radius * t * 0.65, 0, Math.PI * 2);
       ctx.fill();
     });
     // Bright head
@@ -1983,13 +2048,13 @@ function drawComets() {
     ctx.shadowBlur  = 28;
     ctx.fillStyle   = '#ffffff';
     ctx.beginPath();
-    ctx.arc(c.sx, c.sy, c.radius, 0, Math.PI * 2);
+    ctx.arc(head.x, head.y, c.radius, 0, Math.PI * 2);
     ctx.fill();
     // Colored core
     ctx.globalAlpha = 0.7;
     ctx.fillStyle   = c.color;
     ctx.beginPath();
-    ctx.arc(c.sx, c.sy, c.radius * 0.55, 0, Math.PI * 2);
+    ctx.arc(head.x, head.y, c.radius * 0.55, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   });
