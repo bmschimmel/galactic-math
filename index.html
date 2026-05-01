@@ -2051,6 +2051,12 @@ const sounds = {
     setTimeout(() => playFreqSweep(300, 40, 'sine', 0.5, 0.1), 300);
     setTimeout(() => playNoise(0.3, 0.04, 80), 500);
     setTimeout(() => playFreqSweep(80, 20, 'sine', 0.4, 0.06), 700);
+  },
+  dock() {
+    // Magnetic docking clamp — descending approach swoosh + low lock thud
+    playFreqSweep(520, 180, 'sine', 0.14, 0.07);
+    setTimeout(() => playTone(140, 'sine', 0.26, 0.13), 65);
+    setTimeout(() => playTone(210, 'sine', 0.09, 0.07), 130);
   }
 };
 
@@ -2867,7 +2873,10 @@ function submitAnswer() {
           if (answers[i] === null) { next = i; break; }
         }
       }
-      if (next !== -1) loadQuestion(next);
+      if (next !== -1) {
+        sounds.dock();
+        loadQuestion(next);
+      }
     }, 600);
   }
 }
