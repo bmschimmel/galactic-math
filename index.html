@@ -2053,9 +2053,15 @@ const sounds = {
     setTimeout(() => playFreqSweep(80, 20, 'sine', 0.4, 0.06), 700);
   },
   dock() {
-    // Descending approach pip + mid-range lock thud
-    playFreqSweep(720, 300, 'sine', 0.12, 0.22);
-    setTimeout(() => playTone(350, 'sine', 0.18, 0.28), 100);
+    // Resume context in case browser suspended it between user gesture and this setTimeout
+    const ctx = getAudio();
+    const play = () => {
+      playTone(1047, 'sine', 0.15, 0.35);
+      setTimeout(() => playTone(784, 'sine', 0.15, 0.35), 150);
+      setTimeout(() => playTone(523, 'sine', 0.25, 0.4), 300);
+    };
+    if (ctx.state === 'suspended') ctx.resume().then(play);
+    else play();
   }
 };
 
