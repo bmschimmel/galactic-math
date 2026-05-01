@@ -2053,10 +2053,9 @@ const sounds = {
     setTimeout(() => playFreqSweep(80, 20, 'sine', 0.4, 0.06), 700);
   },
   dock() {
-    // Magnetic docking clamp — descending approach swoosh + low lock thud
-    playFreqSweep(520, 180, 'sine', 0.14, 0.07);
-    setTimeout(() => playTone(140, 'sine', 0.26, 0.13), 65);
-    setTimeout(() => playTone(210, 'sine', 0.09, 0.07), 130);
+    // Descending approach pip + mid-range lock thud
+    playFreqSweep(720, 300, 'sine', 0.12, 0.22);
+    setTimeout(() => playTone(350, 'sine', 0.18, 0.28), 100);
   }
 };
 
