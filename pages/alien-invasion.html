@@ -441,11 +441,11 @@
     .end-btn { width: 200px; text-align: center; }
   }
 
-  /* ===== ALIEN COUNTER (top-left, below HUD bar) ===== */
+  /* ===== ALIEN COUNTER (top-right, below HUD bar) ===== */
   #alienCounter {
     position: fixed;
     top: 54px;
-    left: 20px;
+    right: 20px;
     display: none;
     flex-direction: column;
     align-items: center;
@@ -596,7 +596,7 @@
       <b>Shoot all alien ships</b> to win &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> restore +10% &nbsp;·&nbsp; Watch out for comets and asteroids
     </div>
 
-    <div class="error-msg" id="rteError"></div>
+    <div class="error-msg" id="alienError"></div>
     <button class="launch-btn" onclick="launchGame()">🚀 LAUNCH MISSION</button>
     <a class="back-link" href="../index.html">← Back to Galactic Math</a>
   </div>
@@ -1088,8 +1088,8 @@ const sounds = {
 };
 
 // ===== SETUP STATE =====
-let rteNums = new Set([2,3,4,5,6,7,8,9,10,11,12]);
-let rteOps  = new Set(['multiply']);
+let alienNums = new Set([2,3,4,5,6,7,8,9,10,11,12]);
+let alienOps  = new Set(['multiply']);
 let autoLaunch = false; // set true when valid params arrive from main app
 
 // Read URL params passed from main app — skip setup screen if complete
@@ -1098,12 +1098,12 @@ let autoLaunch = false; // set true when valid params arrive from main app
   let numsOk = false, opsOk = false;
   if (p.get('nums')) {
     const parsed = p.get('nums').split(',').map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 13);
-    if (parsed.length >= 3) { rteNums = new Set(parsed); numsOk = true; }
+    if (parsed.length >= 3) { alienNums = new Set(parsed); numsOk = true; }
   }
   if (p.get('ops')) {
     const valid = new Set(['multiply','divide','add','subtract']);
     const parsed = p.get('ops').split(',').filter(o => valid.has(o));
-    if (parsed.length > 0) { rteOps = new Set(parsed); opsOk = true; }
+    if (parsed.length > 0) { alienOps = new Set(parsed); opsOk = true; }
   }
   // Both selections came from main app and are valid — skip setup screen
   if (numsOk && opsOk) autoLaunch = true;
@@ -1114,12 +1114,12 @@ let autoLaunch = false; // set true when valid params arrive from main app
   const grid = document.getElementById('numGrid');
   for (let i = 0; i <= 13; i++) {
     const btn = document.createElement('button');
-    btn.className = 'num-btn' + (rteNums.has(i) ? ' selected' : '');
+    btn.className = 'num-btn' + (alienNums.has(i) ? ' selected' : '');
     btn.textContent = i;
     btn.dataset.num = i;
     btn.onclick = () => {
-      if (rteNums.has(i)) { rteNums.delete(i); btn.classList.remove('selected'); }
-      else { rteNums.add(i); btn.classList.add('selected'); }
+      if (alienNums.has(i)) { alienNums.delete(i); btn.classList.remove('selected'); }
+      else { alienNums.add(i); btn.classList.add('selected'); }
       sounds.navigate();
     };
     grid.appendChild(btn);
@@ -1128,23 +1128,23 @@ let autoLaunch = false; // set true when valid params arrive from main app
 })();
 
 function syncOpButtons() {
-  document.querySelectorAll('.op-btn').forEach(b => b.classList.toggle('selected-op', rteOps.has(b.dataset.op)));
+  document.querySelectorAll('.op-btn').forEach(b => b.classList.toggle('selected-op', alienOps.has(b.dataset.op)));
 }
 function toggleRteOp(op) {
-  if (rteOps.has(op)) rteOps.delete(op); else rteOps.add(op);
+  if (alienOps.has(op)) alienOps.delete(op); else alienOps.add(op);
   syncOpButtons(); sounds.navigate();
 }
 function rteSelectRange(a, b) {
-  rteNums.clear();
+  alienNums.clear();
   document.querySelectorAll('.num-btn').forEach(btn => {
     const n = parseInt(btn.dataset.num);
-    if (n >= a && n <= b) { rteNums.add(n); btn.classList.add('selected'); }
+    if (n >= a && n <= b) { alienNums.add(n); btn.classList.add('selected'); }
     else btn.classList.remove('selected');
   });
   sounds.navigate();
 }
 function rteSelectNone() {
-  rteNums.clear();
+  alienNums.clear();
   document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
   sounds.navigate();
 }
@@ -1284,9 +1284,9 @@ let thrustGainNode = null;
 
 // ===== VALIDATION & LAUNCH =====
 function launchGame() {
-  if (rteOps.size === 0) { document.getElementById('rteError').textContent = '⚠ Select at least one operation'; return; }
-  if (rteNums.size < 3)  { document.getElementById('rteError').textContent = '⚠ Select at least 3 numbers'; return; }
-  document.getElementById('rteError').textContent = '';
+  if (alienOps.size === 0) { document.getElementById('alienError').textContent = '⚠ Select at least one operation'; return; }
+  if (alienNums.size < 3)  { document.getElementById('alienError').textContent = '⚠ Select at least 3 numbers'; return; }
+  document.getElementById('alienError').textContent = '';
   initGame();
 }
 
@@ -1436,7 +1436,7 @@ function generateStars() {
 }
 
 function generateGates() {
-  const opsArr = [...rteOps];
+  const opsArr = [...alienOps];
   const list   = [];
   const yTop   = 500;   // leave space above for Earth approach
   const yBot   = 5200;  // near ship start
@@ -1517,7 +1517,7 @@ function generateObstacles() {
 
 // ===== QUESTION GENERATION =====
 function makeQuestion(op) {
-  const arr  = [...rteNums];
+  const arr  = [...alienNums];
   const pick = () => arr[Math.floor(Math.random()*arr.length)];
   let a, b;
   if (op === 'multiply') { a=pick(); b=pick(); return { text:`${a} × ${b} = ?`, answer:a*b }; }
@@ -2362,6 +2362,7 @@ function render() {
 
   // Screen-space drawing (not shaken)
   drawComets();
+  drawRadar();
   drawDirectionArrow();
 }
 
@@ -2756,17 +2757,80 @@ function drawShip() {
   ctx.restore();
 }
 
-// ===== DIRECTION ARROW (to nearest usable gate) =====
+// ===== RADAR (top-left minimap showing alien positions) =====
+function drawRadar() {
+  const aliens = obstacles.filter(o => o.type === 'alien');
+  if (aliens.length === 0) return;
+
+  const X = 20, Y = 54;   // top-left corner of radar panel
+  const W = 130, H = 130; // panel size
+
+  ctx.save();
+
+  // Panel background
+  ctx.fillStyle = 'rgba(3,7,18,0.82)';
+  ctx.strokeStyle = 'rgba(0,212,255,0.3)';
+  ctx.lineWidth = 1;
+  ctx.shadowColor = 'rgba(0,212,255,0.35)';
+  ctx.shadowBlur = 8;
+  ctx.fillRect(X, Y, W, H);
+  ctx.strokeRect(X, Y, W, H);
+  ctx.shadowBlur = 0;
+
+  // "RADAR" label
+  ctx.font = '600 7px Orbitron, monospace';
+  ctx.fillStyle = 'rgba(107,127,163,0.9)';
+  ctx.textAlign = 'center';
+  ctx.fillText('RADAR', X + W / 2, Y + 11);
+
+  // Inner map area
+  const mx = X + 6, my = Y + 14, mw = W - 12, mh = H - 20;
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(0,212,255,0.07)';
+  ctx.lineWidth = 0.5;
+  for (let i = 1; i < 4; i++) {
+    ctx.beginPath(); ctx.moveTo(mx + mw / 4 * i, my); ctx.lineTo(mx + mw / 4 * i, my + mh); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(mx, my + mh / 4 * i); ctx.lineTo(mx + mw, my + mh / 4 * i); ctx.stroke();
+  }
+
+  // World → radar mapping
+  function toR(wx, wy) {
+    return { x: mx + (wx / WORLD_W) * mw, y: my + (wy / WORLD_H) * mh };
+  }
+
+  // Aliens — pulsing, colored by type (red=shooter, green=non-shooter)
+  const pulse = 0.7 + 0.3 * Math.sin(Date.now() / 400);
+  for (const obs of aliens) {
+    const r = toR(obs.x, obs.y);
+    ctx.globalAlpha = pulse;
+    ctx.fillStyle = obs.color;
+    ctx.shadowColor = obs.color;
+    ctx.shadowBlur = 5;
+    ctx.beginPath(); ctx.arc(r.x, r.y, 3, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Player ship
+  const sr = toR(ship.x, ship.y);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#00d4ff';
+  ctx.shadowColor = '#00d4ff';
+  ctx.shadowBlur = 7;
+  ctx.beginPath(); ctx.arc(sr.x, sr.y, 2.5, 0, Math.PI * 2); ctx.fill();
+
+  ctx.restore();
+}
+
+// ===== DIRECTION ARROW (to nearest off-screen alien) =====
 function drawDirectionArrow() {
-  // Find nearest gate that isn't the just-used one
+  // Find nearest alien that is off-screen
   let target = null, targetDist = Infinity;
-  for (const gate of gates) {
-    if (gate.id === lastUsedGateId) continue;
-    const sp = w2s(ship.x, ship.y);
-    const gp = w2s(gate.x, gate.y);
-    if (onScreen(gp.x, gp.y, -40)) continue; // visible gates don't need arrow
-    const d = Math.hypot(gp.x - sp.x, gp.y - sp.y);
-    if (d < targetDist) { targetDist = d; target = gate; }
+  for (const obs of obstacles) {
+    if (obs.type !== 'alien') continue;
+    const ap = w2s(obs.x, obs.y);
+    if (onScreen(ap.x, ap.y, -40)) continue; // visible aliens don't need arrow
+    const d = Math.hypot(ap.x - canvas.width/2, ap.y - canvas.height/2);
+    if (d < targetDist) { targetDist = d; target = obs; }
   }
   if (!target) return;
 
@@ -2775,7 +2839,7 @@ function drawDirectionArrow() {
   const r     = Math.min(canvas.width, canvas.height) * 0.37;
   const ax    = canvas.width/2  + Math.cos(angle) * r;
   const ay    = canvas.height/2 + Math.sin(angle) * r;
-  const color = OP_COLOR[target.op] || '#00d4ff';
+  const color = target.color;
   const alpha = 0.65 + 0.35*Math.sin(Date.now()/280);
 
   ctx.save();
