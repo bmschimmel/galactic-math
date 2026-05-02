@@ -596,7 +596,7 @@
       <b>Shoot all alien ships</b> to win &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> restore +10% &nbsp;·&nbsp; Watch out for comets and asteroids
     </div>
 
-    <div class="error-msg" id="rteError"></div>
+    <div class="error-msg" id="alienError"></div>
     <button class="launch-btn" onclick="launchGame()">🚀 LAUNCH MISSION</button>
     <a class="back-link" href="../index.html">← Back to Galactic Math</a>
   </div>
@@ -1088,8 +1088,8 @@ const sounds = {
 };
 
 // ===== SETUP STATE =====
-let rteNums = new Set([2,3,4,5,6,7,8,9,10,11,12]);
-let rteOps  = new Set(['multiply']);
+let alienNums = new Set([2,3,4,5,6,7,8,9,10,11,12]);
+let alienOps  = new Set(['multiply']);
 let autoLaunch = false; // set true when valid params arrive from main app
 
 // Read URL params passed from main app — skip setup screen if complete
@@ -1098,12 +1098,12 @@ let autoLaunch = false; // set true when valid params arrive from main app
   let numsOk = false, opsOk = false;
   if (p.get('nums')) {
     const parsed = p.get('nums').split(',').map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 13);
-    if (parsed.length >= 3) { rteNums = new Set(parsed); numsOk = true; }
+    if (parsed.length >= 3) { alienNums = new Set(parsed); numsOk = true; }
   }
   if (p.get('ops')) {
     const valid = new Set(['multiply','divide','add','subtract']);
     const parsed = p.get('ops').split(',').filter(o => valid.has(o));
-    if (parsed.length > 0) { rteOps = new Set(parsed); opsOk = true; }
+    if (parsed.length > 0) { alienOps = new Set(parsed); opsOk = true; }
   }
   // Both selections came from main app and are valid — skip setup screen
   if (numsOk && opsOk) autoLaunch = true;
@@ -1114,12 +1114,12 @@ let autoLaunch = false; // set true when valid params arrive from main app
   const grid = document.getElementById('numGrid');
   for (let i = 0; i <= 13; i++) {
     const btn = document.createElement('button');
-    btn.className = 'num-btn' + (rteNums.has(i) ? ' selected' : '');
+    btn.className = 'num-btn' + (alienNums.has(i) ? ' selected' : '');
     btn.textContent = i;
     btn.dataset.num = i;
     btn.onclick = () => {
-      if (rteNums.has(i)) { rteNums.delete(i); btn.classList.remove('selected'); }
-      else { rteNums.add(i); btn.classList.add('selected'); }
+      if (alienNums.has(i)) { alienNums.delete(i); btn.classList.remove('selected'); }
+      else { alienNums.add(i); btn.classList.add('selected'); }
       sounds.navigate();
     };
     grid.appendChild(btn);
@@ -1128,23 +1128,23 @@ let autoLaunch = false; // set true when valid params arrive from main app
 })();
 
 function syncOpButtons() {
-  document.querySelectorAll('.op-btn').forEach(b => b.classList.toggle('selected-op', rteOps.has(b.dataset.op)));
+  document.querySelectorAll('.op-btn').forEach(b => b.classList.toggle('selected-op', alienOps.has(b.dataset.op)));
 }
 function toggleRteOp(op) {
-  if (rteOps.has(op)) rteOps.delete(op); else rteOps.add(op);
+  if (alienOps.has(op)) alienOps.delete(op); else alienOps.add(op);
   syncOpButtons(); sounds.navigate();
 }
 function rteSelectRange(a, b) {
-  rteNums.clear();
+  alienNums.clear();
   document.querySelectorAll('.num-btn').forEach(btn => {
     const n = parseInt(btn.dataset.num);
-    if (n >= a && n <= b) { rteNums.add(n); btn.classList.add('selected'); }
+    if (n >= a && n <= b) { alienNums.add(n); btn.classList.add('selected'); }
     else btn.classList.remove('selected');
   });
   sounds.navigate();
 }
 function rteSelectNone() {
-  rteNums.clear();
+  alienNums.clear();
   document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
   sounds.navigate();
 }
@@ -1284,9 +1284,9 @@ let thrustGainNode = null;
 
 // ===== VALIDATION & LAUNCH =====
 function launchGame() {
-  if (rteOps.size === 0) { document.getElementById('rteError').textContent = '⚠ Select at least one operation'; return; }
-  if (rteNums.size < 3)  { document.getElementById('rteError').textContent = '⚠ Select at least 3 numbers'; return; }
-  document.getElementById('rteError').textContent = '';
+  if (alienOps.size === 0) { document.getElementById('alienError').textContent = '⚠ Select at least one operation'; return; }
+  if (alienNums.size < 3)  { document.getElementById('alienError').textContent = '⚠ Select at least 3 numbers'; return; }
+  document.getElementById('alienError').textContent = '';
   initGame();
 }
 
@@ -1436,7 +1436,7 @@ function generateStars() {
 }
 
 function generateGates() {
-  const opsArr = [...rteOps];
+  const opsArr = [...alienOps];
   const list   = [];
   const yTop   = 500;   // leave space above for Earth approach
   const yBot   = 5200;  // near ship start
@@ -1517,7 +1517,7 @@ function generateObstacles() {
 
 // ===== QUESTION GENERATION =====
 function makeQuestion(op) {
-  const arr  = [...rteNums];
+  const arr  = [...alienNums];
   const pick = () => arr[Math.floor(Math.random()*arr.length)];
   let a, b;
   if (op === 'multiply') { a=pick(); b=pick(); return { text:`${a} × ${b} = ?`, answer:a*b }; }

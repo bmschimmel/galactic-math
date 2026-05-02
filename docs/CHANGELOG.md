@@ -7,9 +7,9 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-04-15
 
-### IDT-108 — Mobile support for Race to Earth mode (PR #TBD)
+### IDT-108 — Mobile support for Alien Invasion mode (PR #TBD)
 
-Added full touch-device support for `pages/race-to-earth.html`. A virtual D-pad (four directional buttons, bottom-left) and a fire button (bottom-right) appear automatically on touch devices, wiring into the same `keys[]` state used by keyboard input so all existing physics and thrust audio remain unchanged. A pause button is also overlaid on-screen. Responsive CSS media queries (≤600px) shrink the HUD bar, question text, and answer input to fit small phone screens, and the end screen buttons stack vertically. The planet fact popup now dismisses on tap. Hint text in the how-to-play section, question overlay, and planet popup was updated to reference both keyboard and touch controls.
+Added full touch-device support for `pages/alien-invasion.html`. A virtual D-pad (four directional buttons, bottom-left) and a fire button (bottom-right) appear automatically on touch devices, wiring into the same `keys[]` state used by keyboard input so all existing physics and thrust audio remain unchanged. A pause button is also overlaid on-screen. Responsive CSS media queries (≤600px) shrink the HUD bar, question text, and answer input to fit small phone screens, and the end screen buttons stack vertically. The planet fact popup now dismisses on tap. Hint text in the how-to-play section, question overlay, and planet popup was updated to reference both keyboard and touch controls.
 
 ---
 
@@ -19,13 +19,13 @@ Added full touch-device support for `pages/race-to-earth.html`. A virtual D-pad 
 
 Replaced the SVG `og-image` with a real PNG and added proper `favicon.ico` and `favicon-192.png` files so LinkedIn and other rich-link previewers could resolve the site icon and social card image. The `og:image:secure_url` tag was also updated to point to the PNG.
 
-### IDT-105 — Low-fuel warning sound in Race to Earth (PR #79)
+### IDT-105 — Low-fuel warning sound in Alien Invasion (PR #79)
 
-Added an audio warning when the player's oxygen drops to 10% in Race to Earth mode. A voice clip ("low fuel") plays, followed by rising-pitch tick sounds every second to create urgency. The warning re-triggers after an oxygen refuel pickup and a synthesized fallback plays if the clip fails to decode.
+Added an audio warning when the player's oxygen drops to 10% in Alien Invasion mode. A voice clip ("low fuel") plays, followed by rising-pitch tick sounds every second to create urgency. The warning re-triggers after an oxygen refuel pickup and a synthesized fallback plays if the clip fails to decode.
 
-### IDT-104 — Race to Earth UI/UX improvements (PR #81)
+### IDT-104 — Alien Invasion UI/UX improvements (PR #81)
 
-Post-launch polish pass on `pages/race-to-earth.html` based on initial playtesting feedback. Improvements include: adjusted planet proximity detection, an empty-missile click sound, icon and label fixes in the HUD, repositioned countdown overlay, missile handling edge cases, and updated planet fact copy.
+Post-launch polish pass on `pages/alien-invasion.html` based on initial playtesting feedback. Improvements include: adjusted planet proximity detection, an empty-missile click sound, icon and label fixes in the HUD, repositioned countdown overlay, missile handling edge cases, and updated planet fact copy.
 
 ---
 
@@ -43,9 +43,9 @@ Unanswered questions in the missed-problems review showed "You: null". The fix c
 
 ## 2026-04-13 (2)
 
-### IDT-101 — Race to Earth game mode (PR #74)
+### IDT-101 — Alien Invasion game mode (PR #74)
 
-New canvas-based game at `pages/race-to-earth.html`. The player pilots a detailed rocket ship (nose cone, swept fins, engine bell, porthole, animated flame) through 20 math gates in any order to reach home. Thrusting burns oxygen continuously; wrong answers cost an additional 5%. Three bonus rainbow gates require 3 correct answers each and refuel +10% O₂ on completion. Five lives are lost by colliding with drifting asteroids (screen shake + debris particles), alien UFO saucers (multi-layered explosion sound with boom, noise burst, and alien screech + colorful particle explosion), or comets that streak across the screen from random directions with glowing color trails. A pulsing directional arrow always points toward the nearest uncleaned gate when it is off-screen. Gates can be tackled in any order. A "Race to Earth" tile in the main setup screen's Special Modes section passes current number and operator selections into the game as URL params.
+New canvas-based game at `pages/alien-invasion.html`. The player pilots a detailed rocket ship (nose cone, swept fins, engine bell, porthole, animated flame) through 20 math gates in any order to reach home. Thrusting burns oxygen continuously; wrong answers cost an additional 5%. Three bonus rainbow gates require 3 correct answers each and refuel +10% O₂ on completion. Five lives are lost by colliding with drifting asteroids (screen shake + debris particles), alien UFO saucers (multi-layered explosion sound with boom, noise burst, and alien screech + colorful particle explosion), or comets that streak across the screen from random directions with glowing color trails. A pulsing directional arrow always points toward the nearest uncleaned gate when it is off-screen. Gates can be tackled in any order. A "Alien Invasion" tile in the main setup screen's Special Modes section passes current number and operator selections into the game as URL params.
 
 ## 2026-04-13
 

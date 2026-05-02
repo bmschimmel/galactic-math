@@ -336,8 +336,8 @@
     flex-direction: column;
     gap: 8px;
   }
-  /* Race to Earth dev-mode link */
-  .rte-dev-link {
+  /* Alien Invasion dev-mode link */
+  .alien-invasion-link {
     display: block;
     text-align: center;
     margin-top: 10px;
@@ -353,7 +353,7 @@
     width: 100%;
     transition: all 0.2s;
   }
-  .rte-dev-link:hover {
+  .alien-invasion-link:hover {
     border-color: rgba(57,255,20,0.55);
     color: rgba(57,255,20,0.9);
     background: rgba(57,255,20,0.04);
@@ -1665,7 +1665,7 @@
       <button class="btn-primary" onclick="startQuiz()" id="startBtn">
         <span>🚀 BEGIN TRAINING MISSION</span>
       </button>
-      <button class="rte-dev-link" onclick="launchRaceToEarth()">👾 Try Alien Invasion — new mode in development</button>
+      <button class="alien-invasion-link" onclick="launchAlienInvasion()">👾 Try Alien Invasion — new mode in development</button>
     </div>
   </div>
 
@@ -2602,8 +2602,8 @@ function toggleKesselRun() {
   }
 }
 
-// ===== RACE TO EARTH MODE =====
-function launchRaceToEarth() {
+// ===== ALIEN INVASION MODE =====
+function launchAlienInvasion() {
   if (selectedOps.size === 0) {
     document.getElementById('setupError').textContent = '⚠ Select at least one operation to begin';
     return;
@@ -2614,7 +2614,7 @@ function launchRaceToEarth() {
   }
   const nums = [...selectedNums].join(',');
   const ops = [...selectedOps].join(',');
-  window.location.href = `pages/race-to-earth.html?nums=${encodeURIComponent(nums)}&ops=${encodeURIComponent(ops)}`;
+  window.location.href = `pages/alien-invasion.html?nums=${encodeURIComponent(nums)}&ops=${encodeURIComponent(ops)}`;
 }
 
 function startKesselTimer() {
