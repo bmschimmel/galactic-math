@@ -441,11 +441,11 @@
     .end-btn { width: 200px; text-align: center; }
   }
 
-  /* ===== ALIEN COUNTER (top-left, below HUD bar) ===== */
+  /* ===== ALIEN COUNTER (top-right, below HUD bar) ===== */
   #alienCounter {
     position: fixed;
     top: 54px;
-    left: 20px;
+    right: 20px;
     display: none;
     flex-direction: column;
     align-items: center;
@@ -2362,6 +2362,7 @@ function render() {
 
   // Screen-space drawing (not shaken)
   drawComets();
+  drawRadar();
   drawDirectionArrow();
 }
 
@@ -2756,17 +2757,80 @@ function drawShip() {
   ctx.restore();
 }
 
-// ===== DIRECTION ARROW (to nearest usable gate) =====
+// ===== RADAR (top-left minimap showing alien positions) =====
+function drawRadar() {
+  const aliens = obstacles.filter(o => o.type === 'alien');
+  if (aliens.length === 0) return;
+
+  const X = 20, Y = 54;   // top-left corner of radar panel
+  const W = 130, H = 130; // panel size
+
+  ctx.save();
+
+  // Panel background
+  ctx.fillStyle = 'rgba(3,7,18,0.82)';
+  ctx.strokeStyle = 'rgba(0,212,255,0.3)';
+  ctx.lineWidth = 1;
+  ctx.shadowColor = 'rgba(0,212,255,0.35)';
+  ctx.shadowBlur = 8;
+  ctx.fillRect(X, Y, W, H);
+  ctx.strokeRect(X, Y, W, H);
+  ctx.shadowBlur = 0;
+
+  // "RADAR" label
+  ctx.font = '600 7px Orbitron, monospace';
+  ctx.fillStyle = 'rgba(107,127,163,0.9)';
+  ctx.textAlign = 'center';
+  ctx.fillText('RADAR', X + W / 2, Y + 11);
+
+  // Inner map area
+  const mx = X + 6, my = Y + 14, mw = W - 12, mh = H - 20;
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(0,212,255,0.07)';
+  ctx.lineWidth = 0.5;
+  for (let i = 1; i < 4; i++) {
+    ctx.beginPath(); ctx.moveTo(mx + mw / 4 * i, my); ctx.lineTo(mx + mw / 4 * i, my + mh); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(mx, my + mh / 4 * i); ctx.lineTo(mx + mw, my + mh / 4 * i); ctx.stroke();
+  }
+
+  // World → radar mapping
+  function toR(wx, wy) {
+    return { x: mx + (wx / WORLD_W) * mw, y: my + (wy / WORLD_H) * mh };
+  }
+
+  // Aliens — pulsing, colored by type (red=shooter, green=non-shooter)
+  const pulse = 0.7 + 0.3 * Math.sin(Date.now() / 400);
+  for (const obs of aliens) {
+    const r = toR(obs.x, obs.y);
+    ctx.globalAlpha = pulse;
+    ctx.fillStyle = obs.color;
+    ctx.shadowColor = obs.color;
+    ctx.shadowBlur = 5;
+    ctx.beginPath(); ctx.arc(r.x, r.y, 3, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Player ship
+  const sr = toR(ship.x, ship.y);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#00d4ff';
+  ctx.shadowColor = '#00d4ff';
+  ctx.shadowBlur = 7;
+  ctx.beginPath(); ctx.arc(sr.x, sr.y, 2.5, 0, Math.PI * 2); ctx.fill();
+
+  ctx.restore();
+}
+
+// ===== DIRECTION ARROW (to nearest off-screen alien) =====
 function drawDirectionArrow() {
-  // Find nearest gate that isn't the just-used one
+  // Find nearest alien that is off-screen
   let target = null, targetDist = Infinity;
-  for (const gate of gates) {
-    if (gate.id === lastUsedGateId) continue;
-    const sp = w2s(ship.x, ship.y);
-    const gp = w2s(gate.x, gate.y);
-    if (onScreen(gp.x, gp.y, -40)) continue; // visible gates don't need arrow
-    const d = Math.hypot(gp.x - sp.x, gp.y - sp.y);
-    if (d < targetDist) { targetDist = d; target = gate; }
+  for (const obs of obstacles) {
+    if (obs.type !== 'alien') continue;
+    const ap = w2s(obs.x, obs.y);
+    if (onScreen(ap.x, ap.y, -40)) continue; // visible aliens don't need arrow
+    const d = Math.hypot(ap.x - canvas.width/2, ap.y - canvas.height/2);
+    if (d < targetDist) { targetDist = d; target = obs; }
   }
   if (!target) return;
 
@@ -2775,7 +2839,7 @@ function drawDirectionArrow() {
   const r     = Math.min(canvas.width, canvas.height) * 0.37;
   const ax    = canvas.width/2  + Math.cos(angle) * r;
   const ay    = canvas.height/2 + Math.sin(angle) * r;
-  const color = OP_COLOR[target.op] || '#00d4ff';
+  const color = target.color;
   const alpha = 0.65 + 0.35*Math.sin(Date.now()/280);
 
   ctx.save();
