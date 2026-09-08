@@ -307,6 +307,8 @@
   .hud-missiles { font-family: 'Orbitron', monospace; font-size: 15px; color: var(--saber-green); min-width: 24px; text-align: center; }
 
   /* ===== KEY HINT ===== */
+  #flyModeBadge { position: fixed; top: 50%; left: 50%; transform: translate(-50%, 62px); display: none; font-family: 'Orbitron', monospace; font-size: 11px; color: var(--saber-blue); text-shadow: 0 0 12px var(--saber-blue); letter-spacing: 2px; white-space: nowrap; pointer-events: none; z-index: 25; animation: flyModePulse 1.8s ease-in-out infinite; }
+  @keyframes flyModePulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
   #keyHint { position: fixed; bottom: 10px; right: 14px; font-size: 10px; color: rgba(107,127,163,0.4); pointer-events: none; z-index: 5; }
 
   /* ===== DEV BANNER ===== */
@@ -594,6 +596,7 @@
 
     <div class="how-to-play">
       <b>Arrow keys / D-pad</b> to thrust &nbsp;·&nbsp; <b>Space / D-pad center</b> to fire &nbsp;·&nbsp; <b>P / ⏸</b> to pause<br>
+      <b>Prefer a trackpad?</b> Click once to start flying, then move the pointer — middle of the screen stops the ship, click again to turn it off<br>
       <b>Fly through a ring</b> and answer correctly to earn a missile — you can reuse rings, just not the same one twice in a row<br>
       <b>Shoot all alien ships</b> to win &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> restore +10% &nbsp;·&nbsp; Watch out for comets and asteroids
     </div>
@@ -658,6 +661,7 @@
 <div id="wrongFlash"></div>
 
 <!-- ===== PAUSE BANNER ===== -->
+<div id="flyModeBadge">✈ FLYING MODE · CLICK TO STOP</div>
 <div id="pauseBanner">⏸ PAUSED</div>
 <div id="flightBanner"></div>
 
@@ -679,7 +683,7 @@
 </div>
 
 <!-- ===== KEY HINT ===== -->
-<div id="keyHint">Arrow keys to thrust · Enter to submit · P to pause</div>
+<div id="keyHint">Arrow keys or click once to fly with the trackpad · Space to fire · Enter to submit · P to pause</div>
 <div id="devBanner">🚧 Still in development — <a href="feedback.html" target="_blank">submit ideas here</a></div>
 
 <!-- ===== VIRTUAL JOYSTICK (mobile touch) ===== -->
@@ -1363,6 +1367,8 @@ function initGame() {
   screenShake   = 0;
   paused        = false;
   keys          = {};
+  flyMode       = { on: false, sx: 0, sy: 0 };
+  document.getElementById('flyModeBadge').style.display = 'none';
   gameState     = 'countdown';
   rainbowAngle  = 0;
   particles     = [];
@@ -1386,9 +1392,11 @@ function initGame() {
 
   updateHUD();
 
-  window.addEventListener('keydown', onKeyDown);
-  window.addEventListener('keyup',   onKeyUp);
-  window.addEventListener('resize',  onResize);
+  window.addEventListener('keydown',   onKeyDown);
+  window.addEventListener('keyup',     onKeyUp);
+  window.addEventListener('resize',    onResize);
+  window.addEventListener('mousedown', onMouseDown);
+  window.addEventListener('mousemove', onMouseMove);
 
   if (animId) cancelAnimationFrame(animId);
   lastTs = 0;
@@ -1573,6 +1581,9 @@ function makeQuestion(op) {
 const MOVE_KEYS = new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','a','A','d','D','w','W','s','S']);
 
 function onKeyDown(e) {
+  // Keyboard takes control back — before keys[] is set, since leaving fly mode
+  // clears the very arrow key that is being pressed.
+  if (MOVE_KEYS.has(e.key)) setFlyMode(false);
   keys[e.key] = true;
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
     e.preventDefault();
@@ -1592,6 +1603,108 @@ function onKeyUp(e) {
   if (!anyMoveHeld) sounds.thrustStop();
 }
 
+// ===== SHARED DIRECTION MAPPING (touch D-pad + trackpad drag) =====
+// Both pointer inputs write into the same keys[] map the arrow keys use, so the
+// ship moves at exactly one fixed speed no matter how it is being driven.
+const vjoyArrows = {}; // D-pad arrow elements, cached by setupVpadEvents
+
+function setArrowActive(name, on) {
+  const el = vjoyArrows[name];
+  if (el) el.classList.toggle('active', on);
+}
+
+function clearDirKeys() {
+  keys['ArrowUp'] = keys['ArrowDown'] = keys['ArrowLeft'] = keys['ArrowRight'] = false;
+  setArrowActive('up',    false);
+  setArrowActive('down',  false);
+  setArrowActive('left',  false);
+  setArrowActive('right', false);
+}
+
+function applyDir(dx, dy) {
+  clearDirKeys();
+  const ax = Math.abs(dx), ay = Math.abs(dy);
+  // Allow diagonal: both axes fire when neither dominates by >2.5x
+  if (ax > ay * 0.4) {
+    if (dx > 0) { keys['ArrowRight'] = true; setArrowActive('right', true); }
+    else        { keys['ArrowLeft']  = true; setArrowActive('left',  true); }
+  }
+  if (ay > ax * 0.4) {
+    if (dy > 0) { keys['ArrowDown'] = true; setArrowActive('down', true); }
+    else        { keys['ArrowUp']   = true; setArrowActive('up',   true); }
+  }
+  if (gameState === 'playing' && !paused) sounds.thrustStart();
+}
+
+// ===== TRACKPAD DRIVING (CLICK-TO-FLY) =====
+// Holding a click while dragging asks for more finger coordination than young
+// kids have, so flying is a mode instead: one click turns it on, and from then
+// on the trackpad is used normally with nothing held down. The middle of the
+// screen is neutral — that is where the ship sits, since the camera follows it.
+// Move the pointer off-centre and the ship flies that way and keeps flying with
+// the finger completely off the pad. Bring the pointer back to the middle to
+// stop. Click again, or press an arrow key, to leave flying mode.
+//
+// Direction comes from the pointer's offset from screen centre, NOT from the
+// ship's drawn position: the camera lerps toward the ship, so measuring against
+// the ship would feed its own motion back in and make it jitter around the
+// pointer. Screen centre is a fixed origin, so the control is always steady.
+
+const FLY_DEAD_ZONE     = 44;  // px around screen centre that means "stop"
+const TOUCH_MOUSE_GRACE = 700; // ms after a touch that synthesized mouse events are ignored
+
+let flyMode     = { on: false, sx: 0, sy: 0 };
+let lastTouchAt = 0;
+
+// Recomputed every frame so the ship keeps flying with no pointer movement at
+// all — the whole point of the mode.
+function updateFlyDir() {
+  if (!flyMode.on) return;
+  const dx = flyMode.sx - canvas.width  / 2;
+  const dy = flyMode.sy - canvas.height / 2;
+  if (Math.hypot(dx, dy) < FLY_DEAD_ZONE) {
+    clearDirKeys();        // pointer parked in the middle — coast
+    sounds.thrustStop();
+  } else {
+    applyDir(dx, dy);
+  }
+}
+
+function setFlyMode(on) {
+  if (flyMode.on === on) return;
+  flyMode.on = on;
+  if (!on) {
+    clearDirKeys();
+    sounds.thrustStop();
+  }
+  document.getElementById('flyModeBadge').style.display = on ? 'block' : 'none';
+}
+
+function onMouseDown(e) {
+  if (gameState !== 'playing' || paused) return;
+  if (e.target !== canvas) return;                        // HUD buttons behave normally
+  if (Date.now() - lastTouchAt < TOUCH_MOUSE_GRACE) return;
+  e.preventDefault();
+  flyMode.sx = e.clientX;
+  flyMode.sy = e.clientY;
+  setFlyMode(!flyMode.on);
+  sounds.navigate();
+}
+
+function onMouseMove(e) {
+  flyMode.sx = e.clientX;
+  flyMode.sy = e.clientY;
+}
+
+function onTouchAnywhere() {
+  lastTouchAt = Date.now();
+  setFlyMode(false); // touch devices drive with the D-pad, not a synthesized mouse
+}
+
+function setupTrackpadEvents() {
+  window.addEventListener('touchstart', onTouchAnywhere, { passive: true });
+}
+
 // ===== VIRTUAL JOYSTICK (MOBILE TOUCH) =====
 function showVpad() {
   document.getElementById('vjoy').style.display  = 'block';
@@ -1603,38 +1716,15 @@ function hideVpad() {
 }
 
 function setupVpadEvents() {
-  const joyEl      = document.getElementById('vjoy');
-  const thumbEl    = document.getElementById('vjoy-thumb');
-  const arrowUp    = document.getElementById('vjoy-arrow-up');
-  const arrowDown  = document.getElementById('vjoy-arrow-down');
-  const arrowLeft  = document.getElementById('vjoy-arrow-left');
-  const arrowRight = document.getElementById('vjoy-arrow-right');
+  const joyEl   = document.getElementById('vjoy');
+  const thumbEl = document.getElementById('vjoy-thumb');
+  vjoyArrows.up    = document.getElementById('vjoy-arrow-up');
+  vjoyArrows.down  = document.getElementById('vjoy-arrow-down');
+  vjoyArrows.left  = document.getElementById('vjoy-arrow-left');
+  vjoyArrows.right = document.getElementById('vjoy-arrow-right');
 
   const OUTER_R   = 74;  // half of 148px circle
   const DEAD_ZONE = 18;  // px from center = fire zone, no thrust
-
-  function clearDirKeys() {
-    keys['ArrowUp'] = keys['ArrowDown'] = keys['ArrowLeft'] = keys['ArrowRight'] = false;
-    arrowUp.classList.remove('active');
-    arrowDown.classList.remove('active');
-    arrowLeft.classList.remove('active');
-    arrowRight.classList.remove('active');
-  }
-
-  function applyDir(dx, dy) {
-    clearDirKeys();
-    const ax = Math.abs(dx), ay = Math.abs(dy);
-    // Allow diagonal: both axes fire when neither dominates by >2.5x
-    if (ax > ay * 0.4) {
-      if (dx > 0) { keys['ArrowRight'] = true; arrowRight.classList.add('active'); }
-      else        { keys['ArrowLeft']  = true; arrowLeft.classList.add('active'); }
-    }
-    if (ay > ax * 0.4) {
-      if (dy > 0) { keys['ArrowDown'] = true; arrowDown.classList.add('active'); }
-      else        { keys['ArrowUp']   = true; arrowUp.classList.add('active'); }
-    }
-    if (gameState === 'playing' && !paused) sounds.thrustStart();
-  }
 
   function moveThumb(dx, dy, dist) {
     const clamp = Math.min(dist, OUTER_R - 16);
@@ -1688,7 +1778,7 @@ function setupVpadEvents() {
 
 function togglePause() {
   paused = !paused;
-  if (paused) sounds.thrustStop();
+  if (paused) { sounds.thrustStop(); clearDirKeys(); }
   document.getElementById('pauseBanner').style.display = paused ? 'block' : 'none';
   if (!paused) { lastTs = 0; animId = requestAnimationFrame(gameLoop); }
 }
@@ -1712,6 +1802,7 @@ function gameLoop(ts) {
   rainbowAngle = (rainbowAngle + 0.03) % (Math.PI * 2);
 
   if (gameState === 'playing') {
+    updateFlyDir();
     updateShip(dt);
     updateObstacles(dt);
     updateAlienLasers();
@@ -1895,6 +1986,7 @@ function openGateQuestion(gate) {
   activatedGate = gate;
   gameState = 'question';
   sounds.thrustStop();
+  clearDirKeys(); // don't drift while the question is up (fly mode is kept)
   sounds.gateEnter();
   currentQuestion = makeQuestion(gate.op);
 
@@ -2357,9 +2449,12 @@ function endGame(type, title, subtitle) {
 
 function cleanupListeners() {
   sounds.thrustStop();
-  window.removeEventListener('keydown', onKeyDown);
-  window.removeEventListener('keyup',   onKeyUp);
-  window.removeEventListener('resize',  onResize);
+  setFlyMode(false);
+  window.removeEventListener('keydown',   onKeyDown);
+  window.removeEventListener('keyup',     onKeyUp);
+  window.removeEventListener('resize',    onResize);
+  window.removeEventListener('mousedown', onMouseDown);
+  window.removeEventListener('mousemove', onMouseMove);
   if (animId) { cancelAnimationFrame(animId); animId = null; }
   hideVpad();
 }
@@ -2407,6 +2502,55 @@ function render() {
   drawComets();
   drawRadar();
   drawDirectionArrow();
+  drawFlyStick();
+}
+
+// Flying-mode overlay: a neutral ring at screen centre (pointer inside it means
+// stop) and a line showing which way the ship is being steered.
+function drawFlyStick() {
+  if (!flyMode.on || gameState !== 'playing') return;
+  const cx   = canvas.width  / 2;
+  const cy   = canvas.height / 2;
+  const dx   = flyMode.sx - cx;
+  const dy   = flyMode.sy - cy;
+  const dist = Math.hypot(dx, dy);
+  const live = dist >= FLY_DEAD_ZONE;
+  const col  = live ? '0, 212, 255' : '107, 127, 163';
+
+  ctx.save();
+  // Neutral ring — pointer inside this and the ship holds still
+  ctx.setLineDash([5, 6]);
+  ctx.strokeStyle = `rgba(${col}, ${live ? 0.4 : 0.75})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, FLY_DEAD_ZONE, 0, Math.PI*2); ctx.stroke();
+  ctx.setLineDash([]);
+
+  if (live) {
+    // Steering line from neutral toward the pointer
+    const ang = Math.atan2(dy, dx);
+    const r0  = FLY_DEAD_ZONE + 4;
+    const r1  = Math.min(dist, FLY_DEAD_ZONE + 110);
+    const grad = ctx.createLinearGradient(cx + Math.cos(ang)*r0, cy + Math.sin(ang)*r0,
+                                          cx + Math.cos(ang)*r1, cy + Math.sin(ang)*r1);
+    grad.addColorStop(0, 'rgba(0, 212, 255, 0)');
+    grad.addColorStop(1, 'rgba(0, 212, 255, 0.75)');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(ang)*r0, cy + Math.sin(ang)*r0);
+    ctx.lineTo(cx + Math.cos(ang)*r1, cy + Math.sin(ang)*r1);
+    ctx.stroke();
+
+    // Arrowhead pointing the way the ship is flying
+    ctx.translate(cx + Math.cos(ang)*r1, cy + Math.sin(ang)*r1);
+    ctx.rotate(ang);
+    ctx.fillStyle = 'rgba(0, 212, 255, 0.9)';
+    ctx.beginPath();
+    ctx.moveTo(9, 0); ctx.lineTo(-6, -6); ctx.lineTo(-6, 6);
+    ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
 }
 
 function drawStars() {
@@ -3127,6 +3271,7 @@ function drawDirectionArrow() {
 
 const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 setupVpadEvents();
+setupTrackpadEvents();
 
 if (autoLaunch) {
   document.getElementById('setupScreen').style.display = 'none';
