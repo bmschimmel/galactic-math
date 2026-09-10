@@ -76,10 +76,16 @@ selections (at least one operation, at least three numbers), adds a `.launching`
 class for a 1.9 second glow build-up, then navigates to
 `pages/alien-invasion.html` with the numbers and operations as URL params.
 
-`.launching` sets `pointer-events: none` so the button cannot be double-fired
-mid-animation. Because navigating away leaves that class in place, and the
-browser's Back button restores the setup page from the back/forward cache
-exactly as it was left, a `pageshow` listener calls `clearLaunchState()` to strip
-`.launching` (and `.liftoff`) from both launch buttons every time the page is
-shown. Without it, returning from Alien Invasion leaves both launch buttons
-permanently unclickable.
+Double-clicks are guarded with an `alienLaunchPending` flag, matching how Begin
+Mission guards itself. **Never disable a launch button through CSS.** `.launching`
+previously set `pointer-events: none`, and because the class is applied for 1.9
+seconds and then the page navigates away, any return that keeps the DOM — the
+browser's Back button restoring the page from the back/forward cache, most
+obviously — brought the class back with it and left the button permanently
+unclickable. A flag cannot outlive the page, so a restored page always has a
+working button.
+
+A `pageshow` listener also calls `clearLaunchState()`, which resets the flag and
+strips `.launching` (and `.liftoff`) from both launch buttons. That is cosmetic
+now — it stops a restored page from showing a stuck mid-launch glow — rather
+than the thing that keeps the buttons usable.

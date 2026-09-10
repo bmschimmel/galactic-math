@@ -826,7 +826,17 @@ function toggleKesselRun() {
 }
 
 // ===== ALIEN INVASION MODE =====
+// Double-clicks are guarded with a plain flag rather than the button's
+// `.launching` CSS, the way Begin Mission does it. The launch animation runs for
+// 1.9s before navigating, and any way of coming back to this page that keeps the
+// DOM — the browser's Back button restoring it from the back/forward cache, most
+// obviously — brings that class back with it. When the class was what disabled
+// the button, that left it permanently unclickable. A flag cannot outlive the
+// page, so a restored page always has a working button.
+let alienLaunchPending = false;
+
 function launchAlienInvasion() {
+  if (alienLaunchPending) return;
   if (selectedOps.size === 0) {
     document.getElementById('setupError').textContent = '⚠ Select at least one operation to begin';
     return;
@@ -838,6 +848,7 @@ function launchAlienInvasion() {
   const nums = [...selectedNums].join(',');
   const ops = [...selectedOps].join(',');
   const btn = document.querySelector('.alien-invasion-link');
+  alienLaunchPending = true;
   if (btn) btn.classList.add('launching');
   sounds.missionStart();
   setTimeout(() => {
@@ -845,11 +856,11 @@ function launchAlienInvasion() {
   }, 1900);
 }
 
-// Leaving for Alien Invasion parks the launch buttons in their "launching" look,
-// which turns off pointer events. Coming back with the browser's Back button
-// restores the page from the back/forward cache exactly as it was left, so those
-// buttons would stay dead. Clear the launch state whenever the page is shown.
+// A page restored from the back/forward cache is shown exactly as it was left,
+// mid-launch-animation. Clearing the launch state on every `pageshow` resets the
+// glow and the pending flag so the buttons look and behave idle again.
 function clearLaunchState() {
+  alienLaunchPending = false;
   const alienBtn = document.querySelector('.alien-invasion-link');
   if (alienBtn) alienBtn.classList.remove('launching');
   const startBtn = document.getElementById('startBtn');

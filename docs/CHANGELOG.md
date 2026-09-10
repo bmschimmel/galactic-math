@@ -9,7 +9,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ### IDT-215 — Fix dead launch buttons after returning from Alien Invasion (PR #120)
 
-Pressing the browser's Back button in Alien Invasion returned to a setup screen where the "Try Alien Invasion" button no longer did anything. Launching adds a `.launching` class that sets `pointer-events: none` for the glow animation, and the back/forward cache restores the page with that class still applied, so the button stayed dead for the rest of the session. A `pageshow` listener now clears the launch state from both the Alien Invasion and Begin Mission buttons every time the page is shown.
+Pressing the browser's Back button in Alien Invasion returned to a setup screen where the "Try Alien Invasion" button no longer did anything. The button was the only one in the app that guarded double-clicks through CSS: its `.launching` class set `pointer-events: none` for the 1.9 second glow before navigating away, so any return that kept the DOM — a back/forward-cache restore in particular — brought the class back with it and left the button permanently unclickable. The guard now uses an `alienLaunchPending` flag instead, matching Begin Mission, and `pointer-events: none` is gone from the CSS: page state cannot outlive the page, so a restored setup screen always has a working button. A `pageshow` listener also clears the launch state so a restored page does not show a stuck mid-launch glow.
 
 ---
 
