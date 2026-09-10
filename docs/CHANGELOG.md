@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-10
 
-### IDT-217 — Replace the retired feedback title model and detect the next retirement (PR #N)
+### IDT-217 — Replace the retired feedback title model and detect the next retirement (PR #123)
 
 Cloudflare retired `@cf/meta/llama-3.1-8b-instruct` on 2026-05-30, so the feedback worker's title generation had been failing silently ever since — every issue got a truncated-message title from the fallback path instead of a generated one. Title generation now walks an ordered `TITLE_MODELS` list (`@cf/meta/llama-3.2-3b-instruct`, then `@cf/zai-org/glm-4.7-flash`) and uses the first model that answers, so a single retirement rolls over on its own. When every model fails, the worker files one GitHub issue labelled `bug` and `worker-health` naming the failed models and their errors; that syncs into Linear triage, and the open issue doubles as the dedupe key so an outage produces one ticket rather than one per submission. Reporting runs in `ctx.waitUntil()` and is wrapped in its own `try`/`catch`, so it can never break or slow a feedback submission.
 
