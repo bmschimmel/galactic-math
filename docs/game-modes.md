@@ -114,8 +114,13 @@ Trackpad driving exists because arrow keys are awkward for younger players.
 Flying is a **mode** rather than a held gesture, since holding a click while
 dragging asks for more finger coordination than young kids have. One click turns
 flying mode on; from then on the trackpad is used normally with nothing held
-down. A dashed neutral ring is drawn at screen centre, and a `✈ FLYING MODE ·
-CLICK TO STOP` pill sits at the bottom of the screen while the mode is active.
+down. A dashed neutral ring is drawn at screen centre, and a small, dimmed
+`✈ FLYING MODE · CLICK TO STOP` pill sits at the bottom centre of the screen
+while the mode is active. Flying mode is kept when a gate question opens, so the
+pill shares the bottom of the screen with the question overlay: `setFlyMode()`
+toggles a `fly-mode` class on `<body>`, and `body.fly-mode #questionOverlay`
+raises the question's bottom padding so the problem and answer row sit above the
+pill instead of on top of it.
 Move the pointer more than 44px from centre and the ship flies that way — and
 keeps flying with the finger completely off the pad. Bring the pointer back
 inside the ring to stop. Click again, or press any movement key, to leave flying
