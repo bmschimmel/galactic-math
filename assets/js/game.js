@@ -826,7 +826,17 @@ function toggleKesselRun() {
 }
 
 // ===== ALIEN INVASION MODE =====
+// Double-clicks are guarded with a plain flag rather than the button's
+// `.launching` CSS, the way Begin Mission does it. The launch animation runs for
+// 1.9s before navigating, and any way of coming back to this page that keeps the
+// DOM — the browser's Back button restoring it from the back/forward cache, most
+// obviously — brings that class back with it. When the class was what disabled
+// the button, that left it permanently unclickable. A flag cannot outlive the
+// page, so a restored page always has a working button.
+let alienLaunchPending = false;
+
 function launchAlienInvasion() {
+  if (alienLaunchPending) return;
   if (selectedOps.size === 0) {
     document.getElementById('setupError').textContent = '⚠ Select at least one operation to begin';
     return;
@@ -838,12 +848,26 @@ function launchAlienInvasion() {
   const nums = [...selectedNums].join(',');
   const ops = [...selectedOps].join(',');
   const btn = document.querySelector('.alien-invasion-link');
+  alienLaunchPending = true;
   if (btn) btn.classList.add('launching');
   sounds.missionStart();
   setTimeout(() => {
     window.location.href = `pages/alien-invasion.html?nums=${encodeURIComponent(nums)}&ops=${encodeURIComponent(ops)}`;
   }, 1900);
 }
+
+// A page restored from the back/forward cache is shown exactly as it was left,
+// mid-launch-animation. Clearing the launch state on every `pageshow` resets the
+// glow and the pending flag so the buttons look and behave idle again.
+function clearLaunchState() {
+  alienLaunchPending = false;
+  const alienBtn = document.querySelector('.alien-invasion-link');
+  if (alienBtn) alienBtn.classList.remove('launching');
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) startBtn.classList.remove('launching', 'liftoff');
+}
+
+window.addEventListener('pageshow', clearLaunchState);
 
 function startKesselTimer() {
   stopKesselTimer();

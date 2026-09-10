@@ -328,13 +328,15 @@
     color: rgba(57,255,20,0.9);
     background: rgba(57,255,20,0.04);
   }
+  /* No `pointer-events: none` here — double-clicks are guarded in JS instead.
+     This class survives a back/forward-cache restore, so disabling the button
+     through CSS left it permanently unclickable on the way back. */
   .alien-invasion-link.launching {
     border-style: solid;
     border-color: rgba(57,255,20,0.85);
     background: rgba(5, 12, 20, 0.95);
     color: rgba(57,255,20,0.95);
     transition: none;
-    pointer-events: none;
     animation: aiLaunchGlow 1.9s ease-out forwards;
   }
   @keyframes aiLaunchGlow {

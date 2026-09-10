@@ -68,3 +68,24 @@ A count-up timer runs during the quiz. Wrong answers add a **+5 second penalty**
 The **Begin Mission** button (`startBtn`) has a launch animation: it fills left-to-right over ~1.1 seconds (mimicking a rocket launch sequence), then flashes at liftoff, and transitions to the quiz screen at 1.3 seconds. A `missionStart` sound effect plays on click.
 
 The button guards against double-clicks with a `.launching` class check.
+
+## Alien Invasion Launch Button
+
+The **Try Alien Invasion** button (`.alien-invasion-link`) validates the current
+selections (at least one operation, at least three numbers), adds a `.launching`
+class for a 1.9 second glow build-up, then navigates to
+`pages/alien-invasion.html` with the numbers and operations as URL params.
+
+Double-clicks are guarded with an `alienLaunchPending` flag, matching how Begin
+Mission guards itself. **Never disable a launch button through CSS.** `.launching`
+previously set `pointer-events: none`, and because the class is applied for 1.9
+seconds and then the page navigates away, any return that keeps the DOM — the
+browser's Back button restoring the page from the back/forward cache, most
+obviously — brought the class back with it and left the button permanently
+unclickable. A flag cannot outlive the page, so a restored page always has a
+working button.
+
+A `pageshow` listener also calls `clearLaunchState()`, which resets the flag and
+strips `.launching` (and `.liftoff`) from both launch buttons. That is cosmetic
+now — it stops a restored page from showing a stuck mid-launch glow — rather
+than the thing that keeps the buttons usable.

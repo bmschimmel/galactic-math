@@ -76,5 +76,6 @@ Key UI animations defined in the `<style>` block:
 | `congratsBanner` | Pass banner | Fade/scale in, auto-dismiss after 3.5s |
 | `hyperWinBanner` / `hyperFailBanner` | Hyperspace outcome banners | Slide in from top |
 | `.launching` / `.liftoff` on `#startBtn` | Begin Mission button | Left-to-right fill + flash |
+| `aiLaunchGlow` (`.launching` on `.alien-invasion-link`) | Try Alien Invasion button | Green glow build-up before navigating; cleared on `pageshow` |
 | `kesselPenaltyFlash` | Wrong answer in Kessel Run | Red penalty flash beside the input |
 | `progress-fill` | Quiz progress bar | CSS width transition |
