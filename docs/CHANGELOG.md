@@ -5,6 +5,14 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-09-10
+
+### IDT-216 — Stop the flying mode badge and gate questions from overlapping (PR #TBD)
+
+Flying mode is kept while a gate question is open, so the `✈ FLYING MODE · CLICK TO STOP` pill and the question overlay both occupied the bottom centre of the screen and collided. The pill is now smaller and dimmer — 9px type, tighter padding, softer glow and a gentler pulse — so it reads as a status hint rather than a banner. `setFlyMode()` also toggles a `fly-mode` class on `<body>`, and `body.fly-mode #questionOverlay` raises the overlay's bottom padding so the gate label, problem and answer row sit above the pill. The clearance only applies while the pill is showing, so questions keep their full height everywhere else.
+
+---
+
 ## 2026-09-08
 
 ### IDT-212 — Add trackpad steering to Alien Invasion (PR #119)

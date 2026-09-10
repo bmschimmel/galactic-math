@@ -233,6 +233,10 @@
     z-index: 20;
     text-align: center;
   }
+  /* Flying mode keeps its badge pinned to the bottom centre while a gate
+     question is up, so lift the question content clear of it. The gradient
+     still runs to the bottom edge — only the text moves. */
+  body.fly-mode #questionOverlay { padding-bottom: 62px; }
   .gate-op-label { font-family: 'Orbitron', monospace; font-size: 9px; color: var(--muted); letter-spacing: 3px; margin-bottom: 6px; }
   .bonus-progress { display: none; justify-content: center; gap: 10px; margin-bottom: 8px; }
   .bonus-dot { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--gold); background: transparent; transition: all 0.2s; }
@@ -308,16 +312,16 @@
 
   /* ===== KEY HINT ===== */
   #flyModeBadge {
-    position: fixed; bottom: 34px; left: 50%; transform: translateX(-50%);
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
     display: none;
-    font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 2px;
-    color: var(--saber-blue); text-shadow: 0 0 12px var(--saber-blue);
+    font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1.5px;
+    color: rgba(0,212,255,0.7); text-shadow: 0 0 6px rgba(0,212,255,0.35);
     white-space: nowrap; pointer-events: none; z-index: 25;
-    padding: 7px 16px; border-radius: 999px;
-    border: 1px solid rgba(0,212,255,0.35); background: rgba(0,212,255,0.08);
+    padding: 4px 11px; border-radius: 999px;
+    border: 1px solid rgba(0,212,255,0.22); background: rgba(0,212,255,0.05);
     animation: flyModePulse 1.8s ease-in-out infinite;
   }
-  @keyframes flyModePulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+  @keyframes flyModePulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.8; } }
   #keyHint { position: fixed; bottom: 10px; right: 14px; font-size: 10px; color: rgba(107,127,163,0.4); pointer-events: none; z-index: 5; }
 
   /* ===== DEV BANNER ===== */
@@ -1433,6 +1437,7 @@ function initGame() {
   keys          = {};
   flyMode       = { on: false, sx: 0, sy: 0 };
   document.getElementById('flyModeBadge').style.display = 'none';
+  document.body.classList.remove('fly-mode');
   gameState     = 'countdown';
   rainbowAngle  = 0;
   particles     = [];
@@ -1745,6 +1750,9 @@ function setFlyMode(on) {
     sounds.thrustStop();
   }
   document.getElementById('flyModeBadge').style.display = on ? 'block' : 'none';
+  // The badge sits at the bottom centre, where the gate question overlay also
+  // lives — this lets the overlay reserve room for it only while it is showing.
+  document.body.classList.toggle('fly-mode', on);
 }
 
 function onMouseDown(e) {
