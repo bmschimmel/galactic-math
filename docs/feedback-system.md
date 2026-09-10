@@ -84,9 +84,27 @@ automatically instead of dropping straight to the raw-text fallback.
 | `@cf/meta/llama-3.2-3b-instruct` | Primary — smallest and cheapest chat model, ample for an 8-word title | $0.051 / $0.34 |
 | `@cf/zai-org/glm-4.7-flash` | Fallback — one of Cloudflare's named replacements for the retired Llama 3.x models | $0.06 / $0.40 |
 
-Keep the newest lightweight model at the top of the list. Both models bill against the
-same Workers AI free daily allocation, so the cheaper primary also stretches that
-allocation furthest.
+Keep the newest lightweight model at the top of the list.
+
+**Both models run inside the Workers AI free allocation** — 10,000 neurons per day at no
+charge, on the Free and Paid plans alike. The dollar figures above are the overage rates
+that apply only after that allocation is spent. A title call costs roughly 1 neuron
+(~120 input, ~15 output tokens), so the allocation covers on the order of 9,000 titles a
+day; feedback is rate limited to 3 per IP per 10 minutes, so this is not a constraint in
+practice. The retired Llama 3.1 8B cost about 4 neurons per call, so the current primary
+is roughly 4x cheaper.
+
+**When picking a replacement, check that it does not require a paid billing method.** A
+few models do — at the time of writing `@cf/moonshotai/kimi-k2.6`, `kimi-k2.7-code`,
+`@cf/zai-org/glm-5.2`, `glm-5.3`, `glm-5.3-flash`, and the DeepSeek v4 models. The list
+lives on the [Workers AI pricing page](https://developers.cloudflare.com/workers-ai/platform/pricing/).
+Note that `kimi-k2.6` is one of the three models Cloudflare named as a replacement for
+the retired Llama 3.x line, so a recommended model is not automatically a free one.
+
+Cloudflare changed how pricing is *presented* on 2026-08-28 — per-model unit pricing in
+tokens rather than neurons — but billing is still in neurons and the free allocation is
+unchanged. Model pages now lead with a dollars-per-million-tokens figure, which makes
+every model look billable at a glance; it is the overage rate.
 
 **2. Outage reporting.** When *every* model in the chain fails, `reportModelOutage()`
 files a GitHub issue labelled `bug` and `worker-health` naming the failed models and
