@@ -47,24 +47,119 @@ const CATEGORY_LABELS = {
 };
 
 // ===== TITLE GENERATION =====
+// Workers AI retires models on a rolling basis, and a retired model simply
+// starts throwing — there is no advance warning at runtime. The model this
+// worker used before (@cf/meta/llama-3.1-8b-instruct) was retired on
+// 2026-05-30, after which every title silently fell back to raw message text.
+//
+// Two guards against a repeat, both cheap:
+//   1. TITLE_MODELS is tried in order, so one retirement rolls over to the next
+//      model automatically instead of dropping straight to the raw-text fallback.
+//   2. When every model fails, reportModelOutage() files a GitHub issue, which
+//      syncs into Linear triage. Keep the newest lightweight model at the top.
+const TITLE_MODELS = [
+  '@cf/meta/llama-3.2-3b-instruct', // primary — smallest and cheapest chat model
+  '@cf/zai-org/glm-4.7-flash',      // fallback — Cloudflare's recommended replacement
+];
+
+function titlePrompt(message) {
+  return `Write a short GitHub issue title (5\u20138 words, no quotes, no trailing punctuation) that summarizes this feedback from a child using an educational math game. Reply with only the title.\n\nFeedback: ${message}`;
+}
+
+// Returns { title, errors } — title is null when every model failed.
 async function generateTitle(message, ai) {
+  const errors = [];
+  for (const model of TITLE_MODELS) {
+    try {
+      const result = await ai.run(model, {
+        messages: [{ role: 'user', content: titlePrompt(message) }],
+        max_tokens: 30,
+      });
+      const title = result?.response?.trim();
+      if (title) {
+        if (model !== TITLE_MODELS[0]) {
+          console.warn(`Title model fallback in use: ${model}`);
+        }
+        return { title, errors };
+      }
+      errors.push({ model, error: 'empty response' });
+      console.error(`Title model ${model} returned an empty response`);
+    } catch (e) {
+      errors.push({ model, error: e.message });
+      console.error(`Title model ${model} failed: ${e.message}`);
+    }
+  }
+  return { title: null, errors };
+}
+
+// ===== MODEL HEALTH REPORTING =====
+// Files one GitHub issue when title generation is fully down. GitHub issues sync
+// to Linear triage, so this is the whole notification path — no cron, no extra
+// service. The open HEALTH_LABEL issue is the dedupe key: while one is open, no
+// further reports are filed. Close it once TITLE_MODELS is updated.
+const HEALTH_LABEL = 'worker-health';
+const HEALTH_TITLE = 'Feedback worker: AI title generation is failing';
+
+async function hasOpenHealthIssue(env) {
+  const response = await githubRequest(
+    `https://api.github.com/repos/${GITHUB_REPO}/issues?state=open&labels=${HEALTH_LABEL}&per_page=1`,
+    env,
+  );
+  if (!response.ok) return true; // can't confirm — stay quiet rather than spam
+  const issues = await response.json();
+  return issues.length > 0;
+}
+
+async function reportModelOutage(errors, env) {
   try {
-    const result = await ai.run('@cf/meta/llama-3.1-8b-instruct', {
-      messages: [{
-        role: 'user',
-        content: `Write a short GitHub issue title (5–8 words, no quotes, no trailing punctuation) that summarizes this feedback from a child using an educational math game. Reply with only the title.\n\nFeedback: ${message}`,
-      }],
-      max_tokens: 30,
+    if (await hasOpenHealthIssue(env)) return;
+
+    const failures = errors
+      .map(e => `- \`${e.model}\` — ${String(e.error).slice(0, 200)}`)
+      .join('\n');
+    const body = [
+      'Every model in `TITLE_MODELS` failed, so feedback issue titles are falling back',
+      'to the first 50 characters of the message.',
+      '',
+      '**Failed models**',
+      failures,
+      '',
+      'The usual cause is a retired model. Check the Workers AI model catalog',
+      '(<https://developers.cloudflare.com/workers-ai/models/>), update `TITLE_MODELS`',
+      'in `worker/feedback-worker.js`, redeploy, then close this issue — it is the',
+      'dedupe key, so no further reports are filed while it stays open.',
+    ].join('\n');
+
+    const response = await githubRequest(`https://api.github.com/repos/${GITHUB_REPO}/issues`, env, {
+      method: 'POST',
+      body: JSON.stringify({ title: HEALTH_TITLE, body, labels: ['bug', HEALTH_LABEL] }),
     });
-    return result?.response?.trim() || null;
+    if (!response.ok) {
+      console.error('Failed to file model outage issue:', response.status, await response.text());
+      return;
+    }
+    console.error('Filed model outage issue: title generation is down');
   } catch (e) {
-    console.error('generateTitle exception:', e.message);
-    return null;
+    // Never let health reporting break a feedback submission.
+    console.error('reportModelOutage exception:', e.message);
   }
 }
 
+// ===== GITHUB =====
+function githubRequest(url, env, options = {}) {
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github+json',
+      'User-Agent': 'galactic-math-feedback-worker',
+    },
+  });
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin') || '';
 
     // Handle CORS preflight
@@ -128,21 +223,15 @@ export default {
       });
     }
 
-    // Generate title via Claude, fall back to first 50 chars of message
-    const generatedTitle = await generateTitle(message, env.AI);
+    // Generate title via Workers AI, fall back to first 50 chars of message
+    const { title: generatedTitle, errors: modelErrors } = await generateTitle(message, env.AI);
     const title = generatedTitle || `${message.slice(0, 50)}${message.length > 50 ? '…' : ''}`;
 
     const label = CATEGORY_LABELS[category] || 'feedback';
     const issueBody = `${message}\n\n--\n\n**Submitter**: ${name}`;
 
-    const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/issues`, {
+    const response = await githubRequest(`https://api.github.com/repos/${GITHUB_REPO}/issues`, env, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github+json',
-        'User-Agent': 'galactic-math-feedback-worker',
-      },
       body: JSON.stringify({ title, body: issueBody, labels: [label] }),
     });
 
@@ -157,6 +246,11 @@ export default {
 
     const issue = await response.json();
     console.log(`Issue created: ${issue.html_url} from ${ip} (category: ${category}, title: ${title})`);
+
+    // Title generation is fully down — file a health issue after responding.
+    if (!generatedTitle) {
+      ctx.waitUntil(reportModelOutage(modelErrors, env));
+    }
     return new Response(JSON.stringify({ ok: true, url: issue.html_url }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },

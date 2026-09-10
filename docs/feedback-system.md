@@ -58,9 +58,50 @@ A lightweight edge function that sits between the feedback form and GitHub.
 2. **Rate limiting** — max 3 submissions per IP per 10 minutes (in-memory store; resets on worker restart)
 3. **Honeypot check** — silently returns `200 OK` if the hidden honeypot field is filled
 4. **Validation** — requires both `name` and `message` fields
-5. **Title generation** — calls Cloudflare Workers AI (`@cf/meta/llama-3.1-8b-instruct`) to generate a concise 5–8 word GitHub issue title from the feedback message. Falls back to the first 50 characters of the message if AI fails.
+5. **Title generation** — calls Cloudflare Workers AI to generate a concise 5–8 word GitHub issue title from the feedback message. Tries each model in `TITLE_MODELS` in order and uses the first one that answers. Falls back to the first 50 characters of the message if every model fails. See [Model rollover and health](#model-rollover-and-health).
 6. **GitHub issue creation** — POSTs to the GitHub REST API to create the issue with the generated title, category label, and body (`message + submitter name`)
-7. **Observability** — all key events (rate limits, honeypot triggers, issue creation) are logged via Cloudflare Workers observability
+7. **Health reporting** — if every title model failed, the worker files a GitHub issue describing the outage (after the response is sent, via `ctx.waitUntil`)
+8. **Observability** — all key events (rate limits, honeypot triggers, issue creation, model failures) are logged via Cloudflare Workers observability
+
+### Model rollover and health
+
+Workers AI retires models on a rolling basis, and a retired model gives no advance
+warning at runtime — the `ai.run()` call simply starts throwing. The worker originally
+used `@cf/meta/llama-3.1-8b-instruct`, which Cloudflare retired on **2026-05-30**. Because
+the only failure handling was a silent fall back to raw message text, every feedback
+issue filed after that date got a truncated-message title instead of a generated one,
+and nobody noticed until the titles were being renamed by hand in triage.
+
+Two mechanisms guard against a repeat. Both live in `feedback-worker.js`; there is no
+cron job, no extra service, and no scheduled deprecation check.
+
+**1. Model chain.** `TITLE_MODELS` is an ordered list. The worker tries each in turn and
+uses the first that returns a title, so one model's retirement rolls over to the next
+automatically instead of dropping straight to the raw-text fallback.
+
+| Model | Role | Input / output per M tokens |
+|---|---|---|
+| `@cf/meta/llama-3.2-3b-instruct` | Primary — smallest and cheapest chat model, ample for an 8-word title | $0.051 / $0.34 |
+| `@cf/zai-org/glm-4.7-flash` | Fallback — one of Cloudflare's named replacements for the retired Llama 3.x models | $0.06 / $0.40 |
+
+Keep the newest lightweight model at the top of the list. Both models bill against the
+same Workers AI free daily allocation, so the cheaper primary also stretches that
+allocation furthest.
+
+**2. Outage reporting.** When *every* model in the chain fails, `reportModelOutage()`
+files a GitHub issue labelled `bug` and `worker-health` naming the failed models and
+their errors. Since GitHub issues sync into Linear triage, that issue becomes a Linear
+ticket automatically — no separate Linear integration in the worker.
+
+The open `worker-health` issue is also the dedupe key: while one is open, no further
+outage issues are filed, so a sustained outage produces one ticket rather than one per
+submission. **Close the issue once `TITLE_MODELS` has been updated and redeployed**,
+otherwise the next outage will go unreported. If the dedupe lookup itself fails, the
+worker stays quiet rather than risking a flood.
+
+Reporting runs in `ctx.waitUntil()` after the response is sent and is wrapped in its own
+`try`/`catch`, so a health-reporting problem can never break or slow a feedback
+submission.
 
 ### Secrets / Bindings required
 

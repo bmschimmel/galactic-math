@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-10
 
+### IDT-217 — Replace the retired feedback title model and detect the next retirement (PR #N)
+
+Cloudflare retired `@cf/meta/llama-3.1-8b-instruct` on 2026-05-30, so the feedback worker's title generation had been failing silently ever since — every issue got a truncated-message title from the fallback path instead of a generated one. Title generation now walks an ordered `TITLE_MODELS` list (`@cf/meta/llama-3.2-3b-instruct`, then `@cf/zai-org/glm-4.7-flash`) and uses the first model that answers, so a single retirement rolls over on its own. When every model fails, the worker files one GitHub issue labelled `bug` and `worker-health` naming the failed models and their errors; that syncs into Linear triage, and the open issue doubles as the dedupe key so an outage produces one ticket rather than one per submission. Reporting runs in `ctx.waitUntil()` and is wrapped in its own `try`/`catch`, so it can never break or slow a feedback submission.
+
 ### IDT-216 — Stop the flying mode badge and gate questions from overlapping (PR #121)
 
 Flying mode is kept while a gate question is open, so the `✈ FLYING MODE · CLICK TO STOP` pill and the question overlay both occupied the bottom centre of the screen and collided. The pill is now smaller and dimmer — 9px type, tighter padding, softer glow and a gentler pulse — so it reads as a status hint rather than a banner. `setFlyMode()` also toggles a `fly-mode` class on `<body>`, and `body.fly-mode #questionOverlay` raises the overlay's bottom padding so the gate label, problem and answer row sit above the pill. The clearance only applies while the pill is showing, so questions keep their full height everywhere else.
