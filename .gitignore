@@ -1,2 +1,5 @@
 worker/.wrangler/
 worker/.env
+worker/node_modules/
+
+.claude/settings.local.json
