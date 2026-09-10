@@ -5,6 +5,14 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-09-10
+
+### IDT-215 — Fix dead launch buttons after returning from Alien Invasion (PR #TBD)
+
+Pressing the browser's Back button in Alien Invasion returned to a setup screen where the "Try Alien Invasion" button no longer did anything. Launching adds a `.launching` class that sets `pointer-events: none` for the glow animation, and the back/forward cache restores the page with that class still applied, so the button stayed dead for the rest of the session. A `pageshow` listener now clears the launch state from both the Alien Invasion and Begin Mission buttons every time the page is shown.
+
+---
+
 ## 2026-09-08
 
 ### IDT-212 — Add trackpad steering to Alien Invasion (PR #119)

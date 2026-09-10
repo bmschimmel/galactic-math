@@ -845,6 +845,19 @@ function launchAlienInvasion() {
   }, 1900);
 }
 
+// Leaving for Alien Invasion parks the launch buttons in their "launching" look,
+// which turns off pointer events. Coming back with the browser's Back button
+// restores the page from the back/forward cache exactly as it was left, so those
+// buttons would stay dead. Clear the launch state whenever the page is shown.
+function clearLaunchState() {
+  const alienBtn = document.querySelector('.alien-invasion-link');
+  if (alienBtn) alienBtn.classList.remove('launching');
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) startBtn.classList.remove('launching', 'liftoff');
+}
+
+window.addEventListener('pageshow', clearLaunchState);
+
 function startKesselTimer() {
   stopKesselTimer();
   kesselRunElapsed = 0;
