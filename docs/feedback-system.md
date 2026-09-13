@@ -56,14 +56,16 @@ A lightweight edge function that sits between the feedback form and GitHub.
 
 ### Processing steps
 
-1. **CORS preflight** — handles `OPTIONS` requests for cross-origin form submission
-2. **Rate limiting** — max 3 submissions per IP per 10 minutes (in-memory store; resets on worker restart)
-3. **Honeypot check** — silently returns `200 OK` if the hidden honeypot field is filled
-4. **Validation** — requires a `message` field of 500 characters or fewer; any `name` sent by a stale client is ignored
-5. **Title generation** — calls Cloudflare Workers AI to generate a concise 5–8 word GitHub issue title from the feedback message. Tries each model in `TITLE_MODELS` in order and uses the first one that answers. Falls back to the first 50 characters of the message if every model fails. See [Model rollover and health](#model-rollover-and-health).
-6. **GitHub issue creation** — POSTs to the GitHub REST API to create the issue with the generated title, category label, and the message as the body
-7. **Health reporting** — if every title model failed, the worker files a GitHub issue describing the outage (after the response is sent, via `ctx.waitUntil`)
-8. **Observability** — all key events (rate limits, honeypot triggers, issue creation, model failures) are logged via Cloudflare Workers observability
+1. **Origin check** — any request whose `Origin` header is not one of the game's own sites (`galacticmath.app`, `galactic-math.pages.dev`, or a `*.galactic-math.pages.dev` preview) gets a `403` before anything else runs, on both the `OPTIONS` preflight and the `POST`. This stops drive-by use of the endpoint; a hand-crafted request can still forge the header, which is what the rate limit is for
+2. **CORS preflight** — handles `OPTIONS` requests for cross-origin form submission; every CORS response carries `Vary: Origin`
+3. **Rate limiting** — max 3 submissions per IP per 60 seconds, enforced by Cloudflare's Rate Limiting binding (`FEEDBACK_RATE_LIMITER`, configured in `wrangler.toml`). Counters are shared by every instance of the worker in a Cloudflare location and survive restarts. The binding only supports 10- or 60-second windows and is eventually consistent, so it is burst protection rather than exact accounting. If the binding is missing the worker logs an error and lets the request through
+4. **Body size check** — a `Content-Length` over 8 KB is refused with `413` before the body is parsed
+5. **Honeypot check** — silently returns `200 OK` if the hidden honeypot field is filled
+6. **Validation** — requires `message` to be a non-blank string of 500 characters or fewer (type is checked before length, so a non-string can't slip through as `[object Object]`); a non-string `category` falls back to the `feedback` label; any `name` sent by a stale client is ignored
+7. **Title generation** — calls Cloudflare Workers AI to generate a concise 5–8 word GitHub issue title from the feedback message. Tries each model in `TITLE_MODELS` in order and uses the first one that answers. Falls back to the first 50 characters of the message if every model fails. See [Model rollover and health](#model-rollover-and-health).
+8. **GitHub issue creation** — POSTs to the GitHub REST API to create the issue with the generated title, category label, and the message as the body
+9. **Health reporting** — if every title model failed, the worker files a GitHub issue describing the outage (after the response is sent, via `ctx.waitUntil`)
+10. **Observability** — all key events (rejected origins, rate limits, honeypot triggers, issue creation, model failures) are logged via Cloudflare Workers observability
 
 ### Model rollover and health
 
@@ -92,7 +94,7 @@ Keep the newest lightweight model at the top of the list.
 charge, on the Free and Paid plans alike. The dollar figures above are the overage rates
 that apply only after that allocation is spent. A title call costs roughly 1 neuron
 (~120 input, ~15 output tokens), so the allocation covers on the order of 9,000 titles a
-day; feedback is rate limited to 3 per IP per 10 minutes, so this is not a constraint in
+day; feedback is rate limited to 3 per IP per minute, so this is not a constraint in
 practice. The retired Llama 3.1 8B cost about 4 neurons per call, so the current primary
 is roughly 4x cheaper.
 
@@ -129,6 +131,7 @@ submission.
 |---|---|---|
 | `GITHUB_TOKEN` | Secret | GitHub personal access token with `issues:write` scope |
 | `AI` | AI binding | Cloudflare Workers AI for title generation |
+| `FEEDBACK_RATE_LIMITER` | Rate Limiting binding | 3 requests per key per 60 s; declared under `[[ratelimits]]` in `wrangler.toml`, no dashboard setup needed |
 
 ---
 
