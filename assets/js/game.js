@@ -15,18 +15,46 @@
   }
 })();
 
+// ===== MOTION PREFERENCE =====
+// When the OS asks for reduced motion, the starfield is drawn once and left
+// still, and the celebration and hyperspace animations are skipped. Sounds
+// and the banners still play — they carry the reward without the motion.
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // ===== STARS =====
 let currentStarColor = '220, 240, 255';
 
-(function() {
+// The starfield is composed from two offscreen layers so the per-frame work
+// is three cheap blits instead of three full-screen gradient fills and a few
+// hundred arc() calls:
+//   - nebula: the three rotating gradient blobs, repainted at ~10fps
+//   - stars:  every star, drawn once per resize or theme change; the twinkle
+//             comes from cross-fading two halves of the field via globalAlpha
+// The loop also stops while the tab is hidden and never runs at all under
+// prefers-reduced-motion.
+const starBackground = (function() {
   const canvas = document.getElementById('starfield');
   const ctx = canvas.getContext('2d');
+  const nebula = document.createElement('canvas');
+  const nebulaCtx = nebula.getContext('2d');
+  const starLayers = [document.createElement('canvas'), document.createElement('canvas')];
+  const NEBULA_INTERVAL_MS = 100;   // ~10fps is plenty for a 100s rotation
+  const RESIZE_DEBOUNCE_MS = 150;
   let stars = [];
+  let running = false;
+  let lastNebulaAt = -Infinity;
+  let paintedStarColor = '';
+  let resizeTimer = null;
 
   function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    for (const c of [canvas, nebula, ...starLayers]) {
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+    }
     buildStars();
+    paintStarLayers();
+    paintNebula(performance.now());
+    compose(performance.now());
   }
 
   function buildStars() {
@@ -37,59 +65,103 @@ let currentStarColor = '220, 240, 255';
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         r: Math.random() * 1.2 + 0.2,
-        op: Math.random(),
-        speed: Math.random() * 0.00015 + 0.00002,  // glacially slow twinkle
-        phase: Math.random() * Math.PI * 2
+        layer: i % 2
       });
     }
   }
 
-  function draw(t) {
-    const W = canvas.width;
-    const H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    // Slow-rotating nebula gradient — two glowing blobs drifting around
-    const angle = t * 0.00006; // very slow rotation ~100s per full cycle
-    const cx1 = W * (0.5 + 0.45 * Math.cos(angle));
-    const cy1 = H * (0.5 + 0.45 * Math.sin(angle));
-    const cx2 = W * (0.5 + 0.45 * Math.cos(angle + Math.PI));
-    const cy2 = H * (0.5 + 0.45 * Math.sin(angle + Math.PI));
-    const cx3 = W * (0.5 + 0.35 * Math.cos(angle + Math.PI * 0.67));
-    const cy3 = H * (0.5 + 0.35 * Math.sin(angle + Math.PI * 0.67));
-
-    const g1 = ctx.createRadialGradient(cx1, cy1, 0, cx1, cy1, W * 0.55);
-    g1.addColorStop(0, 'rgba(26, 39, 68, 0.55)');
-    g1.addColorStop(1, 'transparent');
-    ctx.fillStyle = g1;
-    ctx.fillRect(0, 0, W, H);
-
-    const g2 = ctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, W * 0.45);
-    g2.addColorStop(0, 'rgba(60, 20, 80, 0.4)');
-    g2.addColorStop(1, 'transparent');
-    ctx.fillStyle = g2;
-    ctx.fillRect(0, 0, W, H);
-
-    const g3 = ctx.createRadialGradient(cx3, cy3, 0, cx3, cy3, W * 0.35);
-    g3.addColorStop(0, 'rgba(0, 40, 80, 0.3)');
-    g3.addColorStop(1, 'transparent');
-    ctx.fillStyle = g3;
-    ctx.fillRect(0, 0, W, H);
-
-    // Stars — subtle twinkle only (opacity 0.25 to 0.6)
-    stars.forEach(s => {
-      const op = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * s.speed * 1000 + s.phase));
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${currentStarColor}, ${op})`;
-      ctx.fill();
+  // Draw every star at full opacity into its layer; compose() sets the alpha.
+  function paintStarLayers() {
+    starLayers.forEach((layer, idx) => {
+      const lctx = layer.getContext('2d');
+      lctx.clearRect(0, 0, layer.width, layer.height);
+      lctx.fillStyle = `rgb(${currentStarColor})`;
+      lctx.beginPath();
+      stars.forEach(s => {
+        if (s.layer !== idx) return;
+        lctx.moveTo(s.x + s.r, s.y);
+        lctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      });
+      lctx.fill();
     });
+    paintedStarColor = currentStarColor;
+  }
+
+  // Slow-rotating nebula gradient — two glowing blobs drifting around
+  function paintNebula(t) {
+    const W = nebula.width;
+    const H = nebula.height;
+    const angle = t * 0.00006; // very slow rotation ~100s per full cycle
+    const blobs = [
+      { a: angle,                  reach: 0.45, radius: 0.55, color: 'rgba(26, 39, 68, 0.55)' },
+      { a: angle + Math.PI,        reach: 0.45, radius: 0.45, color: 'rgba(60, 20, 80, 0.4)' },
+      { a: angle + Math.PI * 0.67, reach: 0.35, radius: 0.35, color: 'rgba(0, 40, 80, 0.3)' },
+    ];
+    nebulaCtx.clearRect(0, 0, W, H);
+    blobs.forEach(b => {
+      const cx = W * (0.5 + b.reach * Math.cos(b.a));
+      const cy = H * (0.5 + b.reach * Math.sin(b.a));
+      const g = nebulaCtx.createRadialGradient(cx, cy, 0, cx, cy, W * b.radius);
+      g.addColorStop(0, b.color);
+      g.addColorStop(1, 'transparent');
+      nebulaCtx.fillStyle = g;
+      nebulaCtx.fillRect(0, 0, W, H);
+    });
+    lastNebulaAt = t;
+  }
+
+  // Stars — subtle twinkle only (opacity 0.25 to 0.6), the two halves of the
+  // field breathing in opposite phase so the whole sky never pulses at once.
+  function compose(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(nebula, 0, 0);
+    const twinkle = REDUCED_MOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 0.0015);
+    ctx.globalAlpha = 0.25 + 0.35 * twinkle;
+    ctx.drawImage(starLayers[0], 0, 0);
+    ctx.globalAlpha = 0.25 + 0.35 * (1 - twinkle);
+    ctx.drawImage(starLayers[1], 0, 0);
+    ctx.globalAlpha = 1;
+  }
+
+  function draw(t) {
+    if (!running) return;
+    if (t - lastNebulaAt >= NEBULA_INTERVAL_MS) paintNebula(t);
+    if (paintedStarColor !== currentStarColor) paintStarLayers();
+    compose(t);
     requestAnimationFrame(draw);
   }
 
-  window.addEventListener('resize', resize);
+  function start() {
+    if (running || REDUCED_MOTION) return;
+    running = true;
+    requestAnimationFrame(draw);
+  }
+
+  function stop() {
+    running = false;
+  }
+
+  // Repaint one frame now — used after a theme change so a still starfield
+  // (reduced motion) picks up the new star color.
+  function refresh() {
+    paintStarLayers();
+    compose(performance.now());
+  }
+
+  // Mobile browsers fire resize repeatedly while the URL bar shows and hides;
+  // rebuilding the whole field on every event is wasted work.
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, RESIZE_DEBOUNCE_MS);
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+
   resize();
-  requestAnimationFrame(draw);
+  start();
+
+  return { refresh };
 })();
 
 // ===== AUDIO ENGINE (Web Audio API) =====
@@ -330,8 +402,10 @@ function launchCelebration() {
   }
 
   // 9 rings staggered over ~2.5s
-  for (let i = 0; i < 9; i++) {
-    setTimeout(spawnRing, i * 280);
+  if (!REDUCED_MOTION) {
+    for (let i = 0; i < 9; i++) {
+      setTimeout(spawnRing, i * 280);
+    }
   }
 
   sounds.shockwaveImpact();
@@ -345,6 +419,8 @@ function launchCelebration() {
       banner.style.animation = 'none';
     }, 3500);
   }, 300);
+
+  if (REDUCED_MOTION) { celebrationActive = false; return; }
 
   const loopUntil = Date.now() + 5000;
 
@@ -433,8 +509,10 @@ function launchKesselCelebration() {
   }
 
   // 22 comets staggered over ~4s
-  for (let i = 0; i < 22; i++) {
-    setTimeout(spawnComet, i * 185);
+  if (!REDUCED_MOTION) {
+    for (let i = 0; i < 22; i++) {
+      setTimeout(spawnComet, i * 185);
+    }
   }
 
   sounds.blasterFlyby();
@@ -448,6 +526,8 @@ function launchKesselCelebration() {
       banner.style.animation = 'none';
     }, 3500);
   }, 300);
+
+  if (REDUCED_MOTION) { celebrationActive = false; return; }
 
   const loopUntil = Date.now() + 9000;
 
@@ -504,6 +584,12 @@ function launchKesselCelebration() {
 
 // ===== HYPERSPACE JUMP ANIMATION =====
 function launchHyperspace(onComplete) {
+  // Reduced motion: no streaks — hold on the banner for a beat, then move on.
+  if (REDUCED_MOTION) {
+    setTimeout(() => { if (onComplete) onComplete(); }, 1200);
+    return;
+  }
+
   const W = shipCanvas.width;
   const H = shipCanvas.height;
   const cx = W / 2;
@@ -1288,6 +1374,7 @@ function cycleTheme() {
   document.documentElement.setAttribute('data-theme', theme.id);
   document.getElementById('themeBtn').textContent = theme.label;
   currentStarColor = theme.starColor;
+  starBackground.refresh();
 }
 
 // ===== SESSION HISTORY MODAL =====
