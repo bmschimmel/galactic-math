@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
+### IDT-272 — Delete unreferenced images and resize the OG image (PR #TBD)
+
+Two source PNGs in `assets/images/` — `logo-planet-only.png` (1.6 MB) and `logo-word-planet.png` (432 KB) — were being deployed to the public web root despite nothing in the HTML, CSS, or JS referencing them; they were only ever inputs for compositing the share image. Both are deleted (git history keeps them recoverable). `og-image-v2.png` was 1.0 MB at 4800×2520 while `index.html` declared it as 1200×630, so it is now downscaled to an actual 1200×630 and stored as an optimized RGB PNG at 286 KB, making the declared `og:image:width` / `og:image:height` true for social validators. Roughly 2.8 MB leaves the repo and the CDN.
+
 ### IDT-271 — Remove the Your Name field from the feedback page (PR #127)
 
 The feedback form asked for a name and the worker wrote it verbatim into the public GitHub issue it filed, which for an app aimed at kids aged 5–12 meant a child's self-entered name could end up permanently public and search-indexed. The field is gone: `pages/feedback.html` no longer renders or validates it and no longer sends `name` in the request, and `worker/feedback-worker.js` no longer requires it, no longer enforces a name length, and files the message alone as the issue body. A `name` sent by a stale cached client is silently dropped rather than rejected, so older tabs keep working through the change. Choosing a category now drops focus straight into the message box, and the glowing divider and spacing that separated the message box from the Transmit button are gone, so the button sits directly under the field.
