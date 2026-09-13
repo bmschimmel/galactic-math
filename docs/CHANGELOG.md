@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
-### IDT-279 — Build the Flight Deck setup flow (PR #TBD)
+### IDT-279 — Build the Flight Deck setup flow (PR #135)
 
 The setup screen is now a deck of five flashcards — Numbers, Math, Game, Options, Launch — with a flight-path stepper on top and Back / Next in the same two slots on every step, replacing the single long card that ended in "Begin Training Mission" with a dashed "Try Alien Invasion" link underneath. Numbers and math keep their defaults so a returning kid taps Next twice; the game and option cards advance by themselves after a tap bounce; a Mission Briefing lists every choice (each row jumps back to its step) above a single **Begin Mission** button in the chosen game's colour. Alien Invasion is an equal game card, and step 4 is per game: Galactic Math picks a game mode (Standard preselected, Hyperspace with its difficulty cards, Kessel Run) by tapping the row itself — the ON/OFF badges are gone — while Alien Invasion picks how bad the invasion is (Sneak Attack 5 / Invasion 10 / Chaos 25 aliens, badged Easy / Normal / Hard). The game reads the new `aliens` URL param for its alien count; the rest of what each card implies is IDT-278. The deck body reserves a fixed minimum height and never clips or scrolls, so nothing moves between steps. Docs: `docs/setup.md` rewritten; `game-modes.md`, `visuals.md`, `audio-engine.md`, `design-ux.md`, `overview.md`, `README.md` and `CLAUDE.md` updated.
 
