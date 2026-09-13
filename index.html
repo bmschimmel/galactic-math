@@ -79,79 +79,162 @@
 
   <div class="saber-divider" style="margin: 16px 0 24px;"></div>
 
-  <!-- SETUP SCREEN -->
+  <!-- SETUP SCREEN — one flashcard per step (IDT-279) -->
   <div class="screen active" id="screen-setup">
-    <div class="setup-card">
-      <span class="setup-label">▸ Confirm your training numbers</span>
+    <div class="setup-card deck">
 
-      <div class="quick-btns">
-        <button class="quick-btn active-preset" id="presetBasic" onclick="selectRange(2,12,'presetBasic')">Basic (2–12)</button>
-        <button class="quick-btn" id="presetAll" onclick="selectAll()">All (0–13)</button>
-        <button class="quick-btn" id="presetClear" onclick="selectNone()">Clear</button>
+      <div class="flight-path" id="flightPath">
+        <button class="fp-node" data-step="0" data-icon="🔢" onclick="goToStep(0)"><span class="fp-dot">🔢</span><span class="fp-lbl">NUMBERS</span></button>
+        <button class="fp-node" data-step="1" data-icon="✖️" onclick="goToStep(1)"><span class="fp-dot">✖️</span><span class="fp-lbl">MATH</span></button>
+        <button class="fp-node" data-step="2" data-icon="🎮" onclick="goToStep(2)"><span class="fp-dot">🎮</span><span class="fp-lbl">GAME</span></button>
+        <button class="fp-node" data-step="3" data-icon="⚙️" onclick="goToStep(3)"><span class="fp-dot">⚙️</span><span class="fp-lbl">OPTIONS</span></button>
+        <button class="fp-node" data-step="4" data-icon="🚀" onclick="goToStep(4)"><span class="fp-dot">🚀</span><span class="fp-lbl">LAUNCH</span></button>
       </div>
 
-      <div class="number-grid" id="numGrid"></div>
+      <div class="deck-body">
 
-      <span class="setup-label" style="margin-top:16px;">▸ Select operation mode</span>
-      <div class="quick-btns" id="modeButtons">
-        <button class="quick-btn mode-btn op-mul-div selected-mode" data-mode="multiply" onclick="toggleOp('multiply')">× Multiply</button>
-        <button class="quick-btn mode-btn op-mul-div" data-mode="divide" onclick="toggleOp('divide')">÷ Divide</button>
-        <button class="quick-btn mode-btn op-add-sub" data-mode="add" onclick="toggleOp('add')">+ Add</button>
-        <button class="quick-btn mode-btn op-add-sub" data-mode="subtract" onclick="toggleOp('subtract')">− Subtract</button>
-        <button class="quick-btn mode-btn" data-mode="all" onclick="selectAllOps()">★ All</button>
-        <button class="quick-btn" onclick="resetOps()" style="border-color:rgba(107,127,163,0.3);color:var(--muted);">↺ Reset</button>
-      </div>
-
-      <div class="saber-divider" style="margin: 20px 0 16px;"></div>
-      <span class="setup-label">▸ Timed Challenge Modes (Optional)</span>
-      <div class="game-mode-tiles">
-        <div class="game-mode-tile-wrap">
-          <button class="game-mode-tile-btn" id="hyperspaceToggle" onclick="toggleHyperspace()">
-            <span class="tile-icon">⚡</span>
-            <div class="tile-body">
-              <div class="tile-name">HYPERSPACE</div>
-              <div class="tile-desc">Finish before the jump!</div>
-            </div>
-            <span class="tile-badge" id="hyperspaceBadge">OFF</span>
-          </button>
-          <div id="hyperspaceOptions">
-            <div class="diff-grid" id="difficultyBtns">
-              <button class="diff-btn selected-mode" data-diff="wicked-easy" onclick="setDifficulty('wicked-easy')">
-                <span class="diff-icon">😌</span>
-                <span class="diff-name">Wicked Easy</span>
-                <span class="diff-time">5:00</span>
-              </button>
-              <button class="diff-btn" data-diff="harder" onclick="setDifficulty('harder')">
-                <span class="diff-icon">😤</span>
-                <span class="diff-name">Harder</span>
-                <span class="diff-time">3:00</span>
-              </button>
-              <button class="diff-btn" data-diff="hyperdrive" onclick="setDifficulty('hyperdrive')">
-                <span class="diff-icon">⚡</span>
-                <span class="diff-name">Hyperdrive</span>
-                <span class="diff-time">1:00</span>
-              </button>
-            </div>
+        <!-- STEP 1: NUMBERS -->
+        <div class="flashcard" id="step-nums">
+          <span class="setup-label">Step 1 of 5</span>
+          <h2 class="step-title">Which numbers are we training?</h2>
+          <div class="quick-btns">
+            <button class="quick-btn active-preset" id="presetBasic" onclick="selectRange(2,12,'presetBasic')">Basic (2–12)</button>
+            <button class="quick-btn" id="presetAll" onclick="selectAll()">All (0–13)</button>
+            <button class="quick-btn" id="presetClear" onclick="selectNone()">Clear</button>
           </div>
+          <div class="number-grid" id="numGrid"></div>
+          <p class="step-hint" id="numsHint"></p>
         </div>
-        <div class="game-mode-tile-wrap">
-          <button class="game-mode-tile-btn" id="kesselToggle" onclick="toggleKesselRun()">
-            <span class="tile-icon">☄️</span>
-            <div class="tile-body">
-              <div class="tile-name">KESSEL RUN</div>
-              <div class="tile-desc">How fast can you finish?</div>
+
+        <!-- STEP 2: MATH -->
+        <div class="flashcard" id="step-ops">
+          <span class="setup-label">Step 2 of 5</span>
+          <h2 class="step-title">What kind of math?</h2>
+          <div class="op-cards" id="modeButtons">
+            <button class="op-card op-mul-div mode-btn selected-mode" data-mode="multiply" onclick="toggleOp('multiply')"><span class="op-sym">×</span><span class="op-name">Multiply</span></button>
+            <button class="op-card op-mul-div mode-btn" data-mode="divide" onclick="toggleOp('divide')"><span class="op-sym">÷</span><span class="op-name">Divide</span></button>
+            <button class="op-card op-add-sub mode-btn" data-mode="add" onclick="toggleOp('add')"><span class="op-sym">+</span><span class="op-name">Add</span></button>
+            <button class="op-card op-add-sub mode-btn" data-mode="subtract" onclick="toggleOp('subtract')"><span class="op-sym">−</span><span class="op-name">Subtract</span></button>
+          </div>
+          <div class="quick-btns">
+            <button class="quick-btn mode-btn" data-mode="all" onclick="selectAllOps()">★ All four</button>
+          </div>
+          <p class="step-hint" id="opsHint"></p>
+        </div>
+
+        <!-- STEP 3: GAME -->
+        <div class="flashcard" id="step-game">
+          <span class="setup-label">Step 3 of 5</span>
+          <h2 class="step-title">Pick your game</h2>
+          <div class="game-cards">
+            <button class="game-card galactic" data-game="galactic" onclick="selectGame('galactic')">
+              <span class="game-icon">🚀</span>
+              <span class="game-text"><span class="game-name">GALACTIC MATH</span><span class="game-desc">Answer 20 problems and earn your Jedi rank.</span></span>
+              <span class="game-check">✓</span>
+            </button>
+            <button class="game-card alien" data-game="alien" onclick="selectGame('alien')">
+              <span class="game-icon">👾</span>
+              <span class="game-text"><span class="game-name">ALIEN INVASION</span><span class="game-desc">Fly your rocket through math gates and blast the aliens!</span></span>
+              <span class="game-check">✓</span>
+            </button>
+            <div class="game-card soon"><span class="game-icon">🛸</span><span class="game-desc">More games coming soon</span></div>
+          </div>
+          <p class="step-hint">Tap one — the next card comes right up.</p>
+        </div>
+
+        <!-- STEP 4: OPTIONS (per game) -->
+        <div class="flashcard" id="step-options">
+          <span class="setup-label">Step 4 of 5</span>
+          <h2 class="step-title" id="optionsTitle">Pick your game mode!</h2>
+
+          <div class="mode-list" id="galacticOptions">
+            <button class="mode-tile selected-mode" data-mode="standard" onclick="setGameMode('standard')">
+              <span class="tile-icon">🧘</span>
+              <span class="tile-body"><span class="tile-name">STANDARD</span><span class="tile-desc">No timer. Go at your own pace.</span></span>
+              <span class="tile-tick">✓</span>
+            </button>
+            <button class="mode-tile" data-mode="hyperspace" id="hyperspaceToggle" onclick="setGameMode('hyperspace')">
+              <span class="tile-icon">⚡</span>
+              <span class="tile-body"><span class="tile-name">HYPERSPACE</span><span class="tile-desc">Finish before the jump!</span></span>
+              <span class="tile-tick">✓</span>
+            </button>
+            <div id="hyperspaceOptions">
+              <div class="diff-grid" id="difficultyBtns">
+                <button class="diff-btn selected-mode" data-diff="wicked-easy" onclick="setDifficulty('wicked-easy')">
+                  <span class="level easy">easy</span>
+                  <span class="diff-icon">😌</span>
+                  <span class="diff-name">Wicked Easy</span>
+                  <span class="diff-time">5:00</span>
+                </button>
+                <button class="diff-btn" data-diff="harder" onclick="setDifficulty('harder')">
+                  <span class="level normal">normal</span>
+                  <span class="diff-icon">😤</span>
+                  <span class="diff-name">Harder</span>
+                  <span class="diff-time">3:00</span>
+                </button>
+                <button class="diff-btn" data-diff="hyperdrive" onclick="setDifficulty('hyperdrive')">
+                  <span class="level hard">hard</span>
+                  <span class="diff-icon">⚡</span>
+                  <span class="diff-name">Hyperdrive</span>
+                  <span class="diff-time">1:00</span>
+                </button>
+              </div>
             </div>
-            <span class="tile-badge" id="kesselBadge">OFF</span>
-          </button>
+            <button class="mode-tile" data-mode="kessel" id="kesselToggle" onclick="setGameMode('kessel')">
+              <span class="tile-icon">☄️</span>
+              <span class="tile-body"><span class="tile-name">KESSEL RUN</span><span class="tile-desc">How fast can you finish? Wrong answers add 5s.</span></span>
+              <span class="tile-tick">✓</span>
+            </button>
+          </div>
+
+          <div class="diff-grid invasion-grid" id="alienOptions" hidden>
+            <button class="diff-btn invasion-btn" data-invasion="sneak" onclick="setInvasion('sneak')">
+              <span class="level easy">easy</span>
+              <span class="diff-icon">🛸</span>
+              <span class="invasion-count">5</span>
+              <span class="diff-name">Sneak Attack</span>
+              <span class="diff-desc">Alien ships unarmed</span>
+            </button>
+            <button class="diff-btn invasion-btn selected-mode" data-invasion="invasion" onclick="setInvasion('invasion')">
+              <span class="level normal">normal</span>
+              <span class="diff-icon">👾</span>
+              <span class="invasion-count">10</span>
+              <span class="diff-name">Invasion</span>
+              <span class="diff-desc">Aliens fire lasers!</span>
+            </button>
+            <button class="diff-btn invasion-btn" data-invasion="chaos" onclick="setInvasion('chaos')">
+              <span class="level hard">hard</span>
+              <span class="diff-icon">🌀</span>
+              <span class="invasion-count">25</span>
+              <span class="diff-name">Chaos</span>
+              <span class="diff-desc">Good luck, pilot</span>
+            </button>
+          </div>
+
+          <p class="step-hint" id="optionsHint"></p>
         </div>
+
+        <!-- STEP 5: LAUNCH -->
+        <div class="flashcard" id="step-launch">
+          <span class="setup-label">Step 5 of 5</span>
+          <h2 class="step-title">Mission briefing</h2>
+          <div class="briefing">
+            <button class="brief-row" onclick="goToStep(0)"><span class="brief-key">Numbers</span><span class="brief-val" id="briefNums"></span><span class="brief-edit">CHANGE</span></button>
+            <button class="brief-row" onclick="goToStep(1)"><span class="brief-key">Math</span><span class="brief-val" id="briefOps"></span><span class="brief-edit">CHANGE</span></button>
+            <button class="brief-row" onclick="goToStep(2)"><span class="brief-key">Game</span><span class="brief-val" id="briefGame"></span><span class="brief-edit">CHANGE</span></button>
+            <button class="brief-row" onclick="goToStep(3)"><span class="brief-key">Options</span><span class="brief-val" id="briefOptions"></span><span class="brief-edit">CHANGE</span></button>
+          </div>
+          <p class="step-hint">Everything look right? Tap a row to change it.</p>
+        </div>
+
       </div>
 
       <div class="error-msg" id="setupError"></div>
-      <div class="saber-divider" style="margin: 20px 0 16px;"></div>
-      <button class="btn-primary" onclick="startQuiz()" id="startBtn">
-        <span>🚀 BEGIN TRAINING MISSION</span>
-      </button>
-      <button class="alien-invasion-link" onclick="launchAlienInvasion()">👾 Try Alien Invasion</button>
+      <div class="deck-nav">
+        <button class="nav-btn btn-back" id="backBtn" onclick="prevStep()"><span>◂ Back</span></button>
+        <button class="nav-btn btn-next" id="nextBtn" onclick="nextStep()"><span>Next ▸</span></button>
+        <button class="nav-btn btn-primary" id="startBtn" onclick="launchMission()" hidden><span id="startBtnLabel">🚀 Begin Mission</span></button>
+      </div>
     </div>
   </div>
 

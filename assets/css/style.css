@@ -176,7 +176,7 @@
     background: rgba(10, 15, 30, 0.85);
     border: 1px solid rgba(0, 212, 255, 0.2);
     border-radius: 16px;
-    padding: 32px 32px 24px;
+    padding: 24px;
     backdrop-filter: blur(10px);
     box-shadow: 0 0 40px rgba(0, 212, 255, 0.08), inset 0 0 60px rgba(0, 0, 0, 0.3);
   }
@@ -187,7 +187,6 @@
     letter-spacing: 4px;
     color: var(--saber-blue);
     text-transform: uppercase;
-    margin-bottom: 16px;
     display: block;
   }
 
@@ -195,7 +194,6 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 8px;
-    margin-bottom: 28px;
   }
 
   .num-btn {
@@ -231,7 +229,6 @@
   .quick-btns {
     display: flex;
     gap: 8px;
-    margin-bottom: 24px;
     flex-wrap: wrap;
   }
 
@@ -259,110 +256,280 @@
     box-shadow: 0 0 14px var(--glow-gold), 0 0 4px var(--glow-gold) inset;
   }
 
-  .mode-btn.selected-mode {
-    background: rgba(0, 212, 255, 0.15);
-    border-color: var(--saber-blue);
-    color: var(--saber-blue);
-    box-shadow: 0 0 12px var(--glow-blue);
+  /* Operation flashcards — purple for × ÷, green for + − */
+  .op-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
-
-  /* Op mode color groups */
-  .quick-btn.op-mul-div {
+  .op-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 18px 10px 14px;
+    background: rgba(10, 15, 30, 0.6);
+    border: 1px solid rgba(107, 127, 163, 0.25);
+    border-radius: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .op-sym {
+    font-family: 'Orbitron', monospace;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+  .op-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .op-card.op-mul-div {
     border-color: rgba(185, 79, 255, 0.3);
     color: var(--saber-purple);
   }
-  .quick-btn.op-mul-div.selected-mode {
-    background: rgba(185, 79, 255, 0.12);
+  .op-card.op-mul-div.selected-mode {
+    background: rgba(185, 79, 255, 0.14);
     border-color: var(--saber-purple);
-    color: var(--saber-purple);
-    box-shadow: 0 0 12px var(--glow-purple);
+    box-shadow: 0 0 18px var(--glow-purple);
   }
-  @media (hover: hover) {
-    .quick-btn.op-mul-div:hover {
-      background: rgba(185, 79, 255, 0.12);
-      border-color: var(--saber-purple);
-      color: var(--saber-purple);
-      box-shadow: 0 0 12px var(--glow-purple);
-    }
-  }
-  .quick-btn.op-add-sub {
+  .op-card.op-add-sub {
     border-color: rgba(57, 255, 20, 0.3);
     color: var(--saber-green);
   }
-  .quick-btn.op-add-sub.selected-mode {
+  .op-card.op-add-sub.selected-mode {
     background: rgba(57, 255, 20, 0.1);
     border-color: var(--saber-green);
-    color: var(--saber-green);
-    box-shadow: 0 0 12px var(--glow-green);
+    box-shadow: 0 0 18px var(--glow-green);
   }
   @media (hover: hover) {
-    .quick-btn.op-add-sub:hover {
-      background: rgba(57, 255, 20, 0.1);
-      border-color: var(--saber-green);
-      color: var(--saber-green);
-      box-shadow: 0 0 12px var(--glow-green);
-    }
+    .op-card.op-mul-div:hover { border-color: var(--saber-purple); }
+    .op-card.op-add-sub:hover { border-color: var(--saber-green); }
   }
 
-  /* Game mode tiles */
-  .game-mode-tiles {
+  /* ===== SETUP DECK ===== */
+  /* The deck body reserves a minimum height so Back / Next sit in the same
+     place on every step. It never clips or scrolls: the slide-in moves only
+     14px, inside the card's padding, and a tap bounce on an edge tile spills
+     into that padding instead of being cut off. */
+  .deck {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 18px;
   }
-  .game-mode-tile-wrap {
+  .deck-body {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+  }
+  .deck-nav {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 212, 255, 0.2);
+  }
+  .deck [hidden] { display: none !important; }
+  .deck .error-msg { margin: 0; }
+
+  /* Flight path */
+  .flight-path {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+  }
+  .flight-path::before {
+    content: '';
+    position: absolute;
+    left: 10%; right: 10%; top: 16px;
+    border-top: 1px dashed rgba(107, 127, 163, 0.25);
+  }
+  .fp-node {
+    position: relative;
+    z-index: 1;
     flex: 1;
-    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 0;
+    cursor: default;
+  }
+  .fp-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--deep-space);
+    border: 1px solid rgba(107, 127, 163, 0.25);
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+  .fp-lbl {
+    font-family: 'Orbitron', monospace;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+  }
+  .fp-node.done { cursor: pointer; }
+  .fp-node.done .fp-dot {
+    border-color: var(--saber-green);
+    color: var(--saber-green);
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    box-shadow: 0 0 10px var(--glow-green);
+  }
+  .fp-node.done .fp-lbl { color: var(--saber-green); }
+  .fp-node.now .fp-dot {
+    border-color: var(--saber-blue);
+    box-shadow: 0 0 14px var(--glow-blue);
+    animation: fpPulse 1.6s ease-in-out infinite;
+  }
+  .fp-node.now .fp-lbl { color: var(--saber-blue); }
+  @keyframes fpPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  /* Flashcards */
+  .flashcard {
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+  }
+  .flashcard.active { display: flex; }
+  .flashcard.in-fwd { animation: cardFwd 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .flashcard.in-back { animation: cardBack 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  @keyframes cardFwd {
+    from { opacity: 0; transform: translateX(14px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes cardBack {
+    from { opacity: 0; transform: translateX(-14px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+  .step-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(16px, 3.6vw, 22px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--star-white);
+    text-wrap: balance;
+  }
+  /* Status line pinned to the floor of the deck body, above the nav row */
+  .step-hint {
+    color: var(--muted);
+    font-size: 13px;
+    min-height: 1.5em;
+    margin-top: auto;
+    padding-top: 8px;
+  }
+  .step-hint.hint-ok { color: var(--saber-green); }
+
+  /* Tap bounce */
+  @keyframes boing {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.12); }
+    65% { transform: scale(0.96); }
+    100% { transform: scale(1); }
+  }
+  .boing { animation: boing 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+  /* Game cards */
+  .game-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .game-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    padding: 22px 14px 18px;
+    background: rgba(10, 15, 30, 0.6);
+    border: 1px solid rgba(107, 127, 163, 0.25);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .game-text { display: contents; }
+  .game-icon {
+    font-size: 40px;
+    line-height: 1;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.15));
+  }
+  .game-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--star-white);
+  }
+  .game-desc {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .game-check {
+    position: absolute;
+    top: 8px; right: 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--saber-green);
+    filter: drop-shadow(0 0 6px var(--saber-green));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .game-card.on .game-check { opacity: 1; }
+  .game-card.galactic:hover, .game-card.galactic.on {
+    border-color: var(--saber-blue);
+    background: rgba(0, 212, 255, 0.08);
+    box-shadow: 0 0 24px var(--glow-blue);
+  }
+  .game-card.alien:hover, .game-card.alien.on {
+    border-color: var(--saber-green);
+    background: rgba(57, 255, 20, 0.06);
+    box-shadow: 0 0 24px var(--glow-green);
+  }
+  .game-card.galactic.on .game-name { color: var(--saber-blue); }
+  .game-card.alien.on .game-name { color: var(--saber-green); }
+  .game-card.dim { opacity: 0.45; transform: scale(0.96); }
+  .game-card.soon {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    gap: 12px;
+    padding: 12px;
+    border-style: dashed;
+    opacity: 0.5;
+    cursor: default;
+  }
+  .game-card.soon .game-icon { font-size: 22px; }
+
+  /* Game mode tiles — the row is the control, the selected row shows a check */
+  .mode-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
-  /* Alien Invasion button */
-  .alien-invasion-link {
-    display: block;
-    text-align: center;
-    margin-top: 10px;
-    padding: 16px;
-    background: transparent;
-    border: 1px dashed rgba(57,255,20,0.25);
-    border-radius: 10px;
-    color: rgba(57,255,20,0.6);
-    font-family: 'Orbitron', monospace;
-    font-size: 14px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    width: 100%;
-    transition: all 0.2s;
-    text-transform: uppercase;
-  }
-  .alien-invasion-link:hover {
-    border-color: rgba(57,255,20,0.55);
-    color: rgba(57,255,20,0.9);
-    background: rgba(57,255,20,0.04);
-  }
-  /* No `pointer-events: none` here — double-clicks are guarded in JS instead.
-     This class survives a back/forward-cache restore, so disabling the button
-     through CSS left it permanently unclickable on the way back. */
-  .alien-invasion-link.launching {
-    border-style: solid;
-    border-color: rgba(57,255,20,0.85);
-    background: rgba(5, 12, 20, 0.95);
-    color: rgba(57,255,20,0.95);
-    transition: none;
-    animation: aiLaunchGlow 1.9s ease-out forwards;
-  }
-  @keyframes aiLaunchGlow {
-    0%   { box-shadow: none; }
-    15%  { box-shadow: 0 0 10px 2px rgba(57,255,20,0.7); }
-    50%  { box-shadow: 0 0 20px 5px rgba(57,255,20,0.9), 0 0 50px 10px rgba(57,255,20,0.3); }
-    85%  { box-shadow: 0 0 30px 8px rgba(57,255,20,0.8), 0 0 70px 14px rgba(57,255,20,0.25); }
-    100% { box-shadow: 0 0 50px 12px rgba(57,255,20,0.4), 0 0 100px 20px rgba(57,255,20,0.1); }
-  }
-  .game-mode-tile-btn {
+  .mode-tile {
     width: 100%;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 16px;
+    padding: 12px 14px;
     background: rgba(10, 15, 30, 0.6);
     border: 1px solid rgba(0, 212, 255, 0.15);
     border-radius: 12px;
@@ -370,72 +537,164 @@
     transition: all 0.25s;
     text-align: left;
   }
-  .game-mode-tile-btn:hover {
-    border-color: rgba(0, 212, 255, 0.4);
-    background: rgba(0, 212, 255, 0.05);
-  }
-  .game-mode-tile-btn.selected-mode {
+  .mode-tile:hover { border-color: rgba(0, 212, 255, 0.4); }
+  .mode-tile.selected-mode {
     border-color: var(--saber-blue);
     background: rgba(0, 212, 255, 0.08);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+    box-shadow: 0 0 18px rgba(0, 212, 255, 0.15);
   }
-  .tile-icon {
-    font-size: 24px;
-    flex-shrink: 0;
-  }
-  .tile-body {
-    flex: 1;
-    min-width: 0;
-  }
+  .tile-icon { font-size: 22px; flex-shrink: 0; }
+  .tile-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .tile-name {
     font-family: 'Orbitron', monospace;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 2px;
     color: var(--star-white);
-    margin-bottom: 3px;
   }
   .tile-desc {
     font-family: 'Exo 2', sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--muted);
     line-height: 1.3;
   }
-  .tile-badge {
-    font-family: 'Orbitron', monospace;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    padding: 5px 10px;
-    border-radius: 20px;
-    border: 1px solid rgba(107, 127, 163, 0.4);
-    color: var(--muted);
-    background: rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+  .tile-tick {
+    width: 22px; height: 22px;
+    border-radius: 50%;
     flex-shrink: 0;
-    position: relative;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(107, 127, 163, 0.25);
+    color: transparent;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 900;
+    transition: all 0.25s;
   }
-  .tile-badge::before {
-    content: '◉';
-    margin-right: 5px;
-    font-size: 8px;
-    opacity: 0.5;
-    transition: all 0.3s;
-  }
-  .game-mode-tile-btn.selected-mode .tile-badge {
+  .mode-tile.selected-mode .tile-tick {
     color: var(--saber-green);
     border-color: var(--saber-green);
-    background: rgba(57, 255, 20, 0.1);
-    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3), inset 0 0 8px rgba(57, 255, 20, 0.08);
-    text-shadow: 0 0 8px var(--saber-green);
+    box-shadow: 0 0 8px var(--glow-green);
   }
-  .game-mode-tile-btn.selected-mode .tile-badge::before {
-    content: '◉';
-    opacity: 1;
+
+  /* Easy / Normal / Hard badges on the three-card grids */
+  .level {
+    font-family: 'Orbitron', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+    opacity: 0.85;
+  }
+  .level.easy { color: var(--saber-green); }
+  .level.normal { color: var(--saber-blue); }
+  .level.hard { color: var(--saber-red); }
+
+  /* Alien Invasion: how bad is it — same shape as the Hyperspace cards */
+  .invasion-grid .diff-btn {
+    padding: 16px 8px 14px;
+    gap: 6px;
+    border-color: rgba(57, 255, 20, 0.15);
+  }
+  .invasion-grid .diff-btn:hover {
+    border-color: rgba(57, 255, 20, 0.45);
+    background: rgba(57, 255, 20, 0.04);
+  }
+  .invasion-grid .diff-btn.selected-mode {
+    border-color: var(--saber-green);
+    background: rgba(57, 255, 20, 0.08);
+    box-shadow: 0 0 16px var(--glow-green);
+  }
+  .invasion-grid .diff-icon { font-size: 26px; }
+  .invasion-count {
+    font-family: 'Orbitron', monospace;
+    font-size: 24px;
+    font-weight: 700;
     color: var(--saber-green);
-    filter: drop-shadow(0 0 4px var(--saber-green));
+    filter: drop-shadow(0 0 8px var(--saber-green));
   }
+  .invasion-grid .diff-name { font-size: 9px; }
+  .diff-desc {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* Mission briefing */
+  .briefing {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .brief-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(107, 127, 163, 0.25);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .brief-row:hover { border-color: var(--saber-blue); }
+  .brief-key {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    width: 76px;
+    flex-shrink: 0;
+  }
+  .brief-val {
+    flex: 1;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 14px;
+    color: var(--star-white);
+  }
+  .brief-edit {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--saber-blue);
+  }
+
+  /* Nav buttons — same height, same two slots on every step */
+  .nav-btn {
+    height: 52px;
+    border-radius: 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .btn-back {
+    background: transparent;
+    border: 1px solid rgba(107, 127, 163, 0.25);
+    color: var(--muted);
+  }
+  .btn-back:hover:not(:disabled) { color: var(--star-white); border-color: var(--saber-blue); }
+  .btn-back:disabled { opacity: 0.3; cursor: default; }
+  .btn-next {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--saber-blue);
+    color: var(--saber-blue);
+  }
+  .btn-next:hover:not(:disabled) {
+    background: rgba(0, 212, 255, 0.2);
+    box-shadow: 0 0 16px var(--glow-blue);
+  }
+  .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+
   /* ===== MOBILE LAYOUT ===== */
   @media (max-width: 600px) {
     /* Push content below the fixed history/theme buttons */
@@ -475,10 +734,20 @@
       justify-content: center;
     }
 
-    /* Stack challenge mode tiles vertically so each gets full width */
-    .game-mode-tiles {
-      flex-direction: column;
+    /* Deck: taller reserve for stacked cards, narrower Back slot, game cards as rows */
+    .deck-body { min-height: 440px; }
+    .deck-nav { grid-template-columns: 96px 1fr; }
+    .game-cards { grid-template-columns: 1fr; }
+    .game-card:not(.soon) {
+      flex-direction: row;
+      text-align: left;
+      gap: 14px;
+      padding: 14px 40px 14px 14px;
     }
+    .game-card:not(.soon) .game-icon { font-size: 32px; }
+    .game-card:not(.soon) .game-text { display: flex; flex-direction: column; gap: 4px; }
+    .fp-lbl { font-size: 7px; letter-spacing: 1px; }
+    .brief-key { width: 60px; }
   }
 
   /* Restart / quit button row */
@@ -550,7 +819,15 @@
   #startBtn {
     position: relative;
     overflow: hidden;
+    padding: 0 16px;
   }
+  #startBtn.alien {
+    background: linear-gradient(135deg, rgba(57, 255, 20, 0.14), rgba(0, 120, 60, 0.15));
+    border-color: var(--saber-green);
+    color: var(--saber-green);
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.1);
+  }
+  #startBtn.alien:hover:not(:disabled) { box-shadow: 0 0 30px var(--glow-green); }
   #startBtn span {
     position: relative;
     z-index: 1;
@@ -1120,13 +1397,14 @@
     opacity: 1;
   }
 
-  /* Hyperspace difficulty grid */
+  /* Hyperspace difficulty grid. The slide-down container clips overflow, so
+     the grid carries a little padding for the tap bounce to breathe in. */
   .diff-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-top: 4px;
   }
+  #hyperspaceOptions .diff-grid { padding: 8px 4px; }
   .diff-btn {
     display: flex;
     flex-direction: column;

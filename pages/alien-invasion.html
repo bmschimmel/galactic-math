@@ -1235,7 +1235,14 @@ const EARTH_RADIUS     = 130;   // large Earth destination radius
 const EARTH_LAND_DIST  = 155;   // how close to land (ship center to Earth center)
 const THRUST_FUEL_RATE  = 0.013; // % fuel burned per frame while thrusting (~0.78%/sec at 60fps)
 const N_ASTEROIDS      = 28;
-const N_ALIENS         = 10;
+// How bad the invasion is comes from the main setup flow as ?aliens=5|10|25.
+// Anything else (or nothing, when this page is opened on its own) is the
+// normal 10. Only the count changes here; see IDT-278 for the rest.
+const ALIEN_COUNTS     = [5, 10, 25];
+const N_ALIENS         = (() => {
+  const n = Number(new URLSearchParams(window.location.search).get('aliens'));
+  return ALIEN_COUNTS.includes(n) ? n : 10;
+})();
 const N_FUEL_PICKUPS   = 6;
 const MISSILE_SPEED     = 14;   // px/frame player missile speed
 const COMET_MAX        = 6;     // max comets on screen at once

@@ -68,7 +68,7 @@ Applied to:
 - Section labels (`▸ Confirm your training numbers`)
 - Question text (`6 × 7 = ?`)
 - The answer input
-- Buttons (`BEGIN TRAINING MISSION`, `ABORT MISSION`)
+- Buttons (`BEGIN MISSION`, `ABORT MISSION`, `NEXT ▸`)
 - Timer displays, score counters, rank titles
 - Nav labels (`PROBLEM 1 OF 20`, `HISTORY`, `◑ DARK`)
 
@@ -99,7 +99,7 @@ The writing voice is that of a calm, encouraging mission control operator speaki
 
 **What this sounds like:**
 - "Confirm your training numbers" — not "Select numbers"
-- "Begin Training Mission" — not "Start Quiz"
+- "Begin Mission" — not "Start Quiz"
 - "Abort Mission" — not "Quit"
 - "Review Missed Problems" — not "Wrong answers"
 - "New Mission" — not "Try again with different numbers"

@@ -678,6 +678,18 @@ let currentQ = 0;
 let score = 0;
 let selectedOps = new Set(['multiply']);
 
+// Setup deck state (IDT-279). The game chosen on step 3 decides which options
+// step 4 shows; both games keep their own "normal" option preselected.
+let selectedGame = null;        // 'galactic' | 'alien'
+let gameMode = 'standard';      // Galactic Math: 'standard' | 'hyperspace' | 'kessel'
+let invasionSize = 'invasion';  // Alien Invasion: 'sneak' | 'invasion' | 'chaos'
+const INVASIONS = {
+  sneak:    { icon: '🛸', name: 'SNEAK ATTACK', aliens: 5 },
+  invasion: { icon: '👾', name: 'INVASION',     aliens: 10 },
+  chaos:    { icon: '🌀', name: 'CHAOS',        aliens: 25 },
+};
+let setupStep = 0;
+
 // Hyperspace mode state
 let hyperspaceEnabled = false;
 let hyperspaceDiff = 'wicked-easy';
@@ -726,8 +738,9 @@ function toggleNum(n, btn) {
     btn.classList.add('selected');
   }
   setActivePreset(null);
+  boing(btn);
   sounds.navigate();
-  document.getElementById('setupError').textContent = '';
+  refreshSetup();
 }
 
 function setActivePreset(id) {
@@ -737,10 +750,7 @@ function setActivePreset(id) {
 }
 
 function selectAll() {
-  selectedNums = new Set([...Array(14).keys()]);
-  document.querySelectorAll('.num-btn').forEach(b => b.classList.add('selected'));
-  setActivePreset('presetAll');
-  sounds.navigate();
+  selectRange(0, 13, 'presetAll');
 }
 
 function selectNone() {
@@ -748,40 +758,7 @@ function selectNone() {
   document.querySelectorAll('.num-btn').forEach(b => b.classList.remove('selected'));
   setActivePreset(null);
   sounds.navigate();
-}
-
-function toggleOp(op) {
-  if (selectedOps.has(op)) selectedOps.delete(op);
-  else selectedOps.add(op);
-  updateOpButtons();
-  sounds.navigate();
-  document.getElementById('setupError').textContent =
-    selectedOps.size === 0 ? '⚠ Select at least one operation to begin' : '';
-}
-
-function selectAllOps() {
-  selectedOps = new Set(['multiply', 'divide', 'add', 'subtract']);
-  updateOpButtons();
-  sounds.navigate();
-  document.getElementById('setupError').textContent = '';
-}
-
-function resetOps() {
-  selectedOps = new Set(['multiply']);
-  updateOpButtons();
-  sounds.navigate();
-  document.getElementById('setupError').textContent = '';
-}
-
-function updateOpButtons() {
-  document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
-    const mode = btn.dataset.mode;
-    if (mode === 'all') {
-      btn.classList.toggle('selected-mode', selectedOps.size === 4);
-    } else {
-      btn.classList.toggle('selected-mode', selectedOps.has(mode));
-    }
-  });
+  refreshSetup();
 }
 
 function selectRange(a, b, presetId) {
@@ -790,36 +767,241 @@ function selectRange(a, b, presetId) {
     const n = parseInt(btn.dataset.num);
     if (n >= a && n <= b) { selectedNums.add(n); btn.classList.add('selected'); }
     else btn.classList.remove('selected');
+    boing(btn);
   });
   setActivePreset(presetId || null);
   sounds.navigate();
+  refreshSetup();
+}
+
+function toggleOp(op) {
+  if (selectedOps.has(op)) selectedOps.delete(op);
+  else selectedOps.add(op);
+  updateOpButtons();
+  boing(document.querySelector(`.op-card[data-mode="${op}"]`));
+  sounds.navigate();
+  refreshSetup();
+}
+
+function selectAllOps() {
+  selectedOps = new Set(['multiply', 'divide', 'add', 'subtract']);
+  updateOpButtons();
+  document.querySelectorAll('.op-card').forEach(boing);
+  sounds.navigate();
+  refreshSetup();
+}
+
+function updateOpButtons() {
+  document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+    const mode = btn.dataset.mode;
+    if (mode === 'all') {
+      btn.classList.toggle('active-preset', selectedOps.size === 4);
+    } else {
+      btn.classList.toggle('selected-mode', selectedOps.has(mode));
+    }
+  });
+}
+
+// ===== SETUP DECK =====
+// One flashcard per step. The deck body keeps a fixed minimum height and the
+// Back / Next / Begin Mission buttons live in the same two slots on every
+// step, so nothing moves while a kid works through the cards.
+const SETUP_STEPS = ['nums', 'ops', 'game', 'options', 'launch'];
+const OP_SYMBOLS = { multiply: '×', divide: '÷', add: '+', subtract: '−' };
+const GAME_INFO = {
+  galactic: { icon: '🚀', name: 'GALACTIC MATH' },
+  alien:    { icon: '👾', name: 'ALIEN INVASION' },
+};
+const AUTO_ADVANCE_MS = 420; // long enough to see the tap bounce before the card slides
+
+// Squash-and-stretch on tap. Removing and re-adding the class restarts the
+// animation on an element that is already on screen.
+function boing(el) {
+  if (!el) return;
+  el.classList.remove('boing');
+  void el.offsetWidth;
+  el.classList.add('boing');
+}
+
+function numsReady() { return selectedNums.size >= 3; }
+function opsReady() { return selectedOps.size >= 1; }
+
+function stepReady(step) {
+  const id = SETUP_STEPS[step];
+  if (id === 'nums') return numsReady();
+  if (id === 'ops') return opsReady();
+  if (id === 'game') return selectedGame !== null;
+  return true;
+}
+
+// "2–12" or "2, 3, 5–7" — a compact label for the selected numbers.
+function numsLabel() {
+  const sorted = [...selectedNums].sort((a, b) => a - b);
+  if (sorted.length === 0) return 'none yet';
+  const parts = [];
+  let start = sorted[0], prev = sorted[0];
+  for (let i = 1; i <= sorted.length; i++) {
+    const n = sorted[i];
+    if (n === prev + 1) { prev = n; continue; }
+    parts.push(start === prev ? `${start}` : `${start}–${prev}`);
+    start = prev = n;
+  }
+  return parts.join(', ');
+}
+
+function opsLabel() {
+  return Object.keys(OP_SYMBOLS).filter(op => selectedOps.has(op)).map(op => OP_SYMBOLS[op]).join(' ') || 'none yet';
+}
+
+function gameLabel() {
+  const g = GAME_INFO[selectedGame];
+  return g ? `${g.icon} ${g.name}` : '';
+}
+
+function optionsLabel() {
+  if (selectedGame === 'alien') {
+    const v = INVASIONS[invasionSize];
+    return `${v.icon} ${v.name} · ${v.aliens} aliens`;
+  }
+  if (gameMode === 'hyperspace') {
+    const btn = document.querySelector(`.diff-btn[data-diff="${hyperspaceDiff}"]`);
+    return `⚡ HYPERSPACE · ${btn.querySelector('.diff-name').textContent} ${btn.querySelector('.diff-time').textContent}`;
+  }
+  return gameMode === 'kessel' ? '☄️ KESSEL RUN' : '🧘 STANDARD';
+}
+
+function goToStep(step, dir) {
+  if (step < 0 || step >= SETUP_STEPS.length) return;
+  // Flight-path nodes only jump backwards; forward travel goes through Next.
+  if (step > setupStep && !dir) return;
+  dir = dir || (step < setupStep ? 'back' : 'fwd');
+  setupStep = step;
+
+  document.querySelectorAll('.flashcard').forEach((card, i) => {
+    card.classList.remove('active', 'in-fwd', 'in-back');
+    if (i === step) {
+      void card.offsetWidth; // restart the slide-in even if this card was just shown
+      card.classList.add('active', dir === 'back' ? 'in-back' : 'in-fwd');
+    }
+  });
+  document.getElementById('setupError').textContent = '';
+  refreshSetup();
+}
+
+function nextStep() {
+  if (!stepReady(setupStep)) return;
+  sounds.navigate();
+  goToStep(setupStep + 1, 'fwd');
+}
+
+function prevStep() {
+  if (setupStep === 0) return;
+  sounds.navigate();
+  goToStep(setupStep - 1, 'back');
+}
+
+// Repaint everything on the deck that depends on state: flight path, hints,
+// which options panel shows, the briefing rows, and the nav buttons.
+function refreshSetup() {
+  document.querySelectorAll('.fp-node').forEach((node, i) => {
+    node.classList.toggle('done', i < setupStep);
+    node.classList.toggle('now', i === setupStep);
+    node.querySelector('.fp-dot').textContent = i < setupStep ? '✓' : node.dataset.icon;
+  });
+
+  const numsHint = document.getElementById('numsHint');
+  numsHint.textContent = numsReady() ? `${selectedNums.size} numbers · ${numsLabel()}` : 'Pick at least 3 numbers';
+  numsHint.classList.toggle('hint-ok', numsReady());
+
+  const opsHint = document.getElementById('opsHint');
+  opsHint.textContent = opsReady() ? `Training ${opsLabel()}` : 'Pick at least one';
+  opsHint.classList.toggle('hint-ok', opsReady());
+
+  const alien = selectedGame === 'alien';
+  document.getElementById('optionsTitle').textContent = alien ? 'How bad is the alien invasion?' : 'Pick your game mode!';
+  document.getElementById('galacticOptions').hidden = alien;
+  document.getElementById('alienOptions').hidden = !alien;
+  document.getElementById('optionsHint').textContent = alien ? 'More aliens means more missiles — and more math to earn them.' : '';
+
+  document.getElementById('briefNums').textContent = numsLabel();
+  document.getElementById('briefOps').textContent = opsLabel();
+  document.getElementById('briefGame').textContent = gameLabel();
+  document.getElementById('briefOptions').textContent = selectedGame ? optionsLabel() : '';
+
+  const onLaunch = SETUP_STEPS[setupStep] === 'launch';
+  document.getElementById('backBtn').disabled = setupStep === 0;
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.hidden = onLaunch;
+  nextBtn.disabled = !stepReady(setupStep);
+  const startBtn = document.getElementById('startBtn');
+  startBtn.hidden = !onLaunch;
+  startBtn.classList.toggle('alien', alien);
+  document.getElementById('startBtnLabel').textContent = `${alien ? '👾' : '🚀'} Begin Mission`;
+}
+
+function selectGame(game) {
+  if (selectedGame !== game) {
+    // Each game arrives at its options card with the normal choice already
+    // made, so Next is live and the card is a chance to change, not a gate.
+    selectedGame = game;
+    if (game === 'alien') {
+      setInvasion('invasion', { silent: true });
+    } else {
+      setGameMode('standard', { silent: true });
+    }
+  }
+  document.querySelectorAll('.game-card[data-game]').forEach(card => {
+    const on = card.dataset.game === game;
+    card.classList.toggle('on', on);
+    card.classList.toggle('dim', !on);
+    if (on) boing(card);
+  });
+  sounds.modeActivate();
+  refreshSetup();
+  setTimeout(() => { if (setupStep === 2) goToStep(3, 'fwd'); }, AUTO_ADVANCE_MS);
+}
+
+function launchMission() {
+  if (selectedGame === 'alien') launchAlienInvasion();
+  else startQuiz();
 }
 
 // ===== HYPERSPACE MODE =====
-function toggleHyperspace() {
-  hyperspaceEnabled = !hyperspaceEnabled;
-  const btn = document.getElementById('hyperspaceToggle');
-  btn.classList.toggle('selected-mode', hyperspaceEnabled);
-  document.getElementById('hyperspaceBadge').textContent = hyperspaceEnabled ? 'ON' : 'OFF';
+// Standard / Hyperspace / Kessel Run are one choice. Hyperspace stays on the
+// card so its difficulty can be picked; the other two move on by themselves.
+function setGameMode(mode, opts) {
+  const silent = opts && opts.silent;
+  gameMode = mode;
+  hyperspaceEnabled = mode === 'hyperspace';
+  kesselRunEnabled = mode === 'kessel';
+
+  document.querySelectorAll('.mode-tile[data-mode]').forEach(tile => {
+    const on = tile.dataset.mode === mode;
+    tile.classList.toggle('selected-mode', on);
+    if (on && !silent) boing(tile);
+  });
   document.getElementById('hyperspaceOptions').classList.toggle('open', hyperspaceEnabled);
-  if (hyperspaceEnabled) {
-    sounds.hyperspaceActivate();
-    if (kesselRunEnabled) {
-      kesselRunEnabled = false;
-      document.getElementById('kesselToggle').classList.remove('selected-mode');
-      document.getElementById('kesselBadge').textContent = 'OFF';
-    }
-  } else {
-    sounds.navigate();
+
+  if (silent) return;
+  if (mode === 'hyperspace') sounds.hyperspaceActivate();
+  else if (mode === 'kessel') sounds.kesselRunActivate();
+  else sounds.navigate();
+  refreshSetup();
+  if (mode !== 'hyperspace') {
+    setTimeout(() => { if (setupStep === 3) goToStep(4, 'fwd'); }, AUTO_ADVANCE_MS);
   }
 }
 
 function setDifficulty(diff) {
   hyperspaceDiff = diff;
   document.querySelectorAll('#difficultyBtns .diff-btn').forEach(btn => {
-    btn.classList.toggle('selected-mode', btn.dataset.diff === diff);
+    const on = btn.dataset.diff === diff;
+    btn.classList.toggle('selected-mode', on);
+    if (on) boing(btn);
   });
   sounds.navigate();
+  refreshSetup();
+  setTimeout(() => { if (setupStep === 3) goToStep(4, 'fwd'); }, AUTO_ADVANCE_MS);
 }
 
 function startHyperspaceTimer() {
@@ -913,33 +1095,28 @@ function hyperspaceFailure() {
   }, 2500);
 }
 
-// ===== KESSEL RUN MODE =====
-function toggleKesselRun() {
-  kesselRunEnabled = !kesselRunEnabled;
-  const btn = document.getElementById('kesselToggle');
-  btn.classList.toggle('selected-mode', kesselRunEnabled);
-  document.getElementById('kesselBadge').textContent = kesselRunEnabled ? 'ON' : 'OFF';
-  if (kesselRunEnabled) {
-    sounds.kesselRunActivate();
-    if (hyperspaceEnabled) {
-      hyperspaceEnabled = false;
-      document.getElementById('hyperspaceToggle').classList.remove('selected-mode');
-      document.getElementById('hyperspaceBadge').textContent = 'OFF';
-      document.getElementById('hyperspaceOptions').classList.remove('open');
-    }
-  } else {
-    sounds.navigate();
-  }
+// ===== ALIEN INVASION MODE =====
+function setInvasion(size, opts) {
+  const silent = opts && opts.silent;
+  invasionSize = size;
+  document.querySelectorAll('.invasion-btn[data-invasion]').forEach(btn => {
+    const on = btn.dataset.invasion === size;
+    btn.classList.toggle('selected-mode', on);
+    if (on && !silent) boing(btn);
+  });
+  if (silent) return;
+  sounds.navigate();
+  refreshSetup();
+  setTimeout(() => { if (setupStep === 3) goToStep(4, 'fwd'); }, AUTO_ADVANCE_MS);
 }
 
-// ===== ALIEN INVASION MODE =====
 // Double-clicks are guarded with a plain flag rather than the button's
-// `.launching` CSS, the way Begin Mission does it. The launch animation runs for
-// 1.9s before navigating, and any way of coming back to this page that keeps the
-// DOM — the browser's Back button restoring it from the back/forward cache, most
-// obviously — brings that class back with it. When the class was what disabled
-// the button, that left it permanently unclickable. A flag cannot outlive the
-// page, so a restored page always has a working button.
+// `.launching` CSS. The launch animation runs before navigating, and any way of
+// coming back to this page that keeps the DOM — the browser's Back button
+// restoring it from the back/forward cache, most obviously — brings that class
+// back with it. When the class was what disabled the button, that left it
+// permanently unclickable. A flag cannot outlive the page, so a restored page
+// always has a working button.
 let alienLaunchPending = false;
 
 function launchAlienInvasion() {
@@ -954,28 +1131,29 @@ function launchAlienInvasion() {
   }
   const nums = [...selectedNums].join(',');
   const ops = [...selectedOps].join(',');
-  const btn = document.querySelector('.alien-invasion-link');
+  const aliens = INVASIONS[invasionSize].aliens;
+  const btn = document.getElementById('startBtn');
   alienLaunchPending = true;
-  if (btn) btn.classList.add('launching');
+  btn.classList.add('launching');
   sounds.missionStart();
+  setTimeout(() => btn.classList.add('liftoff'), 1100);
   setTimeout(() => {
-    window.location.href = `pages/alien-invasion.html?nums=${encodeURIComponent(nums)}&ops=${encodeURIComponent(ops)}`;
-  }, 1900);
+    window.location.href = `pages/alien-invasion.html?nums=${encodeURIComponent(nums)}&ops=${encodeURIComponent(ops)}&aliens=${aliens}`;
+  }, 1300);
 }
 
 // A page restored from the back/forward cache is shown exactly as it was left,
 // mid-launch-animation. Clearing the launch state on every `pageshow` resets the
-// glow and the pending flag so the buttons look and behave idle again.
+// glow and the pending flag so the button looks and behaves idle again.
 function clearLaunchState() {
   alienLaunchPending = false;
-  const alienBtn = document.querySelector('.alien-invasion-link');
-  if (alienBtn) alienBtn.classList.remove('launching');
   const startBtn = document.getElementById('startBtn');
   if (startBtn) startBtn.classList.remove('launching', 'liftoff');
 }
 
 window.addEventListener('pageshow', clearLaunchState);
 
+// ===== KESSEL RUN MODE =====
 function startKesselTimer() {
   stopKesselTimer();
   kesselRunStartedAt = Date.now();
@@ -1386,6 +1564,7 @@ function newMission() {
   stopHyperspaceTimer();
   stopKesselTimer();
   showScreen('setup');
+  goToStep(0, 'back');
 }
 
 // ===== THEME CYCLER =====
@@ -1432,6 +1611,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeHistoryModal();
 });
 
+
+// First paint of the setup deck.
+goToStep(0, 'fwd');
 
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));

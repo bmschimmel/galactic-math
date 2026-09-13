@@ -39,7 +39,8 @@ The file is organized into major sections, marked with `// ===== SECTION NAME ==
 | `KESSEL RUN COMET CELEBRATION` | Streaking comets for Kessel Run mode pass |
 | `HYPERSPACE JUMP ANIMATION` | Blue streak warp animation for Hyperspace mode completion |
 | `APP STATE` | Global state variables |
-| `SETUP` | Number grid, presets, operation buttons |
+| `SETUP` | Number grid, presets, operation cards |
+| `SETUP DECK` | Flashcard steps, flight path, briefing, nav buttons, `refreshSetup()` |
 | `HYPERSPACE MODE` | Toggle, difficulty selection, countdown timer |
 | `KESSEL RUN MODE` | Toggle, elapsed timer, penalty system |
 | `HELPERS` | `getCorrectAnswer()`, `getQuestionText()` |
@@ -65,7 +66,7 @@ The file is organized into major sections, marked with `// ===== SECTION NAME ==
 
 The app has three screens, toggled with the `showScreen(name)` function by adding/removing the `.active` class:
 
-1. **Setup** (`screen-setup`) — number selection, operation mode, game mode
+1. **Setup** (`screen-setup`) — a five-step flashcard deck: numbers, math, game, options, launch (see [setup.md](setup.md))
 2. **Quiz** (`screen-quiz`) — active question, nav dots, answer input, live score
 3. **Results** (`screen-results`) — rank badge, score breakdown, missed problems, session history
 

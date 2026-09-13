@@ -87,7 +87,7 @@ A **comet celebration** plays on a passing score (≥75%).
 
 ## Alien Invasion Mode
 
-A canvas-based space shooter at `pages/alien-invasion.html`. Selected numbers and operations are passed in via URL params (`nums`, `ops`) by the main setup screen.
+A canvas-based space shooter at `pages/alien-invasion.html`. Selected numbers and operations are passed in via URL params (`nums`, `ops`) by the main setup screen, along with how bad the invasion is: `aliens=5|10|25` sets `N_ALIENS` (Sneak Attack / Invasion / Chaos on the setup deck). Any other value, or opening the page on its own, gives the normal 10. Only the count is wired today; the rest of what each card implies is tracked in IDT-278.
 
 ### Objective
 

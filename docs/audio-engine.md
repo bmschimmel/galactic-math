@@ -37,18 +37,18 @@ All game sounds are defined in the `sounds` object. Each sound is a named functi
 | `keypress(key)` | Number key pressed in input | Soft sine tone; frequency mapped to digit (0=523Hz → 9=1319Hz) |
 | `correct()` | Correct answer submitted | Ascending lightsaber hum + two chime overtones |
 | `wrong()` | Wrong answer submitted | Descending imperial-style sawtooth buzz |
-| `navigate()` | Number/op toggled in setup | Short soft beep |
+| `navigate()` | Number/op/option tapped in setup, Next/Back | Short soft beep |
 | `submit()` | Enter pressed | R2-D2-style beep-boop (two quick tones) |
 | `missionStart()` | Begin Mission clicked | Rocket ignition: rumble → thrust build → liftoff shriek (~1.2s) |
 | `victory()` | Passing score celebration | 4-note triumphant fanfare (Star Wars-inspired) |
-| `modeActivate()` | Generic mode enable | Short rising power-up hum |
+| `modeActivate()` | Game card picked on the setup deck | Short rising power-up hum |
 | `blasterFlyby()` | Comet celebration start | TIE fighter–style whoosh |
 | `shockwaveImpact()` | Ring shockwave celebration start | Deep bass thud |
 | `burstPop()` | Particle burst (unused in current UI) | Sharp crack + sparkle |
 | `hyperspaceJump()` | Hyperspace mode completed | Rising roar sweeping up to 8kHz |
 | `hyperspaceTimeout()` | Hyperspace timer expired | Descending failure buzz |
-| `hyperspaceActivate()` | Hyperspace mode toggled ON | Hyperdrive charging up: rumble → high-energy peak |
-| `kesselRunActivate()` | Kessel Run mode toggled ON | Three countdown beeps + race start burst |
+| `hyperspaceActivate()` | Hyperspace row picked | Hyperdrive charging up: rumble → high-energy peak |
+| `kesselRunActivate()` | Kessel Run row picked | Three countdown beeps + race start burst |
 | `abortMission()` | Quit button clicked mid-quiz | Deflating power-down: engines losing thrust then silence |
 
 ---

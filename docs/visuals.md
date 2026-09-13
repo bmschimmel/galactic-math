@@ -97,7 +97,9 @@ Key UI animations defined in the `<style>` block:
 | `feedbackFlash` | Correct/wrong flash overlay | Brief `✓` or `✗` centered on screen |
 | `congratsBanner` | Pass banner | Fade/scale in, auto-dismiss after 3.5s |
 | `hyperWinBanner` / `hyperFailBanner` | Hyperspace outcome banners | Slide in from top |
-| `.launching` / `.liftoff` on `#startBtn` | Begin Mission button | Left-to-right fill + flash |
-| `aiLaunchGlow` (`.launching` on `.alien-invasion-link`) | Try Alien Invasion button | Green glow build-up before navigating; cleared on `pageshow` |
+| `.launching` / `.liftoff` on `#startBtn` | Begin Mission button (both games) | Left-to-right fill + flash; cleared on `pageshow` |
+| `cardFwd` / `cardBack` | Setup deck flashcards | 14px slide + slight scale in, spring easing, direction follows Next/Back |
+| `boing` | Any tapped tile on the setup deck | Squash-and-stretch (1 → 1.12 → 0.96 → 1) over 0.4s; re-triggered by removing and re-adding the class |
+| `fpPulse` | Current flight-path node | Gentle scale pulse |
 | `kesselPenaltyFlash` | Wrong answer in Kessel Run | Red penalty flash beside the input |
 | `progress-fill` | Quiz progress bar | CSS width transition |

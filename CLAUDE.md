@@ -17,7 +17,7 @@ The one piece of server-side code is the feedback worker in `worker/` (see [Feed
 
 - **App structure:** The game entry point is `index.html` (HTML only). CSS lives in `assets/css/style.css` and JS lives in `assets/js/game.js`. Do not inline CSS or JS back into `index.html`.
 - **Pages under `pages/`:** Each is a self-contained HTML file with its own inline `<style>` and `<script>` — they do not load `style.css` or `game.js`, and the split-file rule above does not apply to them. Add a new page only when an issue explicitly requires it.
-  - `pages/alien-invasion.html` — a separate arcade game mode (~3,300 lines), launched from the "Try Alien Invasion" button on the setup screen. It is the only thing that uses a local audio file (`assets/audio/low-fuel.m4a`).
+  - `pages/alien-invasion.html` — a separate arcade game mode (~3,300 lines), launched from the Game step of the setup deck. It is the only thing that uses a local audio file (`assets/audio/low-fuel.m4a`).
   - `pages/feedback.html` — the feedback form. Linked from the footer.
   - `pages/workflow.html` — "How It Works" explainer of the development workflow. Linked from the footer.
   - `pages/prototypes/` — throwaway design prototypes; not linked from the app.
@@ -58,14 +58,15 @@ The one piece of server-side code is the feedback worker in `worker/` (see [Feed
 - Correct/wrong sound effects on answer submission
 - Keypress sounds on number input
 - Celebration on passing (≥75%): ring shockwave in Standard and Hyperspace modes, comet streaks in Kessel Run
-- Hyperspace mode: timed challenge tile with difficulty cards (Wicked Easy 5m / Harder 3m / Hyperdrive 1m) and a countdown bar; blue jump animation on completion
+- Setup deck: five flashcard steps (Numbers → Math → Game → Options → Launch) with a flight-path stepper, fixed-height body, Back/Next in the same slots, and a Mission Briefing before **Begin Mission**
+- Hyperspace mode: game-mode row with difficulty cards (Wicked Easy 5m / Harder 3m / Hyperdrive 1m) and a countdown bar; blue jump animation on completion
 - Kessel Run mode: time how fast you finish; wrong answers add a 5s penalty
 - Theme cycler: Dark, Dim, Midnight, Deep Blue, Retro — fixed button top-right corner
 - Session history panel showing scores and mode labels for all rounds played
 - Results screen with rank, score breakdown, and missed problem review
 - Retry (same numbers) and New Mission (back to setup) options
 - Feedback page at `pages/feedback.html` — linked from footer; POSTs to the feedback worker, which files a GitHub issue
-- Alien Invasion launch button on the setup screen — opens `pages/alien-invasion.html`
+- Alien Invasion as an equal game card on the setup deck — opens `pages/alien-invasion.html` with `nums`, `ops` and `aliens` (5 / 10 / 25)
 
 ## Passing Threshold
 
