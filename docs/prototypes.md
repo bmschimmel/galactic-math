@@ -27,3 +27,15 @@ The launch step does not navigate. It shows what the real app would receive — 
 ### Deep links
 
 The active tab is kept in the URL hash: `#a`, `#b`, `#c`, `#compare`.
+
+---
+
+## Flight Deck — `pages/prototypes/flight-deck.html` (IDT-214, refined Option A)
+
+Option A on its own, dressed as the real setup screen (title, divider, one card). Three refinements over the exploration page came out of review:
+
+- **Fixed-size deck.** `.deck-body` is a fixed-height viewport (`--deck-height`, 400px on desktop and 440px on phones) with the flight path above and the nav bar below, so the card never changes height between steps and the buttons never move. Anything taller than the viewport scrolls inside it.
+- **Consistent nav.** Every step has the same two slots: **◂ Back** on the left (disabled on the first card rather than hidden) and one primary action on the right — **Next ▸**, or **Begin Mission** in the game's colour on the briefing card. All nav buttons share `.nav-btn` and the same height.
+- **"Begin Mission"**, not "Begin Training Mission", for both games.
+
+The game step also carries a dashed "More games coming soon" card to show that step 3 is a list that grows, not a pair of buttons. The launch step shows what the app would receive and offers **↺ New Mission** in the primary slot.
