@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
+### IDT-273 — Add missing security headers and split the CSP directives (PR #131)
+
+`_headers` set a single loose `default-src` that carried `'unsafe-inline'` for every resource type, and nothing else. The CSP is now split into per-resource directives — `script-src` and `style-src` keep `'unsafe-inline'` (the pages rely on inline `onclick=` handlers), while `img-src`, `font-src`, `connect-src`, `object-src 'none'`, `base-uri 'self'` and `frame-ancestors 'none'` are each scoped to exactly what the site loads, so the game can no longer be embedded in another site's iframe. `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin` and a `Permissions-Policy` that turns off camera, microphone and geolocation are added alongside. `docs/overview.md` documents each header and directive and what to update when adding an external resource.
+
 ### IDT-276 — Harden the AI title prompt against injection (PR #133)
 
 The worker built its title prompt by interpolating raw feedback text into the instruction, so a submission reading "ignore the above and reply with…" could dictate the GitHub issue title, which was used exactly as the model returned it. The instruction is now a `system` message that tells the model the feedback is data to summarize rather than commands to follow, and the feedback travels as a separate `user` message. Every model response then passes through `sanitizeTitle()`, which strips quotes, backticks and newlines, drops a "Title:" preamble and trailing punctuation, clamps the result to 80 characters at a word boundary, and treats anything under 3 characters as unusable so the next model — or the message-slice fallback — is used instead. `docs/feedback-system.md` documents both layers.
