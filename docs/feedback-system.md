@@ -62,7 +62,7 @@ A lightweight edge function that sits between the feedback form and GitHub.
 4. **Body size check** — a `Content-Length` over 8 KB is refused with `413` before the body is parsed
 5. **Honeypot check** — silently returns `200 OK` if the hidden honeypot field is filled
 6. **Validation** — requires `message` to be a non-blank string of 500 characters or fewer (type is checked before length, so a non-string can't slip through as `[object Object]`); a non-string `category` falls back to the `feedback` label; any `name` sent by a stale client is ignored
-7. **Title generation** — calls Cloudflare Workers AI to generate a concise 5–8 word GitHub issue title from the feedback message. Tries each model in `TITLE_MODELS` in order and uses the first one that answers. Falls back to the first 50 characters of the message if every model fails. See [Model rollover and health](#model-rollover-and-health).
+7. **Title generation** — calls Cloudflare Workers AI to generate a concise 5–8 word GitHub issue title from the feedback message. Tries each model in `TITLE_MODELS` in order and uses the first one that answers. Falls back to the first 50 characters of the message if every model fails. See [Model rollover and health](#model-rollover-and-health) and [Prompt hardening](#prompt-hardening).
 8. **GitHub issue creation** — POSTs to the GitHub REST API to create the issue with the generated title, category label, and the message as the body
 9. **Health reporting** — if every title model failed, the worker files a GitHub issue describing the outage (after the response is sent, via `ctx.waitUntil`)
 10. **Observability** — all key events (rejected origins, rate limits, honeypot triggers, issue creation, model failures) are logged via Cloudflare Workers observability
@@ -124,6 +124,27 @@ worker stays quiet rather than risking a flood.
 Reporting runs in `ctx.waitUntil()` after the response is sent and is wrapped in its own
 `try`/`catch`, so a health-reporting problem can never break or slow a feedback
 submission.
+
+### Prompt hardening
+
+The feedback text is untrusted input that goes straight into a model call, so two
+things keep a submitter from steering the resulting issue title:
+
+**1. Separation.** The instruction is a `system` message (`TITLE_SYSTEM_PROMPT`) and the
+feedback is passed as its own `user` message. It also tells the model the user message is
+data to summarize, not instructions to follow. The feedback is never interpolated into the
+instruction string, so an "ignore the above and reply with…" submission is just text the
+model is asked to summarize.
+
+**2. Clamping.** `sanitizeTitle()` runs on every model response before it is used: double
+quotes, backticks and wrapping single quotes are stripped, newlines collapse to one line,
+a leading "Title:" preamble and trailing punctuation are removed, and anything over 80
+characters is cut at a word boundary with an ellipsis. A result that ends up shorter than
+3 characters is treated the same as an empty response — the next model is tried, and if
+none produce a usable title the worker falls back to the first 50 characters of the message.
+
+This is deliberately a small hardening pass: the worst case was a rude or misleading title
+on a hobby repo's issue, and both layers are a few lines each.
 
 ### Secrets / Bindings required
 
