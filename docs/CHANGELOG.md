@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
-### IDT-275 — Cut starfield battery drain and honor prefers-reduced-motion (PR #TBD)
+### IDT-275 — Cut starfield battery drain and honor prefers-reduced-motion (PR #132)
 
 The background starfield redrew everything at 60fps forever — three full-screen radial gradients and ~300 individual star arcs every frame, on every screen, even with the tab hidden — a steady GPU and battery cost on the tablets and phones the app is aimed at. The nebula is now painted to an offscreen canvas at ~10fps and the stars are pre-rendered once per resize or theme change into two offscreen layers whose opposite-phase cross-fade carries the twinkle, so a frame is three blits instead of three gradient fills and hundreds of path fills. The loop stops while the tab is hidden and the resize handler is debounced to 150 ms so mobile URL-bar bounces no longer rebuild the field. The app also honors `prefers-reduced-motion` for the first time: the starfield is drawn once and left still, the ring, comet and hyperspace animations are skipped while their sounds and banners still play, and a CSS rule collapses every animation and transition to an instant frame.
 
