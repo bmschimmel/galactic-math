@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
+### IDT-277 — Bring CLAUDE.md back in line with the feedback worker and pages/ (PR #TBD)
+
+`CLAUDE.md` is the first file every agent session reads, and it had drifted: it said the feedback page "pre-fills a GitHub issue on submit" when it has POSTed to a Cloudflare Worker for some time, never mentioned the `worker/` directory, `pages/alien-invasion.html`, `pages/workflow.html` or `_headers`, and carried a stale "~40 KB" size threshold. It now has a Feedback worker section (what it does, that `GITHUB_TOKEN` is a Worker secret, that it deploys separately with `wrangler`, that `TITLE_MODELS` needs updating when Cloudflare retires a model), lists each page under `pages/` and states that those self-contained files are exempt from the split-CSS/JS rule, points at `_headers` as the place to update the CSP when adding an external origin, corrects the celebration line (rings in Standard and Hyperspace, comets in Kessel Run), and replaces the fixed size number with a per-PR growth threshold that will not go stale.
+
 ### IDT-272 — Delete unreferenced images and resize the OG image (PR #128)
 
 Two source PNGs in `assets/images/` — `logo-planet-only.png` (1.6 MB) and `logo-word-planet.png` (432 KB) — were being deployed to the public web root despite nothing in the HTML, CSS, or JS referencing them; they were only ever inputs for compositing the share image. Both are deleted (git history keeps them recoverable). `og-image-v2.png` was 1.0 MB at 4800×2520 while `index.html` declared it as 1200×630, so it is now downscaled to an actual 1200×630 and stored as an optimized RGB PNG at 286 KB, making the declared `og:image:width` / `og:image:height` true for social validators. Roughly 2.8 MB leaves the repo and the CDN.
