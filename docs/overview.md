@@ -15,6 +15,7 @@ galactic-math/
 ├── worker/
 │   ├── feedback-worker.js   # Cloudflare Worker: receives feedback, creates GitHub issues
 │   └── wrangler.toml        # Cloudflare deployment config
+├── _headers            # Cloudflare Pages response headers (CSP and other security headers)
 ├── og-image-v2.png     # Open Graph / Twitter Card preview image (1200×630)
 ├── CLAUDE.md           # Instructions for Claude Code
 ├── CONTRIBUTING.md     # Contributor and workflow guide
@@ -93,3 +94,33 @@ The app has three screens, toggled with the `showScreen(name)` function by addin
 Cloudflare Pages deploys automatically from the `main` branch. Every merge to `main` triggers a deploy; the live site updates within ~60 seconds at `https://galacticmath.app/`.
 
 The feedback worker (`worker/feedback-worker.js`) is deployed separately to Cloudflare Workers via `wrangler`.
+
+### Security headers (`_headers`)
+
+Cloudflare Pages reads `_headers` at the repo root and attaches its headers to every response. The `/*` block sets:
+
+| Header | Value | Why |
+|---|---|---|
+| `Content-Security-Policy` | see below | Restricts where each kind of resource may load from |
+| `X-Content-Type-Options` | `nosniff` | Stops browsers guessing a different MIME type than the one served |
+| `X-Frame-Options` | `DENY` | Legacy twin of `frame-ancestors 'none'` for older browsers |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Sends only the origin, not the full URL, to other sites |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` | The app uses none of these; turns them off outright |
+
+The CSP is split into per-resource directives rather than one `default-src`:
+
+| Directive | Allows | Needed by |
+|---|---|---|
+| `default-src 'self'` | Same-origin only | Fallback for anything not listed (media, workers, frames…) |
+| `script-src 'self' 'unsafe-inline'` | Own scripts plus inline handlers | `game.js`, the inline `onclick=` handlers and the inline scripts in `pages/` |
+| `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com` | Own CSS, inline styles, Google Fonts stylesheet | `style.css`, `style=` attributes, the Orbitron / Exo 2 `<link>` |
+| `font-src https://fonts.gstatic.com` | Google Fonts files | Pulled in by the Google Fonts stylesheet |
+| `img-src 'self' data:` | Own images and `data:` URIs | Favicons; the sub-pages use inline SVG `data:` favicons |
+| `connect-src 'self' https://galactic-math-feedback.bmschimmel.workers.dev` | `fetch()` targets | The feedback worker, and the `fetch()` of `assets/audio/low-fuel.m4a` in Alien Invasion |
+| `object-src 'none'` | Nothing | No plugins |
+| `base-uri 'self'` | Same-origin `<base>` only | Blocks base-tag hijacking |
+| `frame-ancestors 'none'` | No embedding | The game cannot be put in another site's iframe |
+
+`'unsafe-inline'` has to stay in `script-src` while the pages use inline `onclick=` handlers (which `CLAUDE.md` prescribes). Scoping it to `script-src` and `style-src` means images, objects, frames and `<base>` no longer inherit it.
+
+**When adding an external resource** (a new font host, a CDN, an API), add its origin to the matching directive here or the browser will block it silently — check the console for CSP violation reports.
