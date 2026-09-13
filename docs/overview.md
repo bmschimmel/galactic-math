@@ -15,7 +15,7 @@ galactic-math/
 ├── worker/
 │   ├── feedback-worker.js   # Cloudflare Worker: receives feedback, creates GitHub issues
 │   └── wrangler.toml        # Cloudflare deployment config
-├── og-image.svg        # Open Graph preview image
+├── og-image-v2.png     # Open Graph / Twitter Card preview image (1200×630)
 ├── CLAUDE.md           # Instructions for Claude Code
 ├── CONTRIBUTING.md     # Contributor and workflow guide
 └── docs/               # This documentation folder
