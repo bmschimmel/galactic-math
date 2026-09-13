@@ -409,11 +409,6 @@
     <div id="formState" style="display:none">
       <div id="categoryBadge"></div>
 
-      <span class="field-label">▸ Your name</span>
-      <input type="text" class="field-input" id="inputName"
-             placeholder="Han Solo" maxlength="80"
-             onkeydown="if(event.key==='Enter') document.getElementById('inputMessage').focus()">
-
       <span class="field-label" id="messageLabel">▸ What's your idea or what's broken?</span>
       <textarea class="field-input field-textarea" id="inputMessage"
                 placeholder="Tell us what you'd like to see, or describe the bug..."
@@ -668,7 +663,7 @@ function selectCategory(category) {
 
   document.getElementById('categoryState').style.display = 'none';
   document.getElementById('formState').style.display = 'block';
-  document.getElementById('inputName').focus();
+  document.getElementById('inputMessage').focus();
 }
 
 function showCategory() {
@@ -686,13 +681,11 @@ function updateCharCount() {
 }
 
 async function submitFeedback() {
-  const name = document.getElementById('inputName').value.trim();
   const message = document.getElementById('inputMessage').value.trim();
   const honeypot = document.getElementById('honeypot').value;
   const errorEl = document.getElementById('errorMsg');
   const btn = document.querySelector('#formState .btn-primary');
 
-  if (!name) { errorEl.textContent = '⚠ Enter your name'; return; }
   if (!message) { errorEl.textContent = '⚠ Tell us your idea or what\'s broken'; return; }
   if (message.length > 500) { errorEl.textContent = '⚠ Message must be 500 characters or fewer'; return; }
   errorEl.textContent = '';
@@ -704,7 +697,7 @@ async function submitFeedback() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, message, category: selectedCategory, honeypot }),
+      body: JSON.stringify({ message, category: selectedCategory, honeypot }),
     });
 
     if (res.ok) {
