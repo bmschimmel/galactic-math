@@ -149,7 +149,7 @@
   @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
 
   /* Flashcard */
-  .flashcard { display: flex; flex-direction: column; gap: 14px; min-height: 100%; }
+  .flashcard { display: flex; flex-direction: column; gap: 14px; flex: 1; }
   .flashcard.in-fwd { animation: cardFwd 0.5s var(--boing) both; }
   .flashcard.in-back { animation: cardBack 0.5s var(--boing) both; }
   /* Slide stays inside the deck's 24px padding so nothing crosses the border. */
@@ -167,7 +167,7 @@
     color: var(--star-white);
     text-wrap: balance;
   }
-  .step-hint { color: var(--muted); font-size: 13px; min-height: 1.5em; margin-top: auto; }
+  .step-hint { color: var(--muted); font-size: 13px; min-height: 1.5em; margin-top: auto; padding-top: 8px; text-align: left; }
   .hint-ok { color: var(--saber-green); }
 
   /* ===== WIDGETS ===== */
@@ -430,8 +430,8 @@ const MODES = [
 // missiles, more gates, more math — one dial does both jobs.
 const INVASIONS = [
   { id: 'sneak',    icon: '🛸', name: 'Sneak Attack', level: 'easy',   aliens: 5,  desc: 'Alien ships unarmed' },
-  { id: 'invasion', icon: '👾', name: 'Invasion',     level: 'normal', aliens: 10, desc: 'Some ships are armed' },
-  { id: 'chaos',    icon: '🌀', name: 'Chaos',        level: 'hard',   aliens: 25, desc: 'Every ship is armed' },
+  { id: 'invasion', icon: '👾', name: 'Invasion',     level: 'normal', aliens: 10, desc: 'Aliens fire lasers!' },
+  { id: 'chaos',    icon: '🌀', name: 'Chaos',        level: 'hard',   aliens: 25, desc: 'Good luck, pilot' },
 ];
 const DIFFS = [
   { id: 'wicked-easy', icon: '😌', name: 'Wicked Easy', level: 'easy',   time: '5:00' },
@@ -442,7 +442,7 @@ const STEPS = [
   { id: 'nums',   icon: '🔢', label: 'NUMBERS',   title: 'Which numbers are we training?' },
   { id: 'ops',    icon: '✖️', label: 'MATH',      title: 'What kind of math?' },
   { id: 'game',   icon: '🎮', label: 'GAME',      title: 'Pick your game' },
-  { id: 'mode',   icon: '⚙️', label: 'OPTIONS',   title: { galactic: 'Pick your options', alien: 'How bad is the alien invasion?' } },
+  { id: 'mode',   icon: '⚙️', label: 'OPTIONS',   title: { galactic: 'Pick your game mode!', alien: 'How bad is the alien invasion?' } },
   { id: 'launch', icon: '🚀', label: 'LAUNCH',    title: 'Mission briefing' },
 ];
 
@@ -754,7 +754,6 @@ function render(dir) {
     hint.textContent = 'More aliens means more missiles — and more math to earn them. Invasion is the normal game.';
     card.append(invasionPicker(s, () => setTimeout(() => go(4, 'fwd'), 420)));
   } else if (step.id === 'mode') {
-    hint.textContent = 'Standard is already picked. Add a timer if you want one.';
     card.append(modePicker(s, (final) => { if (final) setTimeout(() => go(4, 'fwd'), 420); else refresh(); }));
   } else {
     const brief = el('div', 'briefing stagger');
