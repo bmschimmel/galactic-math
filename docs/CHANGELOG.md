@@ -5,6 +5,18 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-09-13
+
+### IDT-271 — Remove the Your Name field from the feedback page (PR #127)
+
+The feedback form asked for a name and the worker wrote it verbatim into the public GitHub issue it filed, which for an app aimed at kids aged 5–12 meant a child's self-entered name could end up permanently public and search-indexed. The field is gone: `pages/feedback.html` no longer renders or validates it and no longer sends `name` in the request, and `worker/feedback-worker.js` no longer requires it, no longer enforces a name length, and files the message alone as the issue body. A `name` sent by a stale cached client is silently dropped rather than rejected, so older tabs keep working through the change. Choosing a category now drops focus straight into the message box, and the glowing divider and spacing that separated the message box from the Transmit button are gone, so the button sits directly under the field.
+
+### IDT-214 — Prototype three setup-flow journeys for choosing a game (PR #126)
+
+Alien Invasion joined the setup screen as a dashed "Try Alien Invasion" link under the main launch button, and the timed challenge modes only apply to Galactic Math, so the path from picking numbers to launching a game had become uneven. `pages/prototypes/setup-flow.html` is a self-contained, fully clickable page with three alternative journeys — a one-flashcard-per-step wizard (Flight Deck), a game-first page whose rows unlock in turn (Mission Board), and a two-ship layout where each game owns its challenge chips and launch button (Launch Bay) — plus a comparison tab covering order, taps to launch, phone fit and build cost. Each prototype reuses the game's tokens and widgets with bouncy spring motion, and the launch step shows what the real app would receive instead of navigating. Nothing in the game itself changes; `docs/prototypes.md` describes the page.
+
+---
+
 ## 2026-09-10
 
 ### IDT-217 — Replace the retired feedback title model and detect the next retirement (PR #123)

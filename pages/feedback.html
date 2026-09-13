@@ -166,7 +166,7 @@
     letter-spacing: 1px;
     font-family: 'Orbitron', monospace;
     min-height: 18px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
 
   .btn-primary {
@@ -191,13 +191,6 @@
     transform: translateY(-1px);
   }
 
-  .saber-divider {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--saber-blue), transparent);
-    margin: 24px 0;
-    box-shadow: 0 0 6px var(--saber-blue);
-  }
 
   /* ===== CATEGORY PICKER ===== */
   .category-prompt {
@@ -409,16 +402,11 @@
     <div id="formState" style="display:none">
       <div id="categoryBadge"></div>
 
-      <span class="field-label">▸ Your name</span>
-      <input type="text" class="field-input" id="inputName"
-             placeholder="Han Solo" maxlength="80"
-             onkeydown="if(event.key==='Enter') document.getElementById('inputMessage').focus()">
-
       <span class="field-label" id="messageLabel">▸ What's your idea or what's broken?</span>
       <textarea class="field-input field-textarea" id="inputMessage"
                 placeholder="Tell us what you'd like to see, or describe the bug..."
                 maxlength="500" oninput="updateCharCount()"></textarea>
-      <div style="text-align:right; font-size:11px; color:var(--muted); margin-top:-18px; margin-bottom:16px;">
+      <div style="text-align:right; font-size:11px; color:var(--muted); margin-top:-18px; margin-bottom:8px;">
         <span id="charCount">0</span> / 500
       </div>
 
@@ -427,8 +415,6 @@
              style="display:none" tabindex="-1" aria-hidden="true">
 
       <div class="error-msg" id="errorMsg"></div>
-
-      <div class="saber-divider"></div>
 
       <button class="btn-primary" onclick="playTransmitSound(); submitFeedback()">
         📡 TRANSMIT FEEDBACK
@@ -668,7 +654,7 @@ function selectCategory(category) {
 
   document.getElementById('categoryState').style.display = 'none';
   document.getElementById('formState').style.display = 'block';
-  document.getElementById('inputName').focus();
+  document.getElementById('inputMessage').focus();
 }
 
 function showCategory() {
@@ -686,13 +672,11 @@ function updateCharCount() {
 }
 
 async function submitFeedback() {
-  const name = document.getElementById('inputName').value.trim();
   const message = document.getElementById('inputMessage').value.trim();
   const honeypot = document.getElementById('honeypot').value;
   const errorEl = document.getElementById('errorMsg');
   const btn = document.querySelector('#formState .btn-primary');
 
-  if (!name) { errorEl.textContent = '⚠ Enter your name'; return; }
   if (!message) { errorEl.textContent = '⚠ Tell us your idea or what\'s broken'; return; }
   if (message.length > 500) { errorEl.textContent = '⚠ Message must be 500 characters or fewer'; return; }
   errorEl.textContent = '';
@@ -704,7 +688,7 @@ async function submitFeedback() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, message, category: selectedCategory, honeypot }),
+      body: JSON.stringify({ message, category: selectedCategory, honeypot }),
     });
 
     if (res.ok) {

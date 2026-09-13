@@ -11,7 +11,6 @@ const ALLOWED_ORIGINS = [
 ];
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_NAME_LENGTH = 80;
 const MAX_MESSAGE_LENGTH = 500;
 
 // In-memory rate limit store: IP → [timestamp, ...]
@@ -203,15 +202,12 @@ export default {
       });
     }
 
-    const { name, message, category } = body;
-    if (!name || !message) {
-      return new Response(JSON.stringify({ error: 'Missing name or message' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
-      });
-    }
-    if (name.length > MAX_NAME_LENGTH) {
-      return new Response(JSON.stringify({ error: `Name must be ${MAX_NAME_LENGTH} characters or fewer` }), {
+    // Only the message and category are read. The form no longer collects a
+    // name — the app is for kids, and anything typed there would land in a
+    // public GitHub issue — so any `name` a stale client still sends is dropped.
+    const { message, category } = body;
+    if (!message) {
+      return new Response(JSON.stringify({ error: 'Missing message' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
       });
@@ -228,7 +224,7 @@ export default {
     const title = generatedTitle || `${message.slice(0, 50)}${message.length > 50 ? '…' : ''}`;
 
     const label = CATEGORY_LABELS[category] || 'feedback';
-    const issueBody = `${message}\n\n--\n\n**Submitter**: ${name}`;
+    const issueBody = message;
 
     const response = await githubRequest(`https://api.github.com/repos/${GITHUB_REPO}/issues`, env, {
       method: 'POST',

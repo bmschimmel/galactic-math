@@ -20,12 +20,15 @@ A standalone page (not part of `index.html`) linked from the footer. It shares t
 
 ### Fields
 
-- **Name** — required; included in the GitHub issue body
 - **Category** — picker with three options:
   - Bug — creates a `bug` label on GitHub
   - Feature Request — creates an `enhancement` label
   - Other — creates a `feedback` label
 - **Message** — required; the main feedback text
+
+The form deliberately does not ask for a name. The app is for kids aged 5–12 and
+everything submitted lands in a public GitHub issue, so there is no field that
+could carry a child's name onto the public internet.
 
 ### Submission flow
 
@@ -33,7 +36,6 @@ On submit, the form sends a `POST` request to the Cloudflare Worker endpoint wit
 
 ```json
 {
-  "name": "...",
   "category": "bug|feature|other",
   "message": "...",
   "honeypot": ""
@@ -57,9 +59,9 @@ A lightweight edge function that sits between the feedback form and GitHub.
 1. **CORS preflight** — handles `OPTIONS` requests for cross-origin form submission
 2. **Rate limiting** — max 3 submissions per IP per 10 minutes (in-memory store; resets on worker restart)
 3. **Honeypot check** — silently returns `200 OK` if the hidden honeypot field is filled
-4. **Validation** — requires both `name` and `message` fields
+4. **Validation** — requires a `message` field of 500 characters or fewer; any `name` sent by a stale client is ignored
 5. **Title generation** — calls Cloudflare Workers AI to generate a concise 5–8 word GitHub issue title from the feedback message. Tries each model in `TITLE_MODELS` in order and uses the first one that answers. Falls back to the first 50 characters of the message if every model fails. See [Model rollover and health](#model-rollover-and-health).
-6. **GitHub issue creation** — POSTs to the GitHub REST API to create the issue with the generated title, category label, and body (`message + submitter name`)
+6. **GitHub issue creation** — POSTs to the GitHub REST API to create the issue with the generated title, category label, and the message as the body
 7. **Health reporting** — if every title model failed, the worker files a GitHub issue describing the outage (after the response is sent, via `ctx.waitUntil`)
 8. **Observability** — all key events (rate limits, honeypot triggers, issue creation, model failures) are logged via Cloudflare Workers observability
 
