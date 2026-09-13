@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
-### IDT-214 — Prototype three setup-flow journeys for choosing a game (PR #TBD)
+### IDT-214 — Prototype three setup-flow journeys for choosing a game (PR #126)
 
 Alien Invasion joined the setup screen as a dashed "Try Alien Invasion" link under the main launch button, and the timed challenge modes only apply to Galactic Math, so the path from picking numbers to launching a game had become uneven. `pages/prototypes/setup-flow.html` is a self-contained, fully clickable page with three alternative journeys — a one-flashcard-per-step wizard (Flight Deck), a game-first page whose rows unlock in turn (Mission Board), and a two-ship layout where each game owns its challenge chips and launch button (Launch Bay) — plus a comparison tab covering order, taps to launch, phone fit and build cost. Each prototype reuses the game's tokens and widgets with bouncy spring motion, and the launch step shows what the real app would receive instead of navigating. Nothing in the game itself changes; `docs/prototypes.md` describes the page.
 
