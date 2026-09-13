@@ -8,8 +8,11 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 ## 2026-09-13
 
 ### IDT-270 — Enforce allowed origins and fix the rate limiter in the feedback worker (PR #130)
-
 The feedback worker accepted requests from anywhere and its rate limiter was an in-memory `Map` that lived inside a single worker instance, so the 3-per-10-minutes cap reset whenever Cloudflare recycled the worker and never applied across instances. Requests whose `Origin` is not one of the game's own sites now get a `403` before any AI or GitHub call, on both the preflight and the `POST`. The rate limiter is now Cloudflare's Rate Limiting binding (`FEEDBACK_RATE_LIMITER`), declared in `wrangler.toml`, whose counters are shared across worker instances in a location and survive restarts; because the binding only supports 10- or 60-second windows the rule is now 3 submissions per IP per 60 seconds. The worker also refuses bodies over 8 KB by `Content-Length` before parsing, checks that `message` is a string before checking its length, sends `Vary: Origin` on CORS responses, and its `compatibility_date` moves from `2024-01-01` to `2026-09-01`.
+
+### IDT-274 — Base Hyperspace and Kessel Run timers on the wall clock (PR #129)
+
+Both timed modes counted `setInterval` ticks, and browsers throttle background-tab timers to roughly once a minute, so tabbing away paused the Hyperspace countdown and froze the Kessel Run clock — a kid could switch tabs mid-run and come back to a "record" that never happened. Each timer now records `Date.now()` when the round starts and derives elapsed or remaining seconds from that on every repaint; the interval runs at 250 ms and only repaints when the derived second changes, so the display catches up the moment a tab regains focus. The Hyperspace final-10-seconds beep is guarded by a last-announced-second check so a jumped second plays one beep, not a burst, and `stopKesselTimer()` takes a final clock reading so the results screen shows the true time.
 
 ### IDT-272 — Delete unreferenced images and resize the OG image (PR #128)
 
