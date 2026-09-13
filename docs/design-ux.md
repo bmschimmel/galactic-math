@@ -159,6 +159,10 @@ Answer feedback is immediate and multi-sensory:
 
 All of this happens within the same animation frame. The feedback loop must be fast — any delay between pressing Enter and seeing a response breaks immersion for kids.
 
+### Reduced motion
+
+The app honors the OS-level `prefers-reduced-motion` setting. Motion is decoration here, never information: every celebration also has a sound and a banner, and every state change also has a color change. So under reduced motion the starfield stands still, the rings, comets and hyperspace streaks are skipped, and CSS animations collapse to their end frame — and nothing a kid needs to understand the game is lost. See [visuals.md](visuals.md#reduced-motion) for the mechanics.
+
 ### Disabled states
 
 Inputs and buttons are disabled immediately after submission, not after the animation completes. This prevents double-submission when kids press Enter quickly. Disabled styles use `opacity: 0.4` rather than `display: none` so the layout doesn't shift.

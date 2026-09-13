@@ -83,6 +83,17 @@
     position: relative;
   }
 
+  /* Reduced motion: collapse every CSS animation and transition to a single
+     instant frame. The starfield and canvas celebrations check the same
+     query in game.js (REDUCED_MOTION). */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   /* Star field */
   #starfield {
     position: fixed;
