@@ -166,7 +166,7 @@
     letter-spacing: 1px;
     font-family: 'Orbitron', monospace;
     min-height: 18px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
 
   .btn-primary {
@@ -191,13 +191,6 @@
     transform: translateY(-1px);
   }
 
-  .saber-divider {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--saber-blue), transparent);
-    margin: 24px 0;
-    box-shadow: 0 0 6px var(--saber-blue);
-  }
 
   /* ===== CATEGORY PICKER ===== */
   .category-prompt {
@@ -413,7 +406,7 @@
       <textarea class="field-input field-textarea" id="inputMessage"
                 placeholder="Tell us what you'd like to see, or describe the bug..."
                 maxlength="500" oninput="updateCharCount()"></textarea>
-      <div style="text-align:right; font-size:11px; color:var(--muted); margin-top:-18px; margin-bottom:16px;">
+      <div style="text-align:right; font-size:11px; color:var(--muted); margin-top:-18px; margin-bottom:8px;">
         <span id="charCount">0</span> / 500
       </div>
 
@@ -422,8 +415,6 @@
              style="display:none" tabindex="-1" aria-hidden="true">
 
       <div class="error-msg" id="errorMsg"></div>
-
-      <div class="saber-divider"></div>
 
       <button class="btn-primary" onclick="playTransmitSound(); submitFeedback()">
         📡 TRANSMIT FEEDBACK
