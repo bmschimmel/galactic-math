@@ -21,22 +21,27 @@ A countdown timer is overlaid on the quiz screen. The user must complete all que
 | `hyperspaceEnabled` | Whether the mode is toggled on |
 | `hyperspaceDiff` | Selected difficulty: `'wicked-easy'`, `'harder'`, or `'hyperdrive'` |
 | `HYPERSPACE_LIMITS` | Time limits: 300s / 180s / 60s |
-| `hyperspaceTimer` | The `setInterval` handle |
-| `hyperspaceTimeRemaining` | Seconds left |
+| `hyperspaceTimer` | The `setInterval` repaint handle |
+| `hyperspaceStartedAt` | `Date.now()` when the round started |
+| `hyperspaceTimeRemaining` | Seconds left, derived from the clock on each repaint |
+| `hyperspaceLastBeepSecond` | Last second a countdown beep played for (prevents replays) |
 | `hyperspaceHalfwayShown` | Whether the halfway status message has been shown |
 | `hyperspaceHandled` | Guards against the success/failure path running twice |
 
 ### Timer behavior
 
+- Time remaining is computed as `limit - floor((Date.now() - hyperspaceStartedAt) / 1000)` on every repaint, never by counting ticks. The interval runs every `TIMER_REPAINT_MS` (250 ms) purely to refresh the display, so the countdown keeps running accurately when the browser throttles a background tab and catches up as soon as the tab regains focus
 - A progress bar (`hyperspaceBarFill`) shrinks from 100% to 0% as time drains
 - When time remaining drops below 25%, both the countdown text and bar switch to a `.warning` state (red pulsing)
 - At 50% time elapsed, a status message appears: `▸ COORDINATES CHECKED, ALMOST READY`
+- In the final 10 seconds a countdown beep plays once per second; `hyperspaceLastBeepSecond` ensures that if several seconds pass in one repaint (e.g. returning to a throttled tab) only one beep plays rather than a burst
 - If time hits 0: `hyperspaceFailure()` is called — plays a failure sound, shows the fail banner for 2.5s, then shows results
 - If all questions are answered in time: `hyperspaceSuccess()` is called — plays the hyperspace jump sound, launches the `launchHyperspace()` animation (~3s), then shows results
 
 ### Notes
 
 - The `hyperspaceHandled` flag ensures that if the quiz finishes on the exact tick the timer hits 0, only one outcome fires
+- The final-10-seconds beep (`sounds.hyperspaceCountdownTick`) is guarded by `hyperspaceLastBeepSecond`, so returning from a throttled tab plays at most one beep rather than replaying every skipped second
 - Enabling Hyperspace automatically disables Kessel Run and vice versa
 
 ---
@@ -50,9 +55,18 @@ A count-up timer records how long it takes to complete the quiz. Wrong answers a
 | Variable | Purpose |
 |---|---|
 | `kesselRunEnabled` | Whether the mode is toggled on |
-| `kesselRunTimer` | The `setInterval` handle |
-| `kesselRunElapsed` | Seconds elapsed since quiz start |
+| `kesselRunTimer` | The `setInterval` repaint handle |
+| `kesselRunStartedAt` | `Date.now()` when the run started |
+| `kesselRunElapsed` | Seconds elapsed since quiz start, derived from the clock |
 | `kesselRunPenalties` | Total penalty seconds accumulated |
+
+### Timer behavior
+
+Elapsed time is `floor((Date.now() - kesselRunStartedAt) / 1000)`, recomputed on every repaint (`TIMER_REPAINT_MS`, 250 ms). Because the value comes from the wall clock rather than a tick count, switching tabs mid-run doesn't freeze the clock — the full time away is counted. `stopKesselTimer()` takes a final reading from the clock so the results screen shows the true elapsed time regardless of when the last repaint fired.
+
+### Timer behavior
+
+The clock is wall-time based, not a tick count: `elapsed = floor((Date.now() - kesselRunStartedAt) / 1000)`. Tabbing away mid-run does not freeze the clock, so a Kessel time always reflects real seconds. `stopKesselTimer()` takes a final reading from the clock so the results screen never depends on whether the last repaint happened to fire.
 
 ### Penalty display
 
