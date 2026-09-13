@@ -597,15 +597,27 @@ let hyperspaceEnabled = false;
 let hyperspaceDiff = 'wicked-easy';
 const HYPERSPACE_LIMITS = { 'wicked-easy': 300, 'harder': 180, 'hyperdrive': 60 };
 let hyperspaceTimer = null;
+let hyperspaceStartedAt = 0;
 let hyperspaceTimeRemaining = 0;
+let hyperspaceLastBeepSecond = 0;
 let hyperspaceHalfwayShown = false;
 let hyperspaceHandled = false;
 
 // Kessel Run mode state
 let kesselRunEnabled = false;
 let kesselRunTimer = null;
+let kesselRunStartedAt = 0;
 let kesselRunElapsed = 0;
 let kesselRunPenalties = 0;
+
+// Timers derive their value from the wall clock (Date.now()) rather than
+// counting setInterval ticks, so they stay accurate when the browser
+// throttles background tabs. The interval is only a repaint trigger.
+const TIMER_REPAINT_MS = 250;
+
+function secondsSince(startedAt) {
+  return Math.floor((Date.now() - startedAt) / 1000);
+}
 
 // ===== SETUP =====
 const grid = document.getElementById('numGrid');
@@ -726,9 +738,11 @@ function setDifficulty(diff) {
 
 function startHyperspaceTimer() {
   stopHyperspaceTimer();
-  hyperspaceTimeRemaining = HYPERSPACE_LIMITS[hyperspaceDiff];
+  const total = HYPERSPACE_LIMITS[hyperspaceDiff];
+  hyperspaceStartedAt = Date.now();
+  hyperspaceTimeRemaining = total;
+  hyperspaceLastBeepSecond = 0;
   hyperspaceHalfwayShown = false;
-  const total = hyperspaceTimeRemaining;
 
   function fmt(s) {
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -741,7 +755,9 @@ function startHyperspaceTimer() {
   document.getElementById('hyperspaceStatusMsg').textContent = '';
 
   hyperspaceTimer = setInterval(() => {
-    hyperspaceTimeRemaining--;
+    const remaining = Math.max(0, total - secondsSince(hyperspaceStartedAt));
+    if (remaining === hyperspaceTimeRemaining) return; // nothing changed since last repaint
+    hyperspaceTimeRemaining = remaining;
     const pct = hyperspaceTimeRemaining / total;
 
     document.getElementById('hyperspaceCountdown').textContent = fmt(hyperspaceTimeRemaining);
@@ -756,7 +772,12 @@ function startHyperspaceTimer() {
       document.getElementById('hyperspaceStatusMsg').textContent = '▸ COORDINATES CHECKED, ALMOST READY';
     }
 
-    if (hyperspaceTimeRemaining > 0 && hyperspaceTimeRemaining <= 10) {
+    // Beep once per second in the final 10s. The guard means a jump of
+    // several seconds (e.g. returning to a throttled tab) plays one beep,
+    // not a burst of them.
+    if (hyperspaceTimeRemaining > 0 && hyperspaceTimeRemaining <= 10
+        && hyperspaceTimeRemaining !== hyperspaceLastBeepSecond) {
+      hyperspaceLastBeepSecond = hyperspaceTimeRemaining;
       sounds.hyperspaceCountdownTick(hyperspaceTimeRemaining);
     }
 
@@ -764,7 +785,7 @@ function startHyperspaceTimer() {
       stopHyperspaceTimer();
       hyperspaceFailure();
     }
-  }, 1000);
+  }, TIMER_REPAINT_MS);
 }
 
 function stopHyperspaceTimer() {
@@ -871,20 +892,29 @@ window.addEventListener('pageshow', clearLaunchState);
 
 function startKesselTimer() {
   stopKesselTimer();
+  kesselRunStartedAt = Date.now();
   kesselRunElapsed = 0;
   kesselRunPenalties = 0;
   document.getElementById('kesselElapsed').textContent = '0:00';
   document.getElementById('kesselPenalties').textContent = '+0s';
   kesselRunTimer = setInterval(() => {
-    kesselRunElapsed++;
+    const elapsed = secondsSince(kesselRunStartedAt);
+    if (elapsed === kesselRunElapsed) return; // nothing changed since last repaint
+    kesselRunElapsed = elapsed;
     const m = Math.floor(kesselRunElapsed / 60);
     const s = String(kesselRunElapsed % 60).padStart(2, '0');
     document.getElementById('kesselElapsed').textContent = `${m}:${s}`;
-  }, 1000);
+  }, TIMER_REPAINT_MS);
 }
 
 function stopKesselTimer() {
-  if (kesselRunTimer) { clearInterval(kesselRunTimer); kesselRunTimer = null; }
+  if (kesselRunTimer) {
+    clearInterval(kesselRunTimer);
+    kesselRunTimer = null;
+    // Snapshot the final time from the clock so the results screen
+    // doesn't depend on whether the last repaint happened to fire.
+    kesselRunElapsed = secondsSince(kesselRunStartedAt);
+  }
 }
 
 function addKesselPenalty() {
