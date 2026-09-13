@@ -38,4 +38,14 @@ Option A on its own, dressed as the real setup screen (title, divider, one card)
 - **Consistent nav.** Every step has the same two slots: **◂ Back** on the left (disabled on the first card rather than hidden) and one primary action on the right — **Next ▸**, or **Begin Mission** in the game's colour on the briefing card. All nav buttons share `.nav-btn` and the same height.
 - **"Begin Mission"**, not "Begin Training Mission", for both games.
 
+**The challenge step is per game.** Galactic Math keeps Standard / Hyperspace / Kessel Run (Hyperspace opens its three difficulty cards). Alien Invasion has no timer to turn off, so its challenge is the size of the invasion — three cards mirroring the Hyperspace difficulty shape, each with one big number:
+
+| Card | Aliens | Bundled tuning (not shown to the kid) |
+|---|---|---|
+| 🛸 Scout Party | 5 | none shoot back, comets slower |
+| 👾 Invasion (default) | 10 | today's game exactly (`N_ALIENS = 10`, half shoot) |
+| 🌀 Chaos | 25 | most shoot, comets faster, extra fuel pickups |
+
+More aliens means more missiles, which means more gates and more math, so one dial sets difficulty and math volume together. Switching game on step 3 clears the challenge so a kid never carries a Galactic Math mode into Alien Invasion. The launch step shows an `aliens=N` URL param for Alien Invasion, which would replace the fixed `N_ALIENS` constant when this is built.
+
 The game step also carries a dashed "More games coming soon" card to show that step 3 is a list that grows, not a pair of buttons. The launch step shows what the app would receive and offers **↺ New Mission** in the primary slot.

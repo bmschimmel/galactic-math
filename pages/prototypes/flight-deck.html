@@ -275,6 +275,14 @@
   .diff-btn .dn { font-family: var(--display); font-size: 8px; font-weight: 700; letter-spacing: 1px; color: var(--star-white); text-align: center; }
   .diff-btn .dt { font-family: var(--display); font-size: 13px; font-weight: 700; color: var(--gold); filter: drop-shadow(0 0 6px var(--gold)); }
 
+  .invasion-grid .diff-btn { padding: 16px 8px 14px; gap: 6px; border-color: rgba(57, 255, 20, 0.15); }
+  .invasion-grid .diff-btn:hover { border-color: rgba(57, 255, 20, 0.45); }
+  .invasion-grid .diff-btn.on { border-color: var(--saber-green); background: rgba(57, 255, 20, 0.08); box-shadow: 0 0 16px var(--glow-green); }
+  .invasion-grid .di { font-size: 26px; }
+  .invasion-grid .dt { font-size: 24px; color: var(--saber-green); filter: drop-shadow(0 0 8px var(--saber-green)); }
+  .invasion-grid .dn { font-size: 9px; }
+  .invasion-grid .dd { font-size: 10px; color: var(--muted); text-align: center; }
+
   .briefing { display: flex; flex-direction: column; gap: 8px; }
   .brief-row {
     display: flex; align-items: center; gap: 12px;
@@ -401,10 +409,18 @@ const GAMES = {
   galactic: { id: 'galactic', icon: '🚀', name: 'GALACTIC MATH',  desc: 'Answer 20 problems and earn your Jedi rank.' },
   alien:    { id: 'alien',    icon: '👾', name: 'ALIEN INVASION', desc: 'Fly your rocket through 20 math gates. Dodge the asteroids!' },
 };
+// Galactic Math challenges: a timer you can add, or not.
 const MODES = [
-  { id: 'standard',   icon: '🧘', name: 'STANDARD',   desc: { galactic: 'No timer. Go at your own pace.',                 alien: 'No timer. Fly the gates at your own pace.' } },
-  { id: 'hyperspace', icon: '⚡', name: 'HYPERSPACE', desc: { galactic: 'Finish all 20 before the jump!',                 alien: 'Clear every gate before the jump!' } },
-  { id: 'kessel',     icon: '☄️', name: 'KESSEL RUN', desc: { galactic: 'How fast can you finish? Wrong answers add 5s.', alien: 'Fastest run through the gates. Wrong answers add 5s.' } },
+  { id: 'standard',   icon: '🧘', name: 'STANDARD',   desc: 'No timer. Go at your own pace.' },
+  { id: 'hyperspace', icon: '⚡', name: 'HYPERSPACE', desc: 'Finish all 20 before the jump!' },
+  { id: 'kessel',     icon: '☄️', name: 'KESSEL RUN', desc: 'How fast can you finish? Wrong answers add 5s.' },
+];
+// Alien Invasion challenges: how big the invasion is. More aliens means more
+// missiles, more gates, more math — one dial does both jobs.
+const INVASIONS = [
+  { id: 'scout',    icon: '🛸', name: 'Scout Party', aliens: 5,  desc: 'None shoot back' },
+  { id: 'invasion', icon: '👾', name: 'Invasion',    aliens: 10, desc: 'Half shoot back' },
+  { id: 'chaos',    icon: '🌀', name: 'Chaos',       aliens: 25, desc: 'Good luck, pilot' },
 ];
 const DIFFS = [
   { id: 'wicked-easy', icon: '😌', name: 'Wicked Easy', time: '5:00' },
@@ -415,7 +431,7 @@ const STEPS = [
   { id: 'nums',   icon: '🔢', label: 'NUMBERS',   title: 'Which numbers are we training?' },
   { id: 'ops',    icon: '✖️', label: 'MATH',      title: 'What kind of math?' },
   { id: 'game',   icon: '🎮', label: 'GAME',      title: 'Pick your game' },
-  { id: 'mode',   icon: '⏱️', label: 'CHALLENGE', title: 'Pick your challenge' },
+  { id: 'mode',   icon: '⏱️', label: 'CHALLENGE', title: { galactic: 'Pick your challenge', alien: 'How big is the invasion?' } },
   { id: 'launch', icon: '🚀', label: 'LAUNCH',    title: 'Mission briefing' },
 ];
 
@@ -473,6 +489,10 @@ function numsLabel(s) {
 function opsLabel(s) { return OPS.filter(o => s.ops.has(o.id)).map(o => o.sym).join(' ') || 'none yet'; }
 function gameLabel(s) { const g = GAMES[s.game]; return g ? `${g.icon} ${g.name}` : ''; }
 function modeLabel(s) {
+  if (s.game === 'alien') {
+    const v = INVASIONS.find(v => v.id === s.mode);
+    return v ? `${v.icon} ${v.name.toUpperCase()} · ${v.aliens} aliens` : '';
+  }
   const m = MODES.find(m => m.id === s.mode);
   if (!m) return '';
   if (m.id !== 'hyperspace') return `${m.icon} ${m.name}`;
@@ -538,6 +558,7 @@ function gamePicker(s, onPick) {
   const grid = el('div', 'game-cards stagger');
   Object.values(GAMES).forEach(g => {
     const card = btn('game-card ' + g.id, `<span class="gi">${g.icon}</span><span class="gn">${g.name}</span><span class="gd">${g.desc}</span>`, (e) => {
+      if (s.game !== g.id) s.mode = null;
       s.game = g.id;
       [...grid.querySelectorAll('.game-card:not(.soon)')].forEach(c => {
         c.classList.toggle('on', c === e.currentTarget);
@@ -574,7 +595,6 @@ function diffPicker(s, onPick) {
 // onPick(final): final is true when the choice needs no further input.
 function modePicker(s, onPick) {
   const list = el('div', 'mode-list stagger');
-  const gameId = s.game || 'galactic';
   let diffBox = null;
   const paint = () => [...list.querySelectorAll('.mode-tile')].forEach(t => {
     const on = t.dataset.mode === s.mode;
@@ -588,7 +608,7 @@ function modePicker(s, onPick) {
   };
   const hideDiff = () => { if (diffBox) { diffBox.remove(); diffBox = null; } };
   MODES.forEach(m => {
-    const t = btn('mode-tile', `<span class="mi">${m.icon}</span><div class="mb"><div class="mn">${m.name}</div><div class="md">${m.desc[gameId]}</div></div><span class="badge">OFF</span>`, (e) => {
+    const t = btn('mode-tile', `<span class="mi">${m.icon}</span><div class="mb"><div class="mn">${m.name}</div><div class="md">${m.desc}</div></div><span class="badge">OFF</span>`, (e) => {
       s.mode = m.id;
       paint(); boing(e.currentTarget);
       if (m.id === 'hyperspace') { showDiff(); onPick(false); }
@@ -602,14 +622,29 @@ function modePicker(s, onPick) {
   return list;
 }
 
+function invasionPicker(s, onPick) {
+  const grid = el('div', 'diff-grid invasion-grid stagger');
+  INVASIONS.forEach(v => {
+    grid.append(btn('diff-btn alien' + (s.mode === v.id ? ' on' : ''),
+      `<span class="di">${v.icon}</span><span class="dt">${v.aliens}</span><span class="dn">${v.name}</span><span class="dd">${v.desc}</span>`, (e) => {
+        s.mode = v.id;
+        [...grid.children].forEach(c => c.classList.toggle('on', c === e.currentTarget));
+        boing(e.currentTarget);
+        onPick();
+      }));
+  });
+  return grid;
+}
+
 function launchedView(s, onRestart) {
   const g = GAMES[s.game];
   const nums = [...s.nums].sort((a, b) => a - b).join(',');
   const ops = [...s.ops].join(',');
   const modeParam = s.mode === 'hyperspace' ? `hyperspace:${s.diff}` : s.mode;
+  const aliens = (INVASIONS.find(v => v.id === s.mode) || {}).aliens;
   const target = g.id === 'galactic'
     ? `index.html → startQuiz()\nnums=${nums}\nops=${ops}\nmode=${modeParam}`
-    : `pages/alien-invasion.html\n?nums=${nums}\n&ops=${ops}\n&mode=${modeParam}   ← not read by the game yet`;
+    : `pages/alien-invasion.html\n?nums=${nums}\n&ops=${ops}\n&aliens=${aliens}   ← would replace N_ALIENS (fixed at 10 today)`;
   const box = el('div', 'launched');
   box.append(
     el('div', 'big', g.icon),
@@ -681,7 +716,8 @@ function render(dir) {
   const step = STEPS[app.step];
   const card = el('div', 'flashcard ' + (dir === 'back' ? 'in-back' : 'in-fwd'));
   card.append(el('span', 'setup-label', `Step ${app.step + 1} of ${STEPS.length}`));
-  card.append(el('h3', 'step-title', step.title));
+  const title = typeof step.title === 'string' ? step.title : step.title[s.game || 'galactic'];
+  card.append(el('h3', 'step-title', title));
 
   const hint = el('p', 'step-hint');
   const next = btn('nav-btn btn-next', '<span>Next ▸</span>', () => go(app.step + 1, 'fwd'));
@@ -703,6 +739,9 @@ function render(dir) {
   } else if (step.id === 'game') {
     hint.textContent = 'Tap one — the next card comes right up.';
     card.append(gamePicker(s, () => setTimeout(() => go(3, 'fwd'), 420)));
+  } else if (step.id === 'mode' && s.game === 'alien') {
+    hint.textContent = 'More aliens means more missiles — and more math to earn them.';
+    card.append(invasionPicker(s, () => setTimeout(() => go(4, 'fwd'), 420)));
   } else if (step.id === 'mode') {
     hint.textContent = 'Standard is a fine place to start.';
     card.append(modePicker(s, (final) => { if (final) setTimeout(() => go(4, 'fwd'), 420); else refresh(); }));
