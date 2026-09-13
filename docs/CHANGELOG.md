@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
-### IDT-272 — Delete unreferenced images and resize the OG image (PR #TBD)
+### IDT-272 — Delete unreferenced images and resize the OG image (PR #128)
 
 Two source PNGs in `assets/images/` — `logo-planet-only.png` (1.6 MB) and `logo-word-planet.png` (432 KB) — were being deployed to the public web root despite nothing in the HTML, CSS, or JS referencing them; they were only ever inputs for compositing the share image. Both are deleted (git history keeps them recoverable). `og-image-v2.png` was 1.0 MB at 4800×2520 while `index.html` declared it as 1200×630, so it is now downscaled to an actual 1200×630 and stored as an optimized RGB PNG at 286 KB, making the declared `og:image:width` / `og:image:height` true for social validators. Roughly 2.8 MB leaves the repo and the CDN.
 
