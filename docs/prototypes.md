@@ -34,18 +34,20 @@ The active tab is kept in the URL hash: `#a`, `#b`, `#c`, `#compare`.
 
 Option A on its own, dressed as the real setup screen (title, divider, one card). Three refinements over the exploration page came out of review:
 
-- **Fixed-size deck.** `.deck-body` is a fixed-height viewport (`--deck-height`, 400px on desktop and 440px on phones) with the flight path above and the nav bar below, so the card never changes height between steps and the buttons never move. Anything taller than the viewport scrolls inside it.
+- **Fixed-size deck.** `.deck-body` reserves a minimum height (`--deck-height`, 400px on desktop and 440px on phones) with the flight path above and the nav bar below, so the card never changes height between steps and the buttons never move. The body never clips or scrolls: the slide-in animation moves only 14px so it stays inside the deck's padding, and the tap "boing" on an edge tile spills into that padding instead of being cut off. On phones the game cards switch to a row layout so the game step fits the reserved height.
 - **Consistent nav.** Every step has the same two slots: **◂ Back** on the left (disabled on the first card rather than hidden) and one primary action on the right — **Next ▸**, or **Begin Mission** in the game's colour on the briefing card. All nav buttons share `.nav-btn` and the same height.
 - **"Begin Mission"**, not "Begin Training Mission", for both games.
 
-**The challenge step is per game.** Galactic Math keeps Standard / Hyperspace / Kessel Run (Hyperspace opens its three difficulty cards). Alien Invasion has no timer to turn off, so its challenge is the size of the invasion — three cards mirroring the Hyperspace difficulty shape, each with one big number:
+**The options step is per game, and arrives with the normal choice already made.** Step 4 is labelled *Options*, not *Challenge*, because it is optional: picking a game preselects its normal option (Standard for Galactic Math, Invasion for Alien Invasion) so Next is live on arrival and the card is a chance to change, not a gate. Rows and cards select on tap — there are no ON/OFF badges; the chosen row shows a check.
 
-| Card | Aliens | Bundled tuning (not shown to the kid) |
-|---|---|---|
-| 🛸 Scout Party | 5 | none shoot back, comets slower |
-| 👾 Invasion (default) | 10 | today's game exactly (`N_ALIENS = 10`, half shoot) |
-| 🌀 Chaos | 25 | most shoot, comets faster, extra fuel pickups |
+Galactic Math asks *Pick your options*: Standard / Hyperspace / Kessel Run, with Hyperspace opening its three difficulty cards. Alien Invasion has no timer to turn off, so it asks *How bad is the alien invasion?* — three cards mirroring the Hyperspace difficulty shape, each with one big number and an Easy / Normal / Hard badge (the Hyperspace cards carry the same badges):
 
-More aliens means more missiles, which means more gates and more math, so one dial sets difficulty and math volume together. Switching game on step 3 clears the challenge so a kid never carries a Galactic Math mode into Alien Invasion. The launch step shows an `aliens=N` URL param for Alien Invasion, which would replace the fixed `N_ALIENS` constant when this is built.
+| Card | Badge | Aliens | Sub line |
+|---|---|---|---|
+| 🛸 Sneak Attack | Easy | 5 | Alien ships unarmed |
+| 👾 Invasion (default) | Normal | 10 | Some ships are armed |
+| 🌀 Chaos | Hard | 25 | Every ship is armed |
+
+More aliens means more missiles, which means more gates and more math, so one dial sets difficulty and math volume together. Which game levers move under each card is decided in IDT-278, not here. The launch step shows an `aliens=N` URL param for Alien Invasion, which would replace the fixed `N_ALIENS` constant when this is built.
 
 The game step also carries a dashed "More games coming soon" card to show that step 3 is a list that grows, not a pair of buttons. The launch step shows what the app would receive and offers **↺ New Mission** in the primary slot.

@@ -29,8 +29,8 @@
     --boing: cubic-bezier(0.34, 1.56, 0.64, 1);
     --display: 'Orbitron', 'Exo 2', monospace;
     --body: 'Exo 2', 'Segoe UI', sans-serif;
-    /* The deck body is a fixed-size viewport so the card contents never
-       push the nav bar around between steps. */
+    /* The deck body reserves this much height so the nav bar sits in the
+       same place on every step. It never clips or scrolls. */
     --deck-height: 400px;
   }
 
@@ -108,12 +108,9 @@
     display: flex; flex-direction: column; gap: 18px;
   }
   .deck-body {
-    height: var(--deck-height);
-    overflow-y: auto;
-    overflow-x: hidden;
+    min-height: var(--deck-height);
+    overflow: visible;
     display: flex; flex-direction: column;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 212, 255, 0.3) transparent;
   }
   .deck-nav {
     display: grid;
@@ -155,8 +152,9 @@
   .flashcard { display: flex; flex-direction: column; gap: 14px; min-height: 100%; }
   .flashcard.in-fwd { animation: cardFwd 0.5s var(--boing) both; }
   .flashcard.in-back { animation: cardBack 0.5s var(--boing) both; }
-  @keyframes cardFwd { from { opacity: 0; transform: translateX(48px) scale(0.92); } to { opacity: 1; transform: none; } }
-  @keyframes cardBack { from { opacity: 0; transform: translateX(-48px) scale(0.92); } to { opacity: 1; transform: none; } }
+  /* Slide stays inside the deck's 24px padding so nothing crosses the border. */
+  @keyframes cardFwd { from { opacity: 0; transform: translateX(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+  @keyframes cardBack { from { opacity: 0; transform: translateX(-14px) scale(0.97); } to { opacity: 1; transform: none; } }
 
   .setup-label {
     font-family: var(--display); font-size: 11px; letter-spacing: 4px;
@@ -224,6 +222,7 @@
   .game-card .gi { font-size: 40px; line-height: 1; filter: drop-shadow(0 0 10px rgba(255,255,255,0.15)); }
   .game-card .gn { font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: 3px; color: var(--star-white); }
   .game-card .gd { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .game-card .gt { display: contents; }
   .game-card:hover { transform: translateY(-2px); }
   .game-card.galactic:hover, .game-card.galactic.on { border-color: var(--saber-blue); background: rgba(0, 212, 255, 0.08); box-shadow: 0 0 24px var(--glow-blue); }
   .game-card.alien:hover, .game-card.alien.on { border-color: var(--saber-green); background: rgba(57, 255, 20, 0.06); box-shadow: 0 0 24px var(--glow-green); }
@@ -253,13 +252,14 @@
   .mode-tile .mb { flex: 1; min-width: 0; }
   .mode-tile .mn { font-family: var(--display); font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--star-white); margin-bottom: 2px; }
   .mode-tile .md { font-size: 11px; color: var(--muted); line-height: 1.3; }
-  .badge {
-    font-family: var(--display); font-size: 9px; font-weight: 700; letter-spacing: 2px;
-    padding: 5px 10px; border-radius: 20px;
-    border: 1px solid var(--line-soft); color: var(--muted); background: rgba(0, 0, 0, 0.3);
-    flex-shrink: 0; transition: all 0.3s;
+  .mode-tile .tick {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line-soft); color: transparent;
+    font-family: var(--display); font-size: 11px; font-weight: 900;
+    transition: all 0.25s;
   }
-  .mode-tile.on .badge { color: var(--saber-green); border-color: var(--saber-green); background: rgba(57, 255, 20, 0.1); text-shadow: 0 0 8px var(--saber-green); }
+  .mode-tile.on .tick { color: var(--saber-green); border-color: var(--saber-green); box-shadow: 0 0 8px var(--glow-green); }
 
   .diff-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .diff-btn {
@@ -274,6 +274,14 @@
   .diff-btn .di { font-size: 18px; }
   .diff-btn .dn { font-family: var(--display); font-size: 8px; font-weight: 700; letter-spacing: 1px; color: var(--star-white); text-align: center; }
   .diff-btn .dt { font-family: var(--display); font-size: 13px; font-weight: 700; color: var(--gold); filter: drop-shadow(0 0 6px var(--gold)); }
+  .level {
+    font-family: var(--display); font-size: 8px; font-weight: 700; letter-spacing: 2px;
+    padding: 3px 8px; border-radius: 20px; text-transform: uppercase;
+    border: 1px solid currentColor; opacity: 0.85;
+  }
+  .level.easy   { color: var(--saber-green); }
+  .level.normal { color: var(--saber-blue); }
+  .level.hard   { color: var(--saber-red); }
 
   .invasion-grid .diff-btn { padding: 16px 8px 14px; gap: 6px; border-color: rgba(57, 255, 20, 0.15); }
   .invasion-grid .diff-btn:hover { border-color: rgba(57, 255, 20, 0.45); }
@@ -369,6 +377,9 @@
     .deck { padding: 18px 14px; }
     .deck-nav { grid-template-columns: 96px 1fr; }
     .game-cards { grid-template-columns: 1fr; }
+    .game-card:not(.soon) { flex-direction: row; text-align: left; gap: 14px; padding: 14px; }
+    .game-card:not(.soon) .gi { font-size: 32px; }
+    .game-card .gt { display: flex; flex-direction: column; gap: 4px; }
     .fp-node .lbl { font-size: 7px; letter-spacing: 1px; }
     .brief-row .bk { width: 60px; }
   }
@@ -409,29 +420,29 @@ const GAMES = {
   galactic: { id: 'galactic', icon: '🚀', name: 'GALACTIC MATH',  desc: 'Answer 20 problems and earn your Jedi rank.' },
   alien:    { id: 'alien',    icon: '👾', name: 'ALIEN INVASION', desc: 'Fly your rocket through 20 math gates. Dodge the asteroids!' },
 };
-// Galactic Math challenges: a timer you can add, or not.
+// Galactic Math options: a timer you can add, or not. Standard is preselected.
 const MODES = [
   { id: 'standard',   icon: '🧘', name: 'STANDARD',   desc: 'No timer. Go at your own pace.' },
   { id: 'hyperspace', icon: '⚡', name: 'HYPERSPACE', desc: 'Finish all 20 before the jump!' },
   { id: 'kessel',     icon: '☄️', name: 'KESSEL RUN', desc: 'How fast can you finish? Wrong answers add 5s.' },
 ];
-// Alien Invasion challenges: how big the invasion is. More aliens means more
+// Alien Invasion options: how bad the invasion is. More aliens means more
 // missiles, more gates, more math — one dial does both jobs.
 const INVASIONS = [
-  { id: 'scout',    icon: '🛸', name: 'Scout Party', aliens: 5,  desc: 'None shoot back' },
-  { id: 'invasion', icon: '👾', name: 'Invasion',    aliens: 10, desc: 'Half shoot back' },
-  { id: 'chaos',    icon: '🌀', name: 'Chaos',       aliens: 25, desc: 'Good luck, pilot' },
+  { id: 'sneak',    icon: '🛸', name: 'Sneak Attack', level: 'easy',   aliens: 5,  desc: 'Alien ships unarmed' },
+  { id: 'invasion', icon: '👾', name: 'Invasion',     level: 'normal', aliens: 10, desc: 'Some ships are armed' },
+  { id: 'chaos',    icon: '🌀', name: 'Chaos',        level: 'hard',   aliens: 25, desc: 'Every ship is armed' },
 ];
 const DIFFS = [
-  { id: 'wicked-easy', icon: '😌', name: 'Wicked Easy', time: '5:00' },
-  { id: 'harder',      icon: '😤', name: 'Harder',      time: '3:00' },
-  { id: 'hyperdrive',  icon: '⚡', name: 'Hyperdrive',  time: '1:00' },
+  { id: 'wicked-easy', icon: '😌', name: 'Wicked Easy', level: 'easy',   time: '5:00' },
+  { id: 'harder',      icon: '😤', name: 'Harder',      level: 'normal', time: '3:00' },
+  { id: 'hyperdrive',  icon: '⚡', name: 'Hyperdrive',  level: 'hard',   time: '1:00' },
 ];
 const STEPS = [
   { id: 'nums',   icon: '🔢', label: 'NUMBERS',   title: 'Which numbers are we training?' },
   { id: 'ops',    icon: '✖️', label: 'MATH',      title: 'What kind of math?' },
   { id: 'game',   icon: '🎮', label: 'GAME',      title: 'Pick your game' },
-  { id: 'mode',   icon: '⏱️', label: 'CHALLENGE', title: { galactic: 'Pick your challenge', alien: 'How big is the invasion?' } },
+  { id: 'mode',   icon: '⚙️', label: 'OPTIONS',   title: { galactic: 'Pick your options', alien: 'How bad is the alien invasion?' } },
   { id: 'launch', icon: '🚀', label: 'LAUNCH',    title: 'Mission briefing' },
 ];
 
@@ -557,8 +568,10 @@ function opPicker(s, onChange) {
 function gamePicker(s, onPick) {
   const grid = el('div', 'game-cards stagger');
   Object.values(GAMES).forEach(g => {
-    const card = btn('game-card ' + g.id, `<span class="gi">${g.icon}</span><span class="gn">${g.name}</span><span class="gd">${g.desc}</span>`, (e) => {
-      if (s.game !== g.id) s.mode = null;
+    const card = btn('game-card ' + g.id, `<span class="gi">${g.icon}</span><span class="gt"><span class="gn">${g.name}</span><span class="gd">${g.desc}</span></span>`, (e) => {
+      // Each game arrives at its options card with the normal choice already
+      // made, so Next is live and the card is a chance to change, not a gate.
+      if (s.game !== g.id) s.mode = g.id === 'alien' ? 'invasion' : 'standard';
       s.game = g.id;
       [...grid.querySelectorAll('.game-card:not(.soon)')].forEach(c => {
         c.classList.toggle('on', c === e.currentTarget);
@@ -582,7 +595,7 @@ function diffPicker(s, onPick) {
   const grid = el('div', 'diff-grid stagger');
   DIFFS.forEach(d => {
     grid.append(btn('diff-btn' + (s.diff === d.id ? ' on' : ''),
-      `<span class="di">${d.icon}</span><span class="dn">${d.name}</span><span class="dt">${d.time}</span>`, (e) => {
+      `<span class="level ${d.level}">${d.level}</span><span class="di">${d.icon}</span><span class="dn">${d.name}</span><span class="dt">${d.time}</span>`, (e) => {
         s.diff = d.id;
         [...grid.children].forEach(c => c.classList.toggle('on', c === e.currentTarget));
         boing(e.currentTarget);
@@ -597,9 +610,7 @@ function modePicker(s, onPick) {
   const list = el('div', 'mode-list stagger');
   let diffBox = null;
   const paint = () => [...list.querySelectorAll('.mode-tile')].forEach(t => {
-    const on = t.dataset.mode === s.mode;
-    t.classList.toggle('on', on);
-    t.querySelector('.badge').textContent = on ? 'ON' : 'OFF';
+    t.classList.toggle('on', t.dataset.mode === s.mode);
   });
   const showDiff = () => {
     if (diffBox) return;
@@ -608,7 +619,7 @@ function modePicker(s, onPick) {
   };
   const hideDiff = () => { if (diffBox) { diffBox.remove(); diffBox = null; } };
   MODES.forEach(m => {
-    const t = btn('mode-tile', `<span class="mi">${m.icon}</span><div class="mb"><div class="mn">${m.name}</div><div class="md">${m.desc}</div></div><span class="badge">OFF</span>`, (e) => {
+    const t = btn('mode-tile', `<span class="mi">${m.icon}</span><div class="mb"><div class="mn">${m.name}</div><div class="md">${m.desc}</div></div><span class="tick">✓</span>`, (e) => {
       s.mode = m.id;
       paint(); boing(e.currentTarget);
       if (m.id === 'hyperspace') { showDiff(); onPick(false); }
@@ -626,7 +637,7 @@ function invasionPicker(s, onPick) {
   const grid = el('div', 'diff-grid invasion-grid stagger');
   INVASIONS.forEach(v => {
     grid.append(btn('diff-btn alien' + (s.mode === v.id ? ' on' : ''),
-      `<span class="di">${v.icon}</span><span class="dt">${v.aliens}</span><span class="dn">${v.name}</span><span class="dd">${v.desc}</span>`, (e) => {
+      `<span class="level ${v.level}">${v.level}</span><span class="di">${v.icon}</span><span class="dt">${v.aliens}</span><span class="dn">${v.name}</span><span class="dd">${v.desc}</span>`, (e) => {
         s.mode = v.id;
         [...grid.children].forEach(c => c.classList.toggle('on', c === e.currentTarget));
         boing(e.currentTarget);
@@ -740,14 +751,14 @@ function render(dir) {
     hint.textContent = 'Tap one — the next card comes right up.';
     card.append(gamePicker(s, () => setTimeout(() => go(3, 'fwd'), 420)));
   } else if (step.id === 'mode' && s.game === 'alien') {
-    hint.textContent = 'More aliens means more missiles — and more math to earn them.';
+    hint.textContent = 'More aliens means more missiles — and more math to earn them. Invasion is the normal game.';
     card.append(invasionPicker(s, () => setTimeout(() => go(4, 'fwd'), 420)));
   } else if (step.id === 'mode') {
-    hint.textContent = 'Standard is a fine place to start.';
+    hint.textContent = 'Standard is already picked. Add a timer if you want one.';
     card.append(modePicker(s, (final) => { if (final) setTimeout(() => go(4, 'fwd'), 420); else refresh(); }));
   } else {
     const brief = el('div', 'briefing stagger');
-    [['Numbers', numsLabel(s), 0], ['Math', opsLabel(s), 1], ['Game', gameLabel(s), 2], ['Challenge', modeLabel(s), 3]].forEach(([k, v, i]) => {
+    [['Numbers', numsLabel(s), 0], ['Math', opsLabel(s), 1], ['Game', gameLabel(s), 2], ['Options', modeLabel(s), 3]].forEach(([k, v, i]) => {
       brief.append(btn('brief-row', `<span class="bk">${k}</span><span class="bv">${v}</span><span class="be">CHANGE</span>`, () => go(i, 'back')));
     });
     card.append(brief);
