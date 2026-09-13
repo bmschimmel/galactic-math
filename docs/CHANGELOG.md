@@ -7,6 +7,14 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
+### IDT-274 — Base Hyperspace and Kessel Run timers on the wall clock (PR #TBD)
+
+Both timed modes counted `setInterval` ticks, and browsers throttle background-tab timers to roughly once a minute, so tabbing away paused the Hyperspace countdown and froze the Kessel Run clock — a kid could switch tabs mid-run and come back to a "record" that never happened. Each timer now records `Date.now()` when the round starts and derives elapsed or remaining seconds from that on every repaint; the interval runs at 250 ms and only repaints when the derived second changes, so the display catches up the moment a tab regains focus. The Hyperspace final-10-seconds beep is guarded by a last-announced-second check so a jumped second plays one beep, not a burst, and `stopKesselTimer()` takes a final clock reading so the results screen shows the true time.
+
+### IDT-274 — Base Hyperspace and Kessel Run timers on wall clock, not tick counts (PR #TBD)
+
+Both timed modes counted `setInterval` ticks, and browsers throttle background-tab timers to about once a minute, so switching tabs mid-round effectively paused the Hyperspace countdown and froze the Kessel Run clock — a kid could tab away and come back to post a Kessel "record" that never happened. Each timer now records `Date.now()` when the round starts and derives its value from the clock on every repaint; the interval only refreshes the display and runs every 250 ms so the numbers catch up immediately when the tab regains focus. `stopKesselTimer()` takes a final clock reading so the results screen shows the true elapsed time. The Hyperspace ten-second countdown beeps are guarded by a "last second beeped" check, so a jump of several seconds plays one beep rather than a burst.
+
 ### IDT-272 — Delete unreferenced images and resize the OG image (PR #128)
 
 Two source PNGs in `assets/images/` — `logo-planet-only.png` (1.6 MB) and `logo-word-planet.png` (432 KB) — were being deployed to the public web root despite nothing in the HTML, CSS, or JS referencing them; they were only ever inputs for compositing the share image. Both are deleted (git history keeps them recoverable). `og-image-v2.png` was 1.0 MB at 4800×2520 while `index.html` declared it as 1200×630, so it is now downscaled to an actual 1200×630 and stored as an optimized RGB PNG at 286 KB, making the declared `og:image:width` / `og:image:height` true for social validators. Roughly 2.8 MB leaves the repo and the CDN.
