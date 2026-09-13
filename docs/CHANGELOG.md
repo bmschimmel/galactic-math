@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
-### IDT-271 — Remove the Your Name field from the feedback page (PR #TBD)
+### IDT-271 — Remove the Your Name field from the feedback page (PR #127)
 
 The feedback form asked for a name and the worker wrote it verbatim into the public GitHub issue it filed, which for an app aimed at kids aged 5–12 meant a child's self-entered name could end up permanently public and search-indexed. The field is gone: `pages/feedback.html` no longer renders or validates it and no longer sends `name` in the request, and `worker/feedback-worker.js` no longer requires it, no longer enforces a name length, and files the message alone as the issue body. A `name` sent by a stale cached client is silently dropped rather than rejected, so older tabs keep working through the change. Choosing a category now drops focus straight into the message box.
 
