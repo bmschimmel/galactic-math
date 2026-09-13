@@ -17,6 +17,7 @@ This folder contains developer documentation explaining how each part of Galacti
 | [ui.md](ui.md) | Theme cycler, session history, keyboard navigation, mobile support |
 | [design-ux.md](design-ux.md) | Design concept, color palette, typography, tone, wording, interaction patterns |
 | [feedback-system.md](feedback-system.md) | Feedback form, Cloudflare Worker, GitHub Issues integration |
+| [prototypes.md](prototypes.md) | Throwaway UX prototypes under `pages/prototypes/` — currently the setup-flow explorations for IDT-214 |
 | [CHANGELOG.md](CHANGELOG.md) | Full history of changes by Linear issue and PR |
 
 ---
