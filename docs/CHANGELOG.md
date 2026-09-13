@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-13
 
-### IDT-274 — Base Hyperspace and Kessel Run timers on the wall clock (PR #TBD)
+### IDT-274 — Base Hyperspace and Kessel Run timers on the wall clock (PR #129)
 
 Both timed modes counted `setInterval` ticks, and browsers throttle background-tab timers to roughly once a minute, so tabbing away paused the Hyperspace countdown and froze the Kessel Run clock — a kid could switch tabs mid-run and come back to a "record" that never happened. Each timer now records `Date.now()` when the round starts and derives elapsed or remaining seconds from that on every repaint; the interval runs at 250 ms and only repaints when the derived second changes, so the display catches up the moment a tab regains focus. The Hyperspace final-10-seconds beep is guarded by a last-announced-second check so a jumped second plays one beep, not a burst, and `stopKesselTimer()` takes a final clock reading so the results screen shows the true time.
 
