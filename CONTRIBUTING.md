@@ -179,10 +179,17 @@ If you want one as a tracking record, assign it when merging
 
 ## For Claude Code
 
+Multiple Claude Code sessions may be working this repo at the same time, each on a
+different issue. The steps below exist to keep them from picking the same issue or
+colliding on the same file — don't skip the claim or worktree steps even if you're
+the only session running.
+
 When picking up a Linear issue:
 
 1. Only pick up issues that are in the **"To Do"** state **and** have the **"claude"**
-   label. Do not work on issues in any other state or without this label.
+   label. Do not work on issues in any other state or without this label — in
+   particular, skip anything already **"In Progress"**, since another session has
+   already claimed it.
    If multiple issues match, select by priority first (Urgent → High → Medium → Low).
    Break ties by creation date — pick the oldest issue first.
 
@@ -192,10 +199,20 @@ When picking up a Linear issue:
    Instead fall back to `get_issue` with specific IDs — start from the last known
    completed issue number and increment (e.g. try IDT-43, IDT-44, …) until you
    find issues in "Todo" state with the "claude" label.
-2. Confirm you are on `main` and it is up to date: `git pull origin main`
+
+   **Hot files:** if the issue touches `assets/js/game.js` or `assets/css/style.css`,
+   check for other issues currently **"In Progress"** that touch the same file before
+   starting — working two of those in parallel produces a painful merge later. Prefer
+   picking a different, non-conflicting issue instead.
+2. Claim it immediately: transition the issue to **"In Progress"** in Linear before
+   touching git. This is what step 1 checks to avoid two sessions picking the same
+   issue — do it before any other step below.
 3. If no Linear issue exists for the work, create one and assign it to the
-   **"Galactic Math"** project and label it **claude**
-4. Create a branch following the naming convention above
+   **"Galactic Math"** project and label it **claude**, then claim it per step 2.
+4. Do the work in a dedicated git worktree, not the shared checkout:
+   `git worktree add <path> -b idt-NNN-description origin/main`. Run every git
+   command against that worktree's path. Never `git checkout` in the shared checkout
+   — another session may be actively using it.
 5. Make changes only to `index.html` unless the issue explicitly requires otherwise
 5a. After making changes, review `docs/` and update any files whose described behavior has changed; always add a `docs/CHANGELOG.md` entry
 6. Follow all rules in `CLAUDE.md` — single file, no dependencies, no localStorage
@@ -208,3 +225,4 @@ After committing, always:
 1. Push the branch: `git push origin <branch-name>`
 2. Open a PR using GitHub CLI:
    `gh pr create --base main --title "IDT-XX description" --body "Fixes IDT-XX"`
+3. Remove the worktree: `git worktree remove <path>` from the shared checkout
