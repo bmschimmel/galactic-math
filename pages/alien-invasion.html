@@ -668,7 +668,7 @@
     <span class="ctrl-label">🕹 MOVE</span>
     <span class="ctrl-desc">
       <b>Arrow keys</b> or <b>WASD</b>
-      <span class="sub">Rather use the trackpad? <b>Click once</b> to start flying, then just move the pointer — your ship follows. Point at the middle of the screen to stop, and click again to turn it off.</span>
+      <span class="sub">Rather use the mouse or trackpad? <b>Click once</b> to start flying, then just move the pointer — your ship follows. Point at the middle of the screen to stop, and click again to turn it off.</span>
     </span>
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
@@ -751,8 +751,8 @@
 </div>
 
 <!-- ===== KEY HINT ===== -->
-<div id="keyHint">Arrow keys or click once to fly with the trackpad · Space to fire · Enter to submit · P to pause</div>
-<div id="devBanner">🚧 Still in development — <a href="feedback.html" target="_blank">submit ideas here</a></div>
+<div id="keyHint">Arrow keys or click once to fly with the mouse/trackpad · Space to fire · Enter to submit · P to pause</div>
+<div id="devBanner">💡 <a href="feedback.html" target="_blank">Submit ideas here</a></div>
 
 <!-- ===== VIRTUAL JOYSTICK (mobile touch) ===== -->
 <div id="vjoy">
@@ -2345,7 +2345,7 @@ function drawComets() {
 // ===== MISSILE POWERUPS =====
 // ===== PLAYER MISSILES =====
 function firePlayerMissile() {
-  if (!missiles || missiles <= 0) { sounds.missileEmpty(); return; }
+  if (!missiles || missiles <= 0) { sounds.missileEmpty(); showFlightBanner('🎯 Fly through a math ring for missiles!', 1200); return; }
   missiles--;
   missilesFireTotal++;
   updateHUD();

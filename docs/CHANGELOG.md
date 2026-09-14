@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
+### IDT-281 — Tiny fixes for Alien Invasion (PR #TBD)
+
+Three papercuts in Alien Invasion: the pre-launch intro explainer and the in-game bottom-right key hint both called out the trackpad as click-to-fly but never mentioned the mouse works the same way, so both now say "mouse or trackpad." Firing with zero missiles played a dry-click sound and nothing else, leaving kids stuck with no idea why shooting wasn't working — it now also shows the same top-of-screen flight banner used for ammo pickups, prompting them to fly through a math ring. The bottom-left dev banner dropped its "Still in development" wording (the game has shipped) and keeps only the "Submit ideas here" link to the feedback form.
+
 ### IDT-283 — Bump version to 2.0.0 and document the release process (PR #136)
 
 The footer version in `index.html` moves from v1.0.0 to v2.0.0 ahead of the v2.0.0 GitHub release, which gathers everything merged since the v1.0.0 tag in March — Alien Invasion, the Flight Deck setup deck, the Cloudflare feedback worker, security headers and the CSP split, the starfield battery fix and the wall-clock timers. `CONTRIBUTING.md` gains a **Releases** section that writes down the process for the first time: the version string lives only in the footer and is bumped in its own PR; a release is drafted from `main` with `gh release create --generate-notes --notes-start-tag <previous>`, which lists every PR since the last tag; publishing the draft is what creates the tag; and GitHub milestones are an optional tracking record that release notes do not depend on.
