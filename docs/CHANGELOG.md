@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
-### IDT-281 — Tiny fixes for Alien Invasion (PR #TBD)
+### IDT-281 — Tiny fixes for Alien Invasion (PR #139)
 
 Three papercuts in Alien Invasion: the pre-launch intro explainer and the in-game bottom-right key hint both called out the trackpad as click-to-fly but never mentioned the mouse works the same way, so both now say "mouse or trackpad." Firing with zero missiles played a dry-click sound and nothing else, leaving kids stuck with no idea why shooting wasn't working — it now also shows the same top-of-screen flight banner used for ammo pickups, prompting them to fly through a math ring. The bottom-left dev banner dropped its "Still in development" wording (the game has shipped) and keeps only the "Submit ideas here" link to the feedback form.
 
