@@ -211,10 +211,19 @@
   }
 
   .num-btn.selected {
-    background: rgba(0, 212, 255, 0.15);
+    background: var(--saber-blue);
     border-color: var(--saber-blue);
-    color: var(--saber-blue);
-    box-shadow: 0 0 16px var(--glow-blue);
+    border-width: 2px;
+    color: var(--space-black);
+    font-weight: 700;
+    box-shadow: 0 0 18px var(--glow-blue), inset 0 0 8px rgba(255, 255, 255, 0.4);
+    animation: numSelectPop 0.25s ease-out;
+  }
+
+  @keyframes numSelectPop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.18); }
+    100% { transform: scale(1); }
   }
 
   .quick-btns {
