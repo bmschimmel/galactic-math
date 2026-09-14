@@ -684,7 +684,7 @@ let selectedGame = null;        // 'galactic' | 'alien'
 let gameMode = 'standard';      // Galactic Math: 'standard' | 'hyperspace' | 'kessel'
 let invasionSize = 'invasion';  // Alien Invasion: 'sneak' | 'invasion' | 'chaos'
 const INVASIONS = {
-  sneak:    { icon: '🛸', name: 'SNEAK ATTACK', aliens: 5 },
+  recon:    { icon: '🛸', name: 'RECON', aliens: 5 },
   invasion: { icon: '👾', name: 'INVASION',     aliens: 10 },
   chaos:    { icon: '🌀', name: 'CHAOS',        aliens: 25 },
 };
