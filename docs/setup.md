@@ -8,9 +8,9 @@ The setup screen is the first thing a user sees. It is a deck of five flashcards
 
 | Step | Card | Ready when |
 |---|---|---|
-| 1 | **Numbers** — presets + the 0–13 grid | at least 3 numbers |
-| 2 | **Math** — × ÷ + − as big cards, plus "★ All four" | at least 1 operation |
-| 3 | **Game** — Galactic Math or Alien Invasion (plus a dashed "More games coming soon" card) | a game is picked |
+| 1 | **Numbers** — "What numbers should we practice?", presets + the 0–13 grid | at least 3 numbers |
+| 2 | **Math** — × ÷ + − as big cards, plus "Practice all" | at least 1 operation |
+| 3 | **Game** — Galactic Math or Alien Invasion (plus a dashed "More games coming soon" card with a link to the feedback form) | a game is picked |
 | 4 | **Options** — per game, see below | always (the normal option is preselected) |
 | 5 | **Launch** — Mission Briefing rows + Begin Mission | always |
 
@@ -35,7 +35,8 @@ The training goal (which numbers, which operations) is decided first; the game i
 - **`.deck-body` reserves a minimum height** (400px, 440px on phones) so the nav row sits in the same place on every step. It never clips or scrolls: the card slide-in moves only 14px, inside the card's padding, and the tap bounce on an edge tile spills into that padding.
 - **The nav row has the same two slots on every step.** Back on the left (disabled on step 1, not hidden), and one primary action on the right: Next, or Begin Mission on the briefing card. `#nextBtn` and `#startBtn` share the slot and swap via the `hidden` attribute.
 - **The flight path** shows done steps as green checks and the current step pulsing blue. Done nodes are clickable and jump back; `goToStep()` refuses forward jumps that do not come through Next.
-- **The status line** (`.step-hint`, e.g. "11 numbers · 2–12", "Training × ÷") is pinned to the floor of the deck body with `margin-top: auto`, so it reads in the same spot on every card. It turns green (`.hint-ok`) when the step is ready.
+- **Next is always clickable.** When a step is not ready, `nextStep()` puts the reason in `#setupError` ("⚠ Pick at least 3 numbers", "⚠ Pick at least one kind of math", "⚠ Pick a game first") and plays the wrong-answer sound; the message clears as soon as the step becomes ready. There is no running "you picked…" status text on the cards — the Mission Briefing is where the choices are read back.
+- The cards have no "Step x of y" header; the flight path is the progress indicator.
 
 State lives in `game.js`: `setupStep`, `selectedNums`, `selectedOps`, `selectedGame`, `gameMode`, `hyperspaceDiff`, `invasionSize`. `refreshSetup()` repaints everything that depends on it (flight path, hints, which options panel shows, briefing rows, nav buttons) and is called after every change.
 
@@ -51,13 +52,13 @@ A 14-button grid lets users pick any combination of numbers from **0 to 13**. Se
 | **All (0–13)** | Selects all 14 numbers |
 | **Clear** | Deselects everything |
 
-Custom selections clear the active preset highlight. Next is disabled until at least 3 numbers are selected.
+Custom selections clear the active preset highlight. Next explains itself if fewer than 3 numbers are selected.
 
 ---
 
 ## Math (step 2)
 
-Four flashcards — **Multiply (×)**, **Divide (÷)**, **Add (+)**, **Subtract (−)** — purple for × ÷ and green for + −, matching the operation colours used everywhere else. Any combination may be selected; **★ All four** selects them all. Next is disabled until at least one is on.
+Four flashcards — **Multiply (×)**, **Divide (÷)**, **Add (+)**, **Subtract (−)** — purple for × ÷ and green for + −, matching the operation colours used everywhere else. Any combination may be selected; **Practice all** selects them all. Next explains itself if none is on.
 
 Questions are evenly distributed across selected operations (see [quiz-engine.md](quiz-engine.md)).
 
@@ -67,7 +68,7 @@ Questions are evenly distributed across selected operations (see [quiz-engine.md
 
 Two equal cards: 🚀 **Galactic Math** (blue) and 👾 **Alien Invasion** (green). Tapping one marks it with a check, dims the other, plays `sounds.modeActivate()`, and advances. Switching game resets step 4 to that game's normal option so a Galactic Math mode never leaks into Alien Invasion.
 
-The dashed "More games coming soon" card is not interactive; it is there so the step reads as a list that will grow.
+The dashed "More games coming soon" card is not a game; it carries a **Have an idea for a game? Submit it here** link to `pages/feedback.html?category=feature`, which opens the feedback form with Feature Request already chosen.
 
 ---
 

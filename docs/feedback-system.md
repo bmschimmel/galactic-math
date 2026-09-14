@@ -26,6 +26,11 @@ A standalone page (not part of `index.html`) linked from the footer. It shares t
   - Other — creates a `feedback` label
 - **Message** — required; the main feedback text
 
+A link can pre-pick the category with `?category=bug|feature|other`, which skips
+the picker and opens the form with that badge set (the "Have an idea for a game?"
+link on the setup deck uses `?category=feature`). Unknown values fall through to
+the picker.
+
 The form deliberately does not ask for a name. The app is for kids aged 5–12 and
 everything submitted lands in a public GitHub issue, so there is no field that
 could carry a child's name onto the public internet.

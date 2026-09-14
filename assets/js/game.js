@@ -888,8 +888,18 @@ function goToStep(step, dir) {
   refreshSetup();
 }
 
+// Next is always clickable. When the step isn't ready it says what's missing
+// instead of sitting greyed out with no explanation.
 function nextStep() {
-  if (!stepReady(setupStep)) return;
+  if (!stepReady(setupStep)) {
+    const id = SETUP_STEPS[setupStep];
+    document.getElementById('setupError').textContent =
+      id === 'nums' ? '⚠ Pick at least 3 numbers' :
+      id === 'ops'  ? '⚠ Pick at least one kind of math' :
+                      '⚠ Pick a game first';
+    sounds.wrong();
+    return;
+  }
   sounds.navigate();
   goToStep(setupStep + 1, 'fwd');
 }
@@ -903,19 +913,13 @@ function prevStep() {
 // Repaint everything on the deck that depends on state: flight path, hints,
 // which options panel shows, the briefing rows, and the nav buttons.
 function refreshSetup() {
+  // A change that makes the step ready clears any "pick at least…" message.
+  if (stepReady(setupStep)) document.getElementById('setupError').textContent = '';
   document.querySelectorAll('.fp-node').forEach((node, i) => {
     node.classList.toggle('done', i < setupStep);
     node.classList.toggle('now', i === setupStep);
     node.querySelector('.fp-dot').textContent = i < setupStep ? '✓' : node.dataset.icon;
   });
-
-  const numsHint = document.getElementById('numsHint');
-  numsHint.textContent = numsReady() ? `${selectedNums.size} numbers · ${numsLabel()}` : 'Pick at least 3 numbers';
-  numsHint.classList.toggle('hint-ok', numsReady());
-
-  const opsHint = document.getElementById('opsHint');
-  opsHint.textContent = opsReady() ? `Training ${opsLabel()}` : 'Pick at least one';
-  opsHint.classList.toggle('hint-ok', opsReady());
 
   const alien = selectedGame === 'alien';
   document.getElementById('optionsTitle').textContent = alien ? 'How bad is the alien invasion?' : 'Pick your game mode!';
@@ -930,9 +934,7 @@ function refreshSetup() {
 
   const onLaunch = SETUP_STEPS[setupStep] === 'launch';
   document.getElementById('backBtn').disabled = setupStep === 0;
-  const nextBtn = document.getElementById('nextBtn');
-  nextBtn.hidden = onLaunch;
-  nextBtn.disabled = !stepReady(setupStep);
+  document.getElementById('nextBtn').hidden = onLaunch;
   const startBtn = document.getElementById('startBtn');
   startBtn.hidden = !onLaunch;
   startBtn.classList.toggle('alien', alien);

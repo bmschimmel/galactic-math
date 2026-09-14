@@ -95,20 +95,17 @@
 
         <!-- STEP 1: NUMBERS -->
         <div class="flashcard" id="step-nums">
-          <span class="setup-label">Step 1 of 5</span>
-          <h2 class="step-title">Which numbers are we training?</h2>
+          <h2 class="step-title">What numbers should we practice?</h2>
           <div class="quick-btns">
             <button class="quick-btn active-preset" id="presetBasic" onclick="selectRange(2,12,'presetBasic')">Basic (2–12)</button>
             <button class="quick-btn" id="presetAll" onclick="selectAll()">All (0–13)</button>
             <button class="quick-btn" id="presetClear" onclick="selectNone()">Clear</button>
           </div>
           <div class="number-grid" id="numGrid"></div>
-          <p class="step-hint" id="numsHint"></p>
         </div>
 
         <!-- STEP 2: MATH -->
         <div class="flashcard" id="step-ops">
-          <span class="setup-label">Step 2 of 5</span>
           <h2 class="step-title">What kind of math?</h2>
           <div class="op-cards" id="modeButtons">
             <button class="op-card op-mul-div mode-btn selected-mode" data-mode="multiply" onclick="toggleOp('multiply')"><span class="op-sym">×</span><span class="op-name">Multiply</span></button>
@@ -117,34 +114,30 @@
             <button class="op-card op-add-sub mode-btn" data-mode="subtract" onclick="toggleOp('subtract')"><span class="op-sym">−</span><span class="op-name">Subtract</span></button>
           </div>
           <div class="quick-btns">
-            <button class="quick-btn mode-btn" data-mode="all" onclick="selectAllOps()">★ All four</button>
+            <button class="quick-btn mode-btn" data-mode="all" onclick="selectAllOps()">Practice all</button>
           </div>
-          <p class="step-hint" id="opsHint"></p>
         </div>
 
         <!-- STEP 3: GAME -->
         <div class="flashcard" id="step-game">
-          <span class="setup-label">Step 3 of 5</span>
           <h2 class="step-title">Pick your game</h2>
           <div class="game-cards">
             <button class="game-card galactic" data-game="galactic" onclick="selectGame('galactic')">
               <span class="game-icon">🚀</span>
-              <span class="game-text"><span class="game-name">GALACTIC MATH</span><span class="game-desc">Answer 20 problems and earn your Jedi rank.</span></span>
+              <span class="game-text"><span class="game-name">GALACTIC MATH</span><span class="game-desc">Answer 20 problems in a classic flashcard style game to earn your Jedi rank</span></span>
               <span class="game-check">✓</span>
             </button>
             <button class="game-card alien" data-game="alien" onclick="selectGame('alien')">
               <span class="game-icon">👾</span>
-              <span class="game-text"><span class="game-name">ALIEN INVASION</span><span class="game-desc">Fly your rocket through math gates and blast the aliens!</span></span>
+              <span class="game-text"><span class="game-name">ALIEN INVASION</span><span class="game-desc">Fly your rocket ship to the math gates to earn ammo and clear the solar system of the aliens!</span></span>
               <span class="game-check">✓</span>
             </button>
-            <div class="game-card soon"><span class="game-icon">🛸</span><span class="game-desc">More games coming soon</span></div>
+            <div class="game-card soon"><span class="game-icon">🛸</span><span class="game-text"><span class="game-desc">More games coming soon</span><a class="game-idea" href="pages/feedback.html?category=feature">Have an idea for a game? Submit it here ▸</a></span></div>
           </div>
-          <p class="step-hint">Tap one — the next card comes right up.</p>
         </div>
 
         <!-- STEP 4: OPTIONS (per game) -->
         <div class="flashcard" id="step-options">
-          <span class="setup-label">Step 4 of 5</span>
           <h2 class="step-title" id="optionsTitle">Pick your game mode!</h2>
 
           <div class="mode-list" id="galacticOptions">
@@ -155,7 +148,7 @@
             </button>
             <button class="mode-tile" data-mode="hyperspace" id="hyperspaceToggle" onclick="setGameMode('hyperspace')">
               <span class="tile-icon">⚡</span>
-              <span class="tile-body"><span class="tile-name">HYPERSPACE</span><span class="tile-desc">Finish before the jump!</span></span>
+              <span class="tile-body"><span class="tile-name">HYPERSPACE</span><span class="tile-desc">Answer all the questions before the jump to light speed!</span></span>
               <span class="tile-tick">✓</span>
             </button>
             <div id="hyperspaceOptions">
@@ -182,7 +175,7 @@
             </div>
             <button class="mode-tile" data-mode="kessel" id="kesselToggle" onclick="setGameMode('kessel')">
               <span class="tile-icon">☄️</span>
-              <span class="tile-body"><span class="tile-name">KESSEL RUN</span><span class="tile-desc">How fast can you finish? Wrong answers add 5s.</span></span>
+              <span class="tile-body"><span class="tile-name">KESSEL RUN</span><span class="tile-desc">How fast can you finish? Wrong answers add a 5 second penalty!</span></span>
               <span class="tile-tick">✓</span>
             </button>
           </div>
@@ -216,7 +209,6 @@
 
         <!-- STEP 5: LAUNCH -->
         <div class="flashcard" id="step-launch">
-          <span class="setup-label">Step 5 of 5</span>
           <h2 class="step-title">Mission briefing</h2>
           <div class="briefing">
             <button class="brief-row" onclick="goToStep(0)"><span class="brief-key">Numbers</span><span class="brief-val" id="briefNums"></span><span class="brief-edit">CHANGE</span></button>
