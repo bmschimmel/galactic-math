@@ -91,7 +91,7 @@
   /* ===== TWO-PANEL LAYOUT ===== */
   .panels-wrap {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 2fr;
     gap: 0 32px;
     align-items: start;
   }
@@ -217,9 +217,9 @@
   /* ===== RECENT CHANGES LIST ===== */
   .pr-row {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
     margin-bottom: 8px;
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -236,26 +236,44 @@
     font-family: 'Orbitron', monospace;
     font-size: 11px;
     color: var(--saber-purple);
-    flex-shrink: 0;
   }
 
   .pr-title {
     font-size: 13px;
+    line-height: 1.4;
     color: var(--star-white);
-    flex: 1;
   }
 
-  .pr-date {
-    font-size: 10.5px;
+  .pr-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .pr-release {
+    font-family: 'Orbitron', monospace;
+    font-size: 9.5px;
     letter-spacing: 0.5px;
-    color: var(--muted);
-    flex-shrink: 0;
+    color: var(--gold);
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 5px;
+    padding: 2px 6px;
     white-space: nowrap;
   }
 
-  @media (max-width: 480px) {
-    .pr-row { flex-wrap: wrap; }
-    .pr-date { width: 100%; }
+  .pr-release.unreleased {
+    color: var(--muted);
+    background: rgba(107, 127, 163, 0.08);
+    border-color: var(--border);
+  }
+
+  .pr-date {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    white-space: nowrap;
   }
 </style>
 </head>
@@ -300,13 +318,33 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+// A bare GitHub PR URL (as GitHub's auto-generated "What's Changed" list uses)
+// links as "#123" instead of the full URL.
+function linkifyUrl(url) {
+  const prMatch = url.match(/^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\/(\d+)\/?$/);
+  const label = prMatch ? `#${prMatch[1]}` : url;
+  return `<a href="${url}" target="_blank" rel="noopener">${label}</a>`;
+}
+
 // Minimal, safe Markdown-to-HTML: strips raw HTML first, escapes everything,
 // then re-introduces only the handful of tags GitHub release notes actually use.
 function mdToHtml(md) {
   let text = escapeHtml((md || '').replace(/<[^>]+>/g, ''));
 
   text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // Markdown links and bare URLs (e.g. the "What's Changed" PR list) in one pass,
+  // so a bare URL already consumed as part of a markdown link isn't re-linked.
+  text = text.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<]+)/g,
+    (match, linkText, linkUrl, bareUrl) => {
+      if (linkUrl !== undefined) {
+        return `<a href="${linkUrl}" target="_blank" rel="noopener">${linkText}</a>`;
+      }
+      const cleaned = bareUrl.replace(/[.,;:!?)]+$/, '');
+      const trailing = bareUrl.slice(cleaned.length);
+      return linkifyUrl(cleaned) + trailing;
+    }
+  );
 
   let html = '';
   let inList = false;
@@ -374,20 +412,47 @@ function renderReleases(releases) {
   }
 }
 
-function renderPRs(prs) {
+// Releases don't say which PRs they contain, but their auto-generated
+// "What's Changed" body links to each one — map PR number -> release version
+// from that instead of an extra API call per PR.
+function buildPRReleaseMap(releases) {
+  const map = {};
+  for (const r of releases) {
+    if (r.draft) continue;
+    const version = (r.tag_name || '').replace(/^v/i, '');
+    const re = /\/pull\/(\d+)/g;
+    let m;
+    while ((m = re.exec(r.body || ''))) {
+      const num = Number(m[1]);
+      if (!(num in map)) map[num] = version;
+    }
+  }
+  return map;
+}
+
+function renderPRs(prs, prReleaseMap) {
   const list = document.getElementById('prsList');
   if (!prs.length) {
     list.innerHTML = '<p class="muted-note">No recent changes found.</p>';
     return;
   }
 
-  list.innerHTML = prs.map(pr => `
-    <a class="pr-row" href="${pr.html_url}" target="_blank" rel="noopener">
-      <span class="pr-number">#${pr.number}</span>
-      <span class="pr-title">${escapeHtml(pr.title)}</span>
-      <span class="pr-date">${formatDate(pr.merged_at)}</span>
-    </a>
-  `).join('');
+  list.innerHTML = prs.map(pr => {
+    const version = prReleaseMap[pr.number];
+    const releaseBadge = version
+      ? `<span class="pr-release">v${escapeHtml(version)}</span>`
+      : `<span class="pr-release unreleased">Unreleased</span>`;
+    return `
+      <a class="pr-row" href="${pr.html_url}" target="_blank" rel="noopener">
+        <span class="pr-number">#${pr.number}</span>
+        <span class="pr-title">${escapeHtml(pr.title)}</span>
+        <span class="pr-meta-row">
+          ${releaseBadge}
+          <span class="pr-date">${formatDate(pr.merged_at)}</span>
+        </span>
+      </a>
+    `;
+  }).join('');
 }
 
 async function loadReleaseNotes() {
@@ -404,7 +469,7 @@ async function loadReleaseNotes() {
     const mergedPRs = pulls.filter(pr => pr.merged_at).slice(0, 15);
 
     renderReleases(releases);
-    renderPRs(mergedPRs);
+    renderPRs(mergedPRs, buildPRReleaseMap(releases));
 
     document.getElementById('status').style.display = 'none';
     document.getElementById('panelsWrap').style.display = '';

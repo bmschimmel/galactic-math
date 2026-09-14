@@ -15,12 +15,14 @@
 
 ## Layout
 
-The page is two panels in a `.panels-wrap` grid (stacking to one column under 720px, same breakpoint pattern as `pages/workflow.html`):
+The page is two panels in a `.panels-wrap` grid — a 1fr/2fr split, so Releases gets twice the width of Recent Changes — stacking to one column under 720px (same breakpoint pattern as `pages/workflow.html`):
 
-- **Left — Recent Changes**: the merged-PR list.
-- **Right — Releases**: one collapsible row per release.
+- **Left (1/3) — Recent Changes**: the merged-PR list, each row tagged with the release it shipped in.
+- **Right (2/3) — Releases**: one collapsible row per release, given the extra width since release bodies run long.
 
 Each release row is a `<button class="release-toggle">` header (version badge, date, chevron) plus a `.release-body` that starts `hidden`; clicking the header calls `toggleRelease()`, which flips `aria-expanded`, the `hidden` attribute, and an `.expanded` class that rotates the chevron. Rows are collapsed by default.
+
+Each Recent Changes row also carries a `.pr-release` badge — the release `tag_name` if the PR shipped in one, or "Unreleased" if it merged after the last tag. `buildPRReleaseMap()` gets this for free from data already on the page: every release body's auto-generated "What's Changed" list links each PR by number, so the page scans those bodies for `/pull/(\d+)` once and looks up each PR's number in the result, rather than making a request per PR.
 
 ---
 
@@ -43,7 +45,7 @@ GitHub release bodies are Markdown (with the occasional raw `<img>` tag for scre
 
 1. Strips any raw HTML tags outright (screenshots are dropped rather than rendered).
 2. HTML-escapes everything that's left.
-3. Re-introduces only `<h3>`/`<h4>` (`##`/`###`), `<strong>` (`**text**`), `<ul>`/`<li>` (`-`/`*` bullets), `<p>` (paragraphs), and `<a>` for `[text](https://...)` links — each built from the already-escaped text, so nothing from the API can inject a tag the page didn't write itself.
+3. Re-introduces only `<h3>`/`<h4>` (`##`/`###`), `<strong>` (`**text**`), `<ul>`/`<li>` (`-`/`*` bullets), `<p>` (paragraphs), and `<a>` for both `[text](https://...)` links and bare `https://...` URLs — each built from the already-escaped text, so nothing from the API can inject a tag the page didn't write itself. GitHub's auto-generated "What's Changed" list uses bare PR URLs rather than markdown links, so a bare URL is linkified too; one matching `github.com/OWNER/REPO/pull/N` is shown as `#N` instead of the full URL.
 
 This is intentionally a small subset of Markdown, not a general-purpose parser — just enough to render this repo's own release notes cleanly.
 
