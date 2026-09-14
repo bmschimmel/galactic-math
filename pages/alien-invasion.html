@@ -2075,6 +2075,7 @@ function openGateQuestion(gate) {
   gameState = 'question';
   sounds.thrustStop();
   clearDirKeys(); // don't drift while the question is up (fly mode is kept)
+  ship.moving = false; // parked at the gate — updateShip() won't run again to clear this, so the thruster flame would otherwise stay stuck on
   sounds.gateEnter();
   currentQuestion = makeQuestion(gate.op);
 
