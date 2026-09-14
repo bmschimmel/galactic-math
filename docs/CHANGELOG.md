@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
-### IDT-291 — Auto-expand the most recent release on the release notes page (PR #TBD)
+### IDT-291 — Auto-expand the most recent release on the release notes page (PR #143)
 
 Every release row on `pages/release-notes.html` started collapsed unless it matched the footer's `?version=` link, so a plain visit to the page showed nothing but a list of closed headers. The most recent release (index 0 of the newest-first list GitHub returns) now always starts expanded, alongside whichever release a `?version=` param targets if that's a different, older one.
 
