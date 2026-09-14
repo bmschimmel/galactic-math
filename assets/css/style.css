@@ -1817,6 +1817,14 @@
     color: var(--saber-blue);
   }
 
+  .page-footer .version-link,
+  .page-footer .version-link:hover {
+    display: inline-block;
+    margin-top: 4px;
+    color: var(--muted);
+    opacity: 0.4;
+  }
+
   /* ===== COMPAT WARNING BANNER ===== */
   #compatBanner {
     display: none;

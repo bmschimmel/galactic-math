@@ -10,8 +10,9 @@ Galactic Math is a space-themed math trainer for kids in grades K–6. The entir
 galactic-math/
 ├── index.html          # The game — HTML, CSS, and JS in one file
 ├── pages/
-│   ├── feedback.html   # User feedback submission form
-│   └── workflow.html   # Development workflow explainer
+│   ├── feedback.html       # User feedback submission form
+│   ├── workflow.html       # Development workflow explainer
+│   └── release-notes.html  # GitHub releases and recent PRs
 ├── worker/
 │   ├── feedback-worker.js   # Cloudflare Worker: receives feedback, creates GitHub issues
 │   └── wrangler.toml        # Cloudflare deployment config
@@ -117,7 +118,7 @@ The CSP is split into per-resource directives rather than one `default-src`:
 | `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com` | Own CSS, inline styles, Google Fonts stylesheet | `style.css`, `style=` attributes, the Orbitron / Exo 2 `<link>` |
 | `font-src https://fonts.gstatic.com` | Google Fonts files | Pulled in by the Google Fonts stylesheet |
 | `img-src 'self' data:` | Own images and `data:` URIs | Favicons; the sub-pages use inline SVG `data:` favicons |
-| `connect-src 'self' https://galactic-math-feedback.bmschimmel.workers.dev` | `fetch()` targets | The feedback worker, and the `fetch()` of `assets/audio/low-fuel.m4a` in Alien Invasion |
+| `connect-src 'self' https://galactic-math-feedback.bmschimmel.workers.dev https://api.github.com` | `fetch()` targets | The feedback worker, the `fetch()` of `assets/audio/low-fuel.m4a` in Alien Invasion, and the GitHub REST API calls in `pages/release-notes.html` |
 | `object-src 'none'` | Nothing | No plugins |
 | `base-uri 'self'` | Same-origin `<base>` only | Blocks base-tag hijacking |
 | `frame-ancestors 'none'` | No embedding | The game cannot be put in another site's iframe |
