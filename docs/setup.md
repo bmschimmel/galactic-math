@@ -97,11 +97,11 @@ Three cards in the same shape as the Hyperspace difficulty cards, one big number
 
 | Card | Badge | Aliens | Sub line |
 |---|---|---|---|
-| 🛸 Sneak Attack | Easy | 5 | Alien ships unarmed |
+| 🛸 Recon | Easy | 5 | Alien ships unarmed |
 | 👾 Invasion | Normal | 10 | Aliens fire lasers! |
 | 🌀 Chaos | Hard | 25 | Good luck, pilot |
 
-`setInvasion(size)` sets `invasionSize`; the alien count is passed to the game as `aliens=5|10|25`. Only the count is honoured today — the sub lines describe the intent, and the levers behind them (who shoots, comets, fuel) are IDT-278.
+`setInvasion(size)` sets `invasionSize`; the alien count is passed to the game as `aliens=5|10|25`. The count also decides who shoots: 5 (Recon) spawns no shooters, otherwise the first half of aliens are shooters. Comets and fuel don't yet vary by mode — that's IDT-278.
 
 ---
 
