@@ -143,6 +143,40 @@ https://galacticmath.app/
 
 ---
 
+## Releases
+
+Releases are cut from `main` and use [semantic versioning](https://semver.org/):
+bump the **major** version for a change that reworks how the game is played or
+set up, the **minor** version for new modes or features, and the **patch**
+version for fixes.
+
+The version string lives in one place: the footer of `index.html`
+(`<div ...>vX.Y.Z</div>`). Bumping it is a normal code change — open a Linear
+issue, branch, update the footer, add a changelog entry, and get the PR merged
+before the release is created.
+
+Once the bump is on `main`, draft the release with the GitHub CLI:
+
+```bash
+gh release create vX.Y.Z --draft --target main --title "vX.Y.Z" \
+  --generate-notes --notes-start-tag vPREVIOUS
+```
+
+- `--generate-notes` lists every PR merged between the previous tag and `main`,
+  so nothing needs to be tracked by hand. `--notes-start-tag` is the last
+  release's tag (`gh release list` shows it).
+- `--draft` lets you edit the notes before anyone sees them. Add a short
+  **Highlights** section above the generated PR list; `docs/CHANGELOG.md` has
+  the detail to pull from.
+- Publishing the draft creates the `vX.Y.Z` git tag on `main`. Tags are never
+  created by hand — the release is the tag.
+
+GitHub milestones are optional and are not used when generating release notes.
+If you want one as a tracking record, assign it when merging
+(`gh pr edit <n> --milestone vX.Y.Z`) and close it when the release ships.
+
+---
+
 ## For Claude Code
 
 When picking up a Linear issue:
