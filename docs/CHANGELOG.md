@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
+### IDT-284 — Create a release notes page for Galactic Math (PR #TBD)
+
+Seeing what changed meant leaving the app for GitHub, so `pages/release-notes.html` now shows it in place: it calls the public GitHub REST API on load for every published release plus the 15 most recently merged pull requests, rendering each release body through a small escape-first Markdown-to-HTML converter that only re-introduces headings, bold, links, lists and paragraphs (raw `<img>` screenshots are dropped rather than rendered). The footer version link on `index.html` now opens this page filtered to that release — `game.js` reads the version straight from the link's own text rather than hardcoding a second copy, so the version string still lives in one place. A failed request (offline, GitHub down, rate-limited) falls back to a message linking straight to the GitHub releases page instead of a blank screen. `https://api.github.com` is added to `connect-src` in `_headers` for this. Docs: new `docs/release-notes.md`, `docs/overview.md` and `docs/README.md` updated.
+
 ### IDT-283 — Bump version to 2.0.0 and document the release process (PR #136)
 
 The footer version in `index.html` moves from v1.0.0 to v2.0.0 ahead of the v2.0.0 GitHub release, which gathers everything merged since the v1.0.0 tag in March — Alien Invasion, the Flight Deck setup deck, the Cloudflare feedback worker, security headers and the CSP split, the starfield battery fix and the wall-clock timers. `CONTRIBUTING.md` gains a **Releases** section that writes down the process for the first time: the version string lives only in the footer and is bumped in its own PR; a release is drafted from `main` with `gh release create --generate-notes --notes-start-tag <previous>`, which lists every PR since the last tag; publishing the draft is what creates the tag; and GitHub milestones are an optional tracking record that release notes do not depend on.
