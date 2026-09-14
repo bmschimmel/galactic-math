@@ -309,6 +309,15 @@
   #pauseBanner { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); display: none; font-family: 'Orbitron', monospace; font-size: 22px; color: var(--saber-blue); text-shadow: 0 0 20px var(--saber-blue); letter-spacing: 4px; pointer-events: none; z-index: 25; }
   #flightBanner { position: fixed; top: 72px; left: 50%; transform: translateX(-50%); display: none; font-family: 'Orbitron', monospace; font-size: 18px; color: var(--saber-green); text-shadow: 0 0 16px var(--saber-green); letter-spacing: 3px; pointer-events: none; z-index: 25; white-space: nowrap; }
   .hud-missiles { font-family: 'Orbitron', monospace; font-size: 15px; color: var(--saber-green); min-width: 24px; text-align: center; }
+  /* Shared pickup pulse — .pulse sets --pulse-color, statPulse does the scale + glow */
+  .hud-missiles.pulse, #ammoLabel.pulse, .fuel-pct.pulse, #fuelLabel.pulse { animation: statPulse 0.6s ease-out; }
+  .hud-missiles.pulse, #ammoLabel.pulse { --pulse-color: var(--saber-green); }
+  .fuel-pct.pulse, #fuelLabel.pulse     { --pulse-color: var(--gold); }
+  @keyframes statPulse {
+    0%   { transform: scale(1);    text-shadow: none; }
+    35%  { transform: scale(1.5);  text-shadow: 0 0 14px var(--pulse-color); }
+    100% { transform: scale(1);    text-shadow: none; }
+  }
 
   /* ===== KEY HINT ===== */
   #flyModeBadge {
@@ -660,20 +669,19 @@
   <div class="intro-icon">👾</div>
   <div class="intro-title">⚠ ALIEN INVASION!</div>
   <div class="intro-body">
-    The solar system is under attack by aliens!<br>
-    Visit the <strong>math rings</strong> and answer the question correctly to get <strong>missiles</strong> to take them out!
+    Aliens have taken over the solar system! Fly through <strong>math rings</strong> to earn <strong>missiles</strong>, then shoot down every alien ship. Wrong answers cost fuel — dodge comets and asteroids too.
   </div>
 
   <div class="intro-controls" id="introControlsKeys">
     <span class="ctrl-label">🕹 MOVE</span>
     <span class="ctrl-desc">
       <b>Arrow keys</b> or <b>WASD</b>
-      <span class="sub">Rather use the trackpad? <b>Click once</b> to start flying, then just move the pointer — your ship follows. Point at the middle of the screen to stop, and click again to turn it off.</span>
+      <span class="sub">Or click once to fly with the mouse/trackpad — move the pointer to steer, click again to stop.</span>
     </span>
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Press <b>SPACE</b>
-      <span class="sub">You need a missile first — fly through a math ring and answer its question correctly.</span>
+      <span class="sub">Need a missile, complete math problems at the rings!</span>
     </span>
     <span class="ctrl-label">⏸ PAUSE</span>
     <span class="ctrl-desc">Press <b>P</b></span>
@@ -685,7 +693,7 @@
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Tap the <b>🚀 FIRE</b> button at the bottom-right
-      <span class="sub">You need a missile first — fly through a math ring and answer its question correctly.</span>
+      <span class="sub">Need a missile, complete math problems at the rings!</span>
     </span>
   </div>
 
@@ -698,7 +706,7 @@
 <!-- ===== HUD ===== -->
 <div id="hud">
   <div class="hud-bar">
-    <span class="hud-label">FUEL</span>
+    <span class="hud-label" id="fuelLabel">FUEL</span>
     <div class="fuel-bar-outer">
       <div class="fuel-bar-fill" id="fuelFill" style="width:100%"></div>
     </div>
@@ -706,7 +714,7 @@
     <div class="hud-sep"></div>
     <div class="hud-lives" id="livesDisplay"></div>
     <div class="hud-sep"></div>
-    <span class="hud-label">🚀</span>
+    <span class="hud-label" id="ammoLabel">AMMO</span>
     <span class="hud-missiles" id="missileCount">0</span>
     <div class="hud-sep"></div>
     <button class="hud-abort" onclick="abortMission()">✕ ABORT</button>
@@ -751,8 +759,8 @@
 </div>
 
 <!-- ===== KEY HINT ===== -->
-<div id="keyHint">Arrow keys or click once to fly with the trackpad · Space to fire · Enter to submit · P to pause</div>
-<div id="devBanner">🚧 Still in development — <a href="feedback.html" target="_blank">submit ideas here</a></div>
+<div id="keyHint">Arrow keys or click once to fly with the mouse/trackpad · Space to fire · Enter to submit · P to pause</div>
+<div id="devBanner">💡 <a href="feedback.html" target="_blank">Submit ideas here</a></div>
 
 <!-- ===== VIRTUAL JOYSTICK (mobile touch) ===== -->
 <div id="vjoy">
@@ -1025,15 +1033,16 @@ const sounds = {
     });
   },
 
-  // No ammo click — dry click when firing with 0 missiles
+  // No ammo buzz — short descending error tone when firing with 0 missiles
   missileEmpty() {
     const ctx = getAudio();
     const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'square'; o.frequency.value = 180;
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(220, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.14);
     o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.08, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
-    o.start(); o.stop(ctx.currentTime + 0.07);
+    g.gain.setValueAtTime(0.14, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
+    o.start(); o.stop(ctx.currentTime + 0.15);
   },
 
   // Fuel pickup — bright rising chime
@@ -1234,6 +1243,7 @@ const GATE_RADIUS      = 60;    // visual ring radius (px)
 const EARTH_RADIUS     = 130;   // large Earth destination radius
 const EARTH_LAND_DIST  = 155;   // how close to land (ship center to Earth center)
 const THRUST_FUEL_RATE  = 0.013; // % fuel burned per frame while thrusting (~0.78%/sec at 60fps)
+const LOW_FUEL_WARNING_PCT = 20; // audio warning + ticking starts at/below this fuel %
 const N_ASTEROIDS      = 28;
 // How bad the invasion is comes from the main setup flow as ?aliens=5|10|25.
 // Anything else (or nothing, when this page is opened on its own) is the
@@ -1247,6 +1257,8 @@ const N_FUEL_PICKUPS   = 6;
 const MISSILE_SPEED     = 14;   // px/frame player missile speed
 const COMET_MAX        = 6;     // max comets on screen at once
 const COMET_INTERVAL   = 1800;  // ms between comet spawns
+const NO_AMMO_HINT_MS  = 1800;  // how long the "fly to a ring" hint stays up near the ship
+const NO_AMMO_BUZZ_COOLDOWN_MS = 1200; // min gap between buzz sounds while Space is held
 
 // ===== PLANET FACTS =====
 const PLANET_FACTS = {
@@ -1392,6 +1404,8 @@ let screenShake;
 let animId, lastTs;
 let keys = {};
 let wrongFlashTimer = null;
+let noAmmoHintUntil = 0;      // Date.now() timestamp; hint text draws near the ship until this passes
+let noAmmoBuzzedAt = 0;       // throttles the buzz sound so holding Space doesn't machine-gun it
 let rainbowAngle = 0;
 let nextCometTime = 0;
 let hudUpdatePending = false;
@@ -1439,6 +1453,8 @@ function initGame() {
   stopLowFuelTicks();
   activatedGate = null;
   invincibleUntil = 0;
+  noAmmoHintUntil = 0;
+  noAmmoBuzzedAt = 0;
   screenShake   = 0;
   paused        = false;
   keys          = {};
@@ -2069,6 +2085,7 @@ function openGateQuestion(gate) {
   gameState = 'question';
   sounds.thrustStop();
   clearDirKeys(); // don't drift while the question is up (fly mode is kept)
+  ship.moving = false; // parked at the gate — updateShip() won't run again to clear this, so the thruster flame would otherwise stay stuck on
   sounds.gateEnter();
   currentQuestion = makeQuestion(gate.op);
 
@@ -2126,8 +2143,9 @@ function clearGate(gate) {
   document.getElementById('questionOverlay').style.display = 'none';
   gameState = 'playing';
   updateHUD();
+  pulseHUDStat('missileCount', 'ammoLabel');
   sounds.missilePickup();
-  showFlightBanner('🚀 AMMO +2', 900);
+  showFlightBanner('✨ AMMO +2', 900);
 }
 
 // ===== HUD =====
@@ -2140,7 +2158,7 @@ function updateHUD() {
   pct.textContent = Math.round(oxy) + '%';
   pct.classList.toggle('low', oxy <= 25);
 
-  if (oxy > 10) {
+  if (oxy > LOW_FUEL_WARNING_PCT) {
     if (lowFuelWarningPlayed) { lowFuelWarningPlayed = false; stopLowFuelTicks(); }
   } else if (!lowFuelWarningPlayed && gameState === 'playing') {
     lowFuelWarningPlayed = true;
@@ -2165,6 +2183,19 @@ function showFlightBanner(msg, duration) {
   b.textContent = msg;
   b.style.display = 'block';
   setTimeout(() => { if (b.textContent === msg) b.style.display = 'none'; }, duration);
+}
+
+// Pulses a HUD stat (value + its label) so a pickup is impossible to miss —
+// used for both the AMMO count (gate pickup) and FUEL % (fuel pickup).
+const pulseTimers = new Map();
+function pulseHUDStat(valueId, labelId) {
+  const value = document.getElementById(valueId);
+  const label = document.getElementById(labelId);
+  value.classList.remove('pulse'); label.classList.remove('pulse');
+  void value.offsetWidth; // restart the animation even if a pulse is already mid-flight
+  value.classList.add('pulse'); label.classList.add('pulse');
+  clearTimeout(pulseTimers.get(valueId));
+  pulseTimers.set(valueId, setTimeout(() => { value.classList.remove('pulse'); label.classList.remove('pulse'); }, 600));
 }
 
 function abortMission() {
@@ -2345,7 +2376,14 @@ function drawComets() {
 // ===== MISSILE POWERUPS =====
 // ===== PLAYER MISSILES =====
 function firePlayerMissile() {
-  if (!missiles || missiles <= 0) { sounds.missileEmpty(); return; }
+  if (!missiles || missiles <= 0) {
+    const now = Date.now();
+    // Holding Space auto-repeats fast — only re-buzz every NO_AMMO_BUZZ_COOLDOWN_MS
+    // so hammering it doesn't machine-gun the sound, but keep the hint text up.
+    if (now - noAmmoBuzzedAt > NO_AMMO_BUZZ_COOLDOWN_MS) { sounds.missileEmpty(); noAmmoBuzzedAt = now; }
+    noAmmoHintUntil = now + NO_AMMO_HINT_MS;
+    return;
+  }
   missiles--;
   missilesFireTotal++;
   updateHUD();
@@ -2440,6 +2478,7 @@ function showPlanetFact(planet) {
   gameState = 'planet_fact';
   currentFactPlanetType = planet.type;
   sounds.thrustStop();
+  ship.moving = false; // parked reading the label — updateShip() won't run again to clear this (same fix as gates)
 
   // Position popup right next to the planet, clamped to viewport
   const sc    = w2s(planet.x, planet.y);
@@ -2578,6 +2617,7 @@ function render() {
   drawLasers();
   drawParticles();
   drawShip();
+  drawNoAmmoHint();
   ctx.restore();
 
   // Screen-space drawing (not shaken)
@@ -3035,7 +3075,9 @@ function checkFuelPickups() {
       pickup.collected = true;
       oxygen = Math.min(100, oxygen + 10);
       updateHUD();
+      pulseHUDStat('fuelPct', 'fuelLabel');
       sounds.fuelPickup();
+      showFlightBanner('⛽ FUEL +10%', 900);
       spawnParticles(pickup.x, pickup.y, 16, ['#ffd700','#ffaa00','#ffffff','#ffd700'], 1.5, 4.5, 0.015, 0.03, 2, 5);
     }
   }
@@ -3246,6 +3288,21 @@ function drawShip() {
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.beginPath(); ctx.arc(-1.5, -18.5, 1.8, 0, Math.PI*2); ctx.fill();
 
+  ctx.restore();
+}
+
+// Warning text that floats just above the ship when firing with 0 missiles —
+// stays upright (drawn outside drawShip's rotate transform) and follows the
+// ship every frame so it doesn't get left behind if the ship keeps moving.
+function drawNoAmmoHint() {
+  if (Date.now() > noAmmoHintUntil) return;
+  const p = w2s(ship.x, ship.y);
+  const lines = ['Fly to the rings and', 'complete problems to get missiles!'];
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,45,85,0.95)';
+  ctx.font = '700 12px Orbitron,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 12;
+  lines.forEach((line, i) => ctx.fillText(line, p.x, p.y - 62 + i * 15));
   ctx.restore();
 }
 
