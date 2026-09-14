@@ -30,7 +30,7 @@
   }
 
   .container {
-    max-width: 720px;
+    max-width: 960px;
     margin: 0 auto;
   }
 
@@ -88,25 +88,37 @@
 
   .error-box a { color: var(--saber-blue); }
 
+  /* ===== TWO-PANEL LAYOUT ===== */
+  .panels-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 32px;
+    align-items: start;
+  }
+
+  @media (max-width: 720px) {
+    .panels-wrap { grid-template-columns: 1fr; }
+  }
+
   .section-heading {
     font-family: 'Orbitron', monospace;
     font-size: 13px;
     letter-spacing: 3px;
     color: var(--gold);
     text-transform: uppercase;
-    margin: 40px 0 18px;
+    margin-bottom: 18px;
     padding-bottom: 8px;
     border-bottom: 1px solid var(--border);
   }
 
-  /* ===== RELEASE CARDS ===== */
+  /* ===== RELEASE CARDS (collapsible) ===== */
   .release-card {
     background: rgba(10, 15, 30, 0.85);
     border: 1px solid rgba(0, 212, 255, 0.2);
     border-radius: 14px;
-    padding: 24px 28px;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
     backdrop-filter: blur(10px);
+    overflow: hidden;
   }
 
   .release-card.highlight {
@@ -114,13 +126,23 @@
     box-shadow: 0 0 30px rgba(0, 212, 255, 0.25);
   }
 
-  .release-head {
+  .release-toggle {
+    width: 100%;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 10px 14px;
-    margin-bottom: 14px;
+    background: none;
+    border: none;
+    padding: 16px 20px;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
   }
+
+  .release-toggle:hover { background: rgba(0, 212, 255, 0.06); }
 
   .release-badge {
     font-family: 'Orbitron', monospace;
@@ -138,6 +160,22 @@
     font-size: 11px;
     letter-spacing: 1px;
     color: var(--muted);
+  }
+
+  .release-chevron {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 11px;
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  .release-card.expanded .release-chevron {
+    transform: rotate(90deg);
+    color: var(--saber-blue);
+  }
+
+  .release-body {
+    padding: 0 20px 20px;
   }
 
   .release-body h3, .release-body h4 {
@@ -176,7 +214,7 @@
     color: var(--gold);
   }
 
-  /* ===== PULL REQUEST LIST ===== */
+  /* ===== RECENT CHANGES LIST ===== */
   .pr-row {
     display: flex;
     align-items: center;
@@ -216,7 +254,6 @@
   }
 
   @media (max-width: 480px) {
-    .release-card { padding: 18px 18px; }
     .pr-row { flex-wrap: wrap; }
     .pr-date { width: 100%; }
   }
@@ -235,15 +272,17 @@
     🛰️ Couldn't reach GitHub from here. <a href="https://github.com/bmschimmel/galactic-math/releases" target="_blank" rel="noopener">View releases on GitHub →</a>
   </div>
 
-  <section id="releasesSection" style="display:none;">
-    <div class="section-heading">🚀 Releases</div>
-    <div id="releasesList"></div>
-  </section>
+  <div id="panelsWrap" class="panels-wrap" style="display:none;">
+    <section class="panel">
+      <div class="section-heading">🛰️ Recent Changes</div>
+      <div id="prsList"></div>
+    </section>
 
-  <section id="prsSection" style="display:none;">
-    <div class="section-heading">🛠️ Recent Pull Requests</div>
-    <div id="prsList"></div>
-  </section>
+    <section class="panel">
+      <div class="section-heading">🚀 Releases</div>
+      <div id="releasesList"></div>
+    </section>
+  </div>
 </div>
 
 <script>
@@ -295,6 +334,17 @@ function mdToHtml(md) {
   return html || '<p><em>No description provided.</em></p>';
 }
 
+// Every release renders collapsed except the one named in ?version=,
+// which arrives expanded, highlighted, and scrolled into view.
+function toggleRelease(btn) {
+  const card = btn.closest('.release-card');
+  const body = card.querySelector('.release-body');
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', String(!expanded));
+  body.hidden = expanded;
+  card.classList.toggle('expanded', !expanded);
+}
+
 function renderReleases(releases) {
   const list = document.getElementById('releasesList');
   const visible = releases.filter(r => !r.draft);
@@ -307,12 +357,13 @@ function renderReleases(releases) {
     const version = (r.tag_name || '').replace(/^v/i, '');
     const isTarget = wantedVersion && version.toLowerCase() === wantedVersion.toLowerCase();
     return `
-      <div class="release-card${isTarget ? ' highlight' : ''}" id="release-${escapeHtml(version)}">
-        <div class="release-head">
+      <div class="release-card${isTarget ? ' highlight expanded' : ''}" id="release-${escapeHtml(version)}">
+        <button class="release-toggle" onclick="toggleRelease(this)" aria-expanded="${isTarget}">
           <span class="release-badge">${escapeHtml(r.tag_name || version)}</span>
           <span class="release-date">${formatDate(r.published_at || r.created_at)}</span>
-        </div>
-        <div class="release-body">${mdToHtml(r.body)}</div>
+          <span class="release-chevron">▸</span>
+        </button>
+        <div class="release-body"${isTarget ? '' : ' hidden'}>${mdToHtml(r.body)}</div>
       </div>
     `;
   }).join('');
@@ -326,7 +377,7 @@ function renderReleases(releases) {
 function renderPRs(prs) {
   const list = document.getElementById('prsList');
   if (!prs.length) {
-    list.innerHTML = '<p class="muted-note">No recent pull requests found.</p>';
+    list.innerHTML = '<p class="muted-note">No recent changes found.</p>';
     return;
   }
 
@@ -356,8 +407,7 @@ async function loadReleaseNotes() {
     renderPRs(mergedPRs);
 
     document.getElementById('status').style.display = 'none';
-    document.getElementById('releasesSection').style.display = '';
-    document.getElementById('prsSection').style.display = '';
+    document.getElementById('panelsWrap').style.display = '';
   } catch (err) {
     document.getElementById('status').style.display = 'none';
     document.getElementById('errorMsg').style.display = '';

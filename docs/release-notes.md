@@ -9,7 +9,18 @@
 | File | Role |
 |---|---|
 | `pages/release-notes.html` | The release notes page — self-contained, no `game.js`/`style.css` |
-| `index.html` footer | The `v2.0.0` link that opens this page filtered to that release |
+| `index.html` footer | A "📜 Release Notes" link (unfiltered) plus the `v2.0.0` link that opens this page filtered to that release |
+
+---
+
+## Layout
+
+The page is two panels in a `.panels-wrap` grid (stacking to one column under 720px, same breakpoint pattern as `pages/workflow.html`):
+
+- **Left — Recent Changes**: the merged-PR list.
+- **Right — Releases**: one collapsible row per release.
+
+Each release row is a `<button class="release-toggle">` header (version badge, date, chevron) plus a `.release-body` that starts `hidden`; clicking the header calls `toggleRelease()`, which flips `aria-expanded`, the `hidden` attribute, and an `.expanded` class that rotates the chevron. Rows are collapsed by default.
 
 ---
 
@@ -42,4 +53,4 @@ This is intentionally a small subset of Markdown, not a general-purpose parser �
 
 The footer version link doesn't hardcode a query string. `game.js` reads the version straight from the link's own visible text (`v2.0.0` → `2.0.0`) and builds `pages/release-notes.html?version=2.0.0` at load time, so the version string still lives in exactly one place per `CONTRIBUTING.md`'s release process — bumping the footer text is enough.
 
-On `release-notes.html`, that `version` param is compared (case-insensitively, ignoring a leading `v`) against each release's `tag_name`. A match gets a `.highlight` glow and the page scrolls to it with `scrollIntoView()`. Opening the page without a `version` param (e.g. from its own footer, if linked elsewhere) just shows every release, unfiltered.
+On `release-notes.html`, that `version` param is compared (case-insensitively, ignoring a leading `v`) against each release's `tag_name`. A match renders that row already expanded with a `.highlight` glow, and the page scrolls to it with `scrollIntoView()`; every other release stays collapsed. The "📜 Release Notes" footer link carries no `version` param, so it opens the page with every release collapsed.
