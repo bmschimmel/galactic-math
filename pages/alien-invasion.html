@@ -309,10 +309,13 @@
   #pauseBanner { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); display: none; font-family: 'Orbitron', monospace; font-size: 22px; color: var(--saber-blue); text-shadow: 0 0 20px var(--saber-blue); letter-spacing: 4px; pointer-events: none; z-index: 25; }
   #flightBanner { position: fixed; top: 72px; left: 50%; transform: translateX(-50%); display: none; font-family: 'Orbitron', monospace; font-size: 18px; color: var(--saber-green); text-shadow: 0 0 16px var(--saber-green); letter-spacing: 3px; pointer-events: none; z-index: 25; white-space: nowrap; }
   .hud-missiles { font-family: 'Orbitron', monospace; font-size: 15px; color: var(--saber-green); min-width: 24px; text-align: center; }
-  .hud-missiles.pulse, #ammoLabel.pulse { animation: ammoPulse 0.6s ease-out; }
-  @keyframes ammoPulse {
+  /* Shared pickup pulse — .pulse sets --pulse-color, statPulse does the scale + glow */
+  .hud-missiles.pulse, #ammoLabel.pulse, .fuel-pct.pulse, #fuelLabel.pulse { animation: statPulse 0.6s ease-out; }
+  .hud-missiles.pulse, #ammoLabel.pulse { --pulse-color: var(--saber-green); }
+  .fuel-pct.pulse, #fuelLabel.pulse     { --pulse-color: var(--gold); }
+  @keyframes statPulse {
     0%   { transform: scale(1);    text-shadow: none; }
-    35%  { transform: scale(1.5);  text-shadow: 0 0 14px var(--saber-green); }
+    35%  { transform: scale(1.5);  text-shadow: 0 0 14px var(--pulse-color); }
     100% { transform: scale(1);    text-shadow: none; }
   }
 
@@ -703,7 +706,7 @@
 <!-- ===== HUD ===== -->
 <div id="hud">
   <div class="hud-bar">
-    <span class="hud-label">FUEL</span>
+    <span class="hud-label" id="fuelLabel">FUEL</span>
     <div class="fuel-bar-outer">
       <div class="fuel-bar-fill" id="fuelFill" style="width:100%"></div>
     </div>
@@ -1400,7 +1403,6 @@ let screenShake;
 let animId, lastTs;
 let keys = {};
 let wrongFlashTimer = null;
-let ammoPulseTimer = null;
 let noAmmoHintUntil = 0;      // Date.now() timestamp; hint text draws near the ship until this passes
 let noAmmoBuzzedAt = 0;       // throttles the buzz sound so holding Space doesn't machine-gun it
 let rainbowAngle = 0;
@@ -2140,7 +2142,7 @@ function clearGate(gate) {
   document.getElementById('questionOverlay').style.display = 'none';
   gameState = 'playing';
   updateHUD();
-  pulseAmmoHUD();
+  pulseHUDStat('missileCount', 'ammoLabel');
   sounds.missilePickup();
   showFlightBanner('✨ AMMO +2', 900);
 }
@@ -2182,15 +2184,17 @@ function showFlightBanner(msg, duration) {
   setTimeout(() => { if (b.textContent === msg) b.style.display = 'none'; }, duration);
 }
 
-// Pulses the AMMO stat in the top HUD so a missile pickup is impossible to miss
-function pulseAmmoHUD() {
-  const count = document.getElementById('missileCount');
-  const label = document.getElementById('ammoLabel');
-  count.classList.remove('pulse'); label.classList.remove('pulse');
-  void count.offsetWidth; // restart the animation even if a pulse is already mid-flight
-  count.classList.add('pulse'); label.classList.add('pulse');
-  clearTimeout(ammoPulseTimer);
-  ammoPulseTimer = setTimeout(() => { count.classList.remove('pulse'); label.classList.remove('pulse'); }, 600);
+// Pulses a HUD stat (value + its label) so a pickup is impossible to miss —
+// used for both the AMMO count (gate pickup) and FUEL % (fuel pickup).
+const pulseTimers = new Map();
+function pulseHUDStat(valueId, labelId) {
+  const value = document.getElementById(valueId);
+  const label = document.getElementById(labelId);
+  value.classList.remove('pulse'); label.classList.remove('pulse');
+  void value.offsetWidth; // restart the animation even if a pulse is already mid-flight
+  value.classList.add('pulse'); label.classList.add('pulse');
+  clearTimeout(pulseTimers.get(valueId));
+  pulseTimers.set(valueId, setTimeout(() => { value.classList.remove('pulse'); label.classList.remove('pulse'); }, 600));
 }
 
 function abortMission() {
@@ -2473,6 +2477,7 @@ function showPlanetFact(planet) {
   gameState = 'planet_fact';
   currentFactPlanetType = planet.type;
   sounds.thrustStop();
+  ship.moving = false; // parked reading the label — updateShip() won't run again to clear this (same fix as gates)
 
   // Position popup right next to the planet, clamped to viewport
   const sc    = w2s(planet.x, planet.y);
@@ -3069,6 +3074,7 @@ function checkFuelPickups() {
       pickup.collected = true;
       oxygen = Math.min(100, oxygen + 10);
       updateHUD();
+      pulseHUDStat('fuelPct', 'fuelLabel');
       sounds.fuelPickup();
       spawnParticles(pickup.x, pickup.y, 16, ['#ffd700','#ffaa00','#ffffff','#ffd700'], 1.5, 4.5, 0.015, 0.03, 2, 5);
     }
