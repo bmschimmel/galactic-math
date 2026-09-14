@@ -682,7 +682,7 @@ let selectedOps = new Set(['multiply']);
 // step 4 shows; both games keep their own "normal" option preselected.
 let selectedGame = null;        // 'galactic' | 'alien'
 let gameMode = 'standard';      // Galactic Math: 'standard' | 'hyperspace' | 'kessel'
-let invasionSize = 'invasion';  // Alien Invasion: 'sneak' | 'invasion' | 'chaos'
+let invasionSize = 'invasion';  // Alien Invasion: 'recon' | 'invasion' | 'chaos'
 const INVASIONS = {
   recon:    { icon: '🛸', name: 'RECON', aliens: 5 },
   invasion: { icon: '👾', name: 'INVASION',     aliens: 10 },
