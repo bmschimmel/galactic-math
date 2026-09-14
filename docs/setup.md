@@ -1,6 +1,6 @@
 # Setup Screen — the Flight Deck
 
-The setup screen is the first thing a user sees. It is a deck of five flashcards, one decision per card, ending in a Mission Briefing and a **Begin Mission** button. The design came out of the IDT-214 prototypes (see [prototypes.md](prototypes.md)); this page describes what shipped.
+The setup screen is the first thing a user sees. It is a deck of five flashcards, one decision per card, ending in a Mission Briefing and a **Begin Mission** button. The design came out of the IDT-214 prototypes; this page describes what shipped.
 
 ---
 

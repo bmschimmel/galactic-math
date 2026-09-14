@@ -20,7 +20,6 @@ The one piece of server-side code is the feedback worker in `worker/` (see [Feed
   - `pages/alien-invasion.html` — a separate arcade game mode (~3,300 lines), launched from the Game step of the setup deck. It is the only thing that uses a local audio file (`assets/audio/low-fuel.m4a`).
   - `pages/feedback.html` — the feedback form. Linked from the footer.
   - `pages/workflow.html` — "How It Works" explainer of the development workflow. Linked from the footer.
-  - `pages/prototypes/` — throwaway design prototypes; not linked from the app.
 - **Security headers:** `_headers` at the repo root is read by Cloudflare Pages and holds the Content-Security-Policy plus the other security headers. Any new external origin (a font host, an API, a CDN) must be added to the matching CSP directive there or the browser will block it silently. The CSP only applies on the deployed site, not when opening `index.html` locally.
 - **No external dependencies:** No npm, no frameworks, no CDN libraries except Google Fonts. The game must work offline after first load.
 - **No localStorage or cookies:** Don't persist data between sessions.
