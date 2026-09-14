@@ -706,6 +706,13 @@ async function submitFeedback() {
     btn.textContent = '📡 TRANSMIT FEEDBACK';
   }
 }
+
+// Links from the game can land on a category directly, e.g. the
+// "Have an idea for a game?" link on the setup deck → ?category=feature
+(function() {
+  const wanted = new URLSearchParams(window.location.search).get('category');
+  if (wanted && CATEGORY_META[wanted]) selectCategory(wanted);
+})();
 </script>
 </body>
 </html>

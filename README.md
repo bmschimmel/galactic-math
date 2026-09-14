@@ -35,10 +35,11 @@ Or download `index.html` and open it in any modern browser.
 
 1. Select which numbers you want to practice (e.g. just the 6s and 7s, or all 0–13)
 2. Select an operation mode (multiply, divide, add, subtract, or a combo)
-3. Optionally, select a timed challenge with **Hyperdrive** or **Kessel Run** Modes
-4. Hit **Begin Training Mission**
-5. Type your answer and press **Enter**
-6. Finish all 20 to see your rank and review any missed problems
+3. Pick a game — **Galactic Math** or **Alien Invasion**
+4. Pick your options: a game mode for Galactic Math (Standard, **Hyperspace**, **Kessel Run**) or how bad the invasion is for Alien Invasion
+5. Check the Mission Briefing and hit **Begin Mission**
+6. Type your answer and press **Enter**
+7. Finish all 20 to see your rank and review any missed problems
 
 ---
 
