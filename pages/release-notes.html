@@ -27,10 +27,12 @@
     font-family: 'Exo 2', sans-serif;
     min-height: 100vh;
     padding: 40px 20px 80px;
+    overflow-x: hidden;
   }
 
   .container {
-    max-width: 960px;
+    max-width: 1152px;
+    width: 100%;
     margin: 0 auto;
   }
 
@@ -94,6 +96,13 @@
     grid-template-columns: 1fr 2fr;
     gap: 0 32px;
     align-items: start;
+  }
+
+  /* Grid items don't shrink below their content's intrinsic width by default,
+     so a long unbroken token (a raw URL) can force the whole page to scroll
+     sideways without this. */
+  .panel {
+    min-width: 0;
   }
 
   @media (max-width: 720px) {
@@ -193,6 +202,7 @@
     line-height: 1.7;
     color: var(--star-white);
     margin-bottom: 10px;
+    overflow-wrap: anywhere;
   }
 
   .release-body ul {
@@ -204,10 +214,12 @@
     line-height: 1.7;
     color: var(--star-white);
     margin-bottom: 4px;
+    overflow-wrap: anywhere;
   }
 
   .release-body a {
     color: var(--saber-blue);
+    overflow-wrap: anywhere;
   }
 
   .release-body strong {
@@ -242,12 +254,12 @@
     font-size: 13px;
     line-height: 1.4;
     color: var(--star-white);
+    overflow-wrap: anywhere;
   }
 
   .pr-meta-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 8px;
   }
 
@@ -263,17 +275,12 @@
     white-space: nowrap;
   }
 
-  .pr-release.unreleased {
-    color: var(--muted);
-    background: rgba(107, 127, 163, 0.08);
-    border-color: var(--border);
-  }
-
   .pr-date {
     font-size: 10px;
     letter-spacing: 0.5px;
     color: var(--muted);
     white-space: nowrap;
+    margin-left: auto;
   }
 </style>
 </head>
@@ -439,9 +446,7 @@ function renderPRs(prs, prReleaseMap) {
 
   list.innerHTML = prs.map(pr => {
     const version = prReleaseMap[pr.number];
-    const releaseBadge = version
-      ? `<span class="pr-release">v${escapeHtml(version)}</span>`
-      : `<span class="pr-release unreleased">Unreleased</span>`;
+    const releaseBadge = version ? `<span class="pr-release">v${escapeHtml(version)}</span>` : '';
     return `
       <a class="pr-row" href="${pr.html_url}" target="_blank" rel="noopener">
         <span class="pr-number">#${pr.number}</span>

@@ -22,7 +22,7 @@ The page is two panels in a `.panels-wrap` grid — a 1fr/2fr split, so Releases
 
 Each release row is a `<button class="release-toggle">` header (version badge, date, chevron) plus a `.release-body` that starts `hidden`; clicking the header calls `toggleRelease()`, which flips `aria-expanded`, the `hidden` attribute, and an `.expanded` class that rotates the chevron. Rows are collapsed by default.
 
-Each Recent Changes row also carries a `.pr-release` badge — the release `tag_name` if the PR shipped in one, or "Unreleased" if it merged after the last tag. `buildPRReleaseMap()` gets this for free from data already on the page: every release body's auto-generated "What's Changed" list links each PR by number, so the page scans those bodies for `/pull/(\d+)` once and looks up each PR's number in the result, rather than making a request per PR.
+Each Recent Changes row also carries a `.pr-release` badge naming the release it shipped in, when it has one — a PR that merged after the last tag simply has no badge, just its date. `buildPRReleaseMap()` gets this for free from data already on the page: every release body's auto-generated "What's Changed" list links each PR by number, so the page scans those bodies for `/pull/(\d+)` once and looks up each PR's number in the result, rather than making a request per PR.
 
 ---
 
