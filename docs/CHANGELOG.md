@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
-### IDT-282 — Fill the Flight Deck's empty space and widen it on desktop (PR #TBD)
+### IDT-282 — Fill the Flight Deck's empty space and widen it on desktop (PR #141)
 
 The Flight Deck setup steps reserve a fixed-height card so Back/Next never jump between steps, but several steps (Math, Game, Options, Launch) had far less content than that reserve, leaving a large dead gap below the tiles. The math and game cards now stretch to fill that height with `flex: 1` grid rows instead of sitting at their natural size; the game mode list, alien invasion picker, and mission briefing rows center vertically in the leftover space instead of clumping at the top. Separately, the whole page was pinned to a 700px-wide column no matter how large the viewport got — above 900px wide it now widens to 860px, with the setup deck's number, operation, and game tiles scaling up to use the extra room.
 
