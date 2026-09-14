@@ -327,7 +327,10 @@
     gap: 18px;
   }
   .deck-body {
-    min-height: 400px;
+    /* Tallest step (OPTIONS, default state) needs ~332px; this gives a
+       small cushion without leaving a big dead zone on shorter steps like
+       NUMBERS (IDT-297). */
+    min-height: 340px;
     display: flex;
     flex-direction: column;
   }
@@ -792,20 +795,21 @@
   }
 
   /* ===== SHORT VIEWPORT LAYOUT ===== */
-  /* On laptops with a limited browser height (~750px or less of usable
-     viewport), the setup deck's reserved min-heights and generous spacing
-     pushed the launch button and footer below the fold on first load
-     (IDT-297). Tighten vertical rhythm so the whole setup card fits without
-     scrolling. */
-  @media (max-height: 750px) {
-    .container { padding-top: 12px; }
+  /* On laptops with a limited browser height, the setup deck's reserved
+     min-heights and generous spacing pushed the launch button and footer
+     below the fold on first load (IDT-297). Tighten vertical rhythm so the
+     whole setup card fits without scrolling. 820px covers common 768px-tall
+     screens too, since browser chrome (tabs/address bar) always eats into
+     the real usable viewport. */
+  @media (max-height: 820px) {
+    .container { padding-top: 8px; }
     .title-main { font-size: clamp(22px, 5vw, 34px); }
     .title-logo { margin-bottom: 0; }
     .title-sub { margin-top: 2px; }
-    .title-divider { margin: 12px 0 16px; }
+    .title-divider { margin: 10px 0 12px; }
     .setup-card { padding: 16px; }
-    .deck { gap: 12px; }
-    .deck-body { min-height: 300px; }
+    .deck { gap: 10px; }
+    .deck-body { min-height: 230px; }
     .deck-nav { padding-top: 10px; }
     .nav-btn { height: 44px; }
     .page-footer { padding: 8px 20px 12px; line-height: 1.6; }
