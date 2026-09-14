@@ -1443,7 +1443,6 @@ function initGame() {
   document.getElementById('alienCounter').style.display   = 'flex';
   document.getElementById('keyHint').style.display        = 'block';
   document.getElementById('devBanner').style.display      = 'block';
-  if (isTouchDevice) showVpad();
 
   loadLowFuelClip(); // load after user gesture so AudioContext starts cleanly
 
@@ -1527,6 +1526,7 @@ function dismissIntro() {
     _introDismissListener = null;
   }
   document.getElementById('introOverlay').style.display = 'none';
+  if (isTouchDevice) showVpad();
   runCountdown();
 }
 

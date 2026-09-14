@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
+### IDT-280 — Stop the virtual D-pad and fire button showing through the intro briefing (PR #150)
+
+On touch devices, `initGame()` called `showVpad()` before `showIntroExplainer()` ever ran, so the virtual D-pad and fire button (`z-index: 50`) rendered on top of the full-screen "ALIEN INVASION!" briefing overlay (`z-index: 35`) instead of appearing once gameplay actually starts. `showVpad()` now fires from `dismissIntro()` instead, right as the briefing closes and the countdown begins.
+
 ### IDT-298 — Remove pages/prototypes/ from the repo (PR #149)
 
 Throwaway UX prototypes were living in the public repo under `pages/prototypes/`, documented via `docs/prototypes.md`. Removed both, along with the dangling references in `docs/README.md`, `docs/setup.md`, and the page-structure bullet in `CLAUDE.md`. Going forward, prototype explorations are handed to the user directly (a file or a Claude Artifact) instead of being committed.
