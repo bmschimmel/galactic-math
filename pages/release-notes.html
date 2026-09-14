@@ -398,17 +398,20 @@ function renderReleases(releases) {
     return;
   }
 
-  list.innerHTML = visible.map(r => {
+  list.innerHTML = visible.map((r, i) => {
     const version = (r.tag_name || '').replace(/^v/i, '');
     const isTarget = wantedVersion && version.toLowerCase() === wantedVersion.toLowerCase();
+    // GitHub returns releases newest-first, so index 0 is the most recent —
+    // it starts expanded too, even when a different release is also targeted.
+    const isExpanded = isTarget || i === 0;
     return `
-      <div class="release-card${isTarget ? ' highlight expanded' : ''}" id="release-${escapeHtml(version)}">
-        <button class="release-toggle" onclick="toggleRelease(this)" aria-expanded="${isTarget}">
+      <div class="release-card${isTarget ? ' highlight' : ''}${isExpanded ? ' expanded' : ''}" id="release-${escapeHtml(version)}">
+        <button class="release-toggle" onclick="toggleRelease(this)" aria-expanded="${isExpanded}">
           <span class="release-badge">${escapeHtml(r.tag_name || version)}</span>
           <span class="release-date">${formatDate(r.published_at || r.created_at)}</span>
           <span class="release-chevron">▸</span>
         </button>
-        <div class="release-body"${isTarget ? '' : ' hidden'}>${mdToHtml(r.body)}</div>
+        <div class="release-body"${isExpanded ? '' : ' hidden'}>${mdToHtml(r.body)}</div>
       </div>
     `;
   }).join('');
