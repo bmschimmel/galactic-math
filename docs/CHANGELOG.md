@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
-### IDT-284 — Create a release notes page for Galactic Math (PR #TBD)
+### IDT-284 — Create a release notes page for Galactic Math (PR #140)
 
 Seeing what changed meant leaving the app for GitHub, so `pages/release-notes.html` now shows it in place: it calls the public GitHub REST API on load for every published release plus the 15 most recently merged pull requests, rendering each release body through a small escape-first Markdown-to-HTML converter that only re-introduces headings, bold, links, lists and paragraphs (raw `<img>` screenshots are dropped rather than rendered). The footer version link on `index.html` now opens this page filtered to that release — `game.js` reads the version straight from the link's own text rather than hardcoding a second copy, so the version string still lives in one place. A failed request (offline, GitHub down, rate-limited) falls back to a message linking straight to the GitHub releases page instead of a blank screen. `https://api.github.com` is added to `connect-src` in `_headers` for this. Docs: new `docs/release-notes.md`, `docs/overview.md` and `docs/README.md` updated.
 
