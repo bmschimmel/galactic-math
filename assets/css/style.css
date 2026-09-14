@@ -247,16 +247,21 @@
     box-shadow: 0 0 14px var(--glow-gold), 0 0 4px var(--glow-gold) inset;
   }
 
-  /* Operation flashcards — purple for × ÷, green for + − */
+  /* Operation flashcards — purple for × ÷, green for + −
+     flex + a two-row template lets the cards grow to fill the deck body
+     instead of leaving blank space below a short 2x2 grid. */
   .op-cards {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     gap: 10px;
+    flex: 1;
   }
   .op-card {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     padding: 18px 10px 14px;
     background: rgba(10, 15, 30, 0.6);
@@ -393,6 +398,7 @@
   .flashcard {
     display: none;
     flex-direction: column;
+    justify-content: center;
     gap: 14px;
     flex: 1;
   }
@@ -433,17 +439,21 @@
   }
   .boing { animation: boing 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-  /* Game cards */
+  /* Game cards — the top row (the actual game picks) stretches to fill the
+     deck body; the "more coming soon" row below keeps its natural height. */
   .game-cards {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr auto;
     gap: 12px;
+    flex: 1;
   }
   .game-card {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
     gap: 8px;
     padding: 22px 14px 18px;
@@ -500,6 +510,7 @@
   .game-card.soon {
     grid-column: 1 / -1;
     flex-direction: row;
+    justify-content: flex-start;
     gap: 12px;
     padding: 12px;
     border-style: dashed;
@@ -517,11 +528,15 @@
   }
   .game-idea:hover { text-decoration: underline; }
 
-  /* Game mode tiles — the row is the control, the selected row shows a check */
+  /* Game mode tiles — the row is the control, the selected row shows a check.
+     flex: 1 + a bigger gap lets the list use the deck body's full height
+     instead of clumping at the top with blank space below. */
   .mode-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    justify-content: center;
+    gap: 16px;
+    flex: 1;
   }
   .mode-tile {
     width: 100%;
@@ -624,11 +639,14 @@
     text-align: center;
   }
 
-  /* Mission briefing */
+  /* Mission briefing — centered in the deck body like the other steps
+     instead of clumping at the top with blank space below. */
   .briefing {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    justify-content: center;
+    gap: 12px;
+    flex: 1;
   }
   .brief-row {
     display: flex;
@@ -694,6 +712,19 @@
   }
   .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
 
+  /* ===== DESKTOP LAYOUT ===== */
+  /* Above 900px the page was stuck at a 700px column no matter how wide the
+     viewport got, leaving growing empty margins on laptop/desktop screens.
+     Let it widen a bit and give the setup tiles more room to grow into. */
+  @media (min-width: 900px) {
+    .container, .page-wrapper { max-width: 860px; }
+    .num-btn { font-size: 16px; }
+    .op-sym { font-size: 42px; }
+    .op-card { padding: 26px 10px 20px; }
+    .game-icon { font-size: 48px; }
+    .game-card:not(.soon) { padding: 30px 14px 26px; }
+  }
+
   /* ===== MOBILE LAYOUT ===== */
   @media (max-width: 600px) {
     /* Push content below the fixed history/theme buttons */
@@ -736,9 +767,10 @@
     /* Deck: taller reserve for stacked cards, narrower Back slot, game cards as rows */
     .deck-body { min-height: 440px; }
     .deck-nav { grid-template-columns: 96px 1fr; }
-    .game-cards { grid-template-columns: 1fr; }
+    .game-cards { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr auto; }
     .game-card:not(.soon) {
       flex-direction: row;
+      justify-content: flex-start;
       text-align: left;
       gap: 14px;
       padding: 14px 40px 14px 14px;
@@ -1397,11 +1429,17 @@
   }
 
   /* Hyperspace difficulty grid. The slide-down container clips overflow, so
-     the grid carries a little padding for the tap bounce to breathe in. */
+     the grid carries a little padding for the tap bounce to breathe in.
+     flex + align-content only take effect for #alienOptions, the one place
+     this grid sits directly in the deck body — they center it in the
+     leftover space instead of leaving blank space below. Nested inside
+     #hyperspaceOptions (not a flex parent) they're simply ignored. */
   .diff-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    align-content: center;
     gap: 8px;
+    flex: 1;
   }
   #hyperspaceOptions .diff-grid { padding: 8px 4px; }
   .diff-btn {

@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
+### IDT-282 — Fill the Flight Deck's empty space and widen it on desktop (PR #TBD)
+
+The Flight Deck setup steps reserve a fixed-height card so Back/Next never jump between steps, but several steps (Math, Game, Options, Launch) had far less content than that reserve, leaving a large dead gap below the tiles. The math and game cards now stretch to fill that height with `flex: 1` grid rows instead of sitting at their natural size; the game mode list, alien invasion picker, and mission briefing rows center vertically in the leftover space instead of clumping at the top. Separately, the whole page was pinned to a 700px-wide column no matter how large the viewport got — above 900px wide it now widens to 860px, with the setup deck's number, operation, and game tiles scaling up to use the extra room.
+
 ### IDT-283 — Bump version to 2.0.0 and document the release process (PR #136)
 
 The footer version in `index.html` moves from v1.0.0 to v2.0.0 ahead of the v2.0.0 GitHub release, which gathers everything merged since the v1.0.0 tag in March — Alien Invasion, the Flight Deck setup deck, the Cloudflare feedback worker, security headers and the CSP split, the starfield battery fix and the wall-clock timers. `CONTRIBUTING.md` gains a **Releases** section that writes down the process for the first time: the version string lives only in the footer and is bumped in its own PR; a release is drafted from `main` with `gh release create --generate-notes --notes-start-tag <previous>`, which lists every PR since the last tag; publishing the draft is what creates the tag; and GitHub milestones are an optional tracking record that release notes do not depend on.
