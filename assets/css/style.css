@@ -777,9 +777,21 @@
       justify-content: center;
     }
 
-    /* Deck: taller reserve for stacked cards, narrower Back slot, game cards as rows */
-    .deck-body { min-height: 440px; }
-    .deck-nav { grid-template-columns: 96px 1fr; }
+    /* Deck: taller reserve for stacked cards, narrower Back slot, game cards as rows.
+       370px is a small cushion over the tallest mobile step (OPTIONS, measured at
+       361px) — 440px left ~79px of dead space below shorter steps (IDT-300). */
+    .deck-body { min-height: 370px; }
+    .deck-nav { grid-template-columns: 96px 1fr; padding-top: 12px; }
+
+    /* Tighten the title divider and footer so the page fits in one screen on
+       common phone heights (844-852px) without the laptop-only short-viewport
+       treatment — that query is now width-gated and no longer reaches phones
+       at all (IDT-300). `body` prefix beats the unconditional base rules
+       further down the file (title-divider, page-footer), which otherwise
+       win the cascade by appearing later at equal specificity — the same
+       clobbering bug this fix is for, just against a different rule. */
+    body .title-divider { margin: 12px 0 16px; }
+    body .page-footer { padding: 14px 20px 20px; }
     .game-cards { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr auto; }
     .game-card:not(.soon) {
       flex-direction: row;
@@ -800,19 +812,27 @@
      below the fold on first load (IDT-297). Tighten vertical rhythm so the
      whole setup card fits without scrolling. 820px covers common 768px-tall
      screens too, since browser chrome (tabs/address bar) always eats into
-     the real usable viewport. */
-  @media (max-height: 820px) {
+     the real usable viewport. min-width:601px keeps this laptop-only: without
+     it, this query also matched phones (virtually all are <=820px tall in
+     portrait) and clobbered the MOBILE LAYOUT block's own padding-top and
+     deck-body values with laptop-tuned numbers, causing the fixed history/theme
+     buttons to overlap the title and the deck to overflow on phones (IDT-300). */
+  @media (max-height: 820px) and (min-width: 601px) {
     .container { padding-top: 8px; }
     .title-main { font-size: clamp(22px, 5vw, 34px); }
     .title-logo { margin-bottom: 0; }
     .title-sub { margin-top: 2px; }
-    .title-divider { margin: 10px 0 12px; }
+    /* body prefix: these two have an unconditional base rule further down
+       the file that otherwise wins the cascade at equal specificity by
+       appearing later in source order (IDT-300 — this query never actually
+       tightened the divider/footer on laptops either, for the same reason). */
+    body .title-divider { margin: 10px 0 12px; }
     .setup-card { padding: 16px; }
     .deck { gap: 10px; }
     .deck-body { min-height: 230px; }
     .deck-nav { padding-top: 10px; }
     .nav-btn { height: 44px; }
-    .page-footer { padding: 8px 20px 12px; line-height: 1.6; }
+    body .page-footer { padding: 8px 20px 12px; line-height: 1.6; }
   }
 
   /* Restart / quit button row */
