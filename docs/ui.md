@@ -78,6 +78,10 @@ The layout is responsive down to ~375px wide. Key mobile considerations:
 - The answer input is large and touch-friendly
 - A dedicated **Submit** button appears for touch users (Enter still works on keyboard)
 
+## Desktop Support
+
+Above 900px wide, `.container`/`.page-wrapper` widen from the 700px column to 860px, and the setup deck's number, operation, and game tiles scale up to match (see [setup.md](setup.md)) — before IDT-282 the page stayed pinned at 700px on any screen, leaving growing empty margins on laptop/desktop.
+
 ### Alien Invasion touch controls
 
 On touch devices, `pages/alien-invasion.html` renders a virtual D-pad (bottom-left) and a fire button (bottom-right). These wire into the same `keys[]` state used by keyboard input so all physics and audio remain unchanged. A pause button is also overlaid on-screen. The planet fact popup dismisses on tap. Responsive CSS (`≤600px`) shrinks the HUD bar, question text, and answer input for small phones, and stacks end-screen buttons vertically.
