@@ -1243,6 +1243,7 @@ const GATE_RADIUS      = 60;    // visual ring radius (px)
 const EARTH_RADIUS     = 130;   // large Earth destination radius
 const EARTH_LAND_DIST  = 155;   // how close to land (ship center to Earth center)
 const THRUST_FUEL_RATE  = 0.013; // % fuel burned per frame while thrusting (~0.78%/sec at 60fps)
+const LOW_FUEL_WARNING_PCT = 20; // audio warning + ticking starts at/below this fuel %
 const N_ASTEROIDS      = 28;
 // How bad the invasion is comes from the main setup flow as ?aliens=5|10|25.
 // Anything else (or nothing, when this page is opened on its own) is the
@@ -2157,7 +2158,7 @@ function updateHUD() {
   pct.textContent = Math.round(oxy) + '%';
   pct.classList.toggle('low', oxy <= 25);
 
-  if (oxy > 10) {
+  if (oxy > LOW_FUEL_WARNING_PCT) {
     if (lowFuelWarningPlayed) { lowFuelWarningPlayed = false; stopLowFuelTicks(); }
   } else if (!lowFuelWarningPlayed && gameState === 'playing') {
     lowFuelWarningPlayed = true;
@@ -3076,6 +3077,7 @@ function checkFuelPickups() {
       updateHUD();
       pulseHUDStat('fuelPct', 'fuelLabel');
       sounds.fuelPickup();
+      showFlightBanner('⛽ FUEL +10%', 900);
       spawnParticles(pickup.x, pickup.y, 16, ['#ffd700','#ffaa00','#ffffff','#ffd700'], 1.5, 4.5, 0.015, 0.03, 2, 5);
     }
   }
