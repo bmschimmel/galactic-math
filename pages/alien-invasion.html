@@ -660,20 +660,19 @@
   <div class="intro-icon">👾</div>
   <div class="intro-title">⚠ ALIEN INVASION!</div>
   <div class="intro-body">
-    The solar system is under attack by aliens!<br>
-    Visit the <strong>math rings</strong> and answer the question correctly to get <strong>missiles</strong> to take them out!
+    Aliens have taken over the solar system! Fly through <strong>math rings</strong> to earn <strong>missiles</strong>, then shoot down every alien ship. Wrong answers cost fuel — dodge comets and asteroids too.
   </div>
 
   <div class="intro-controls" id="introControlsKeys">
     <span class="ctrl-label">🕹 MOVE</span>
     <span class="ctrl-desc">
       <b>Arrow keys</b> or <b>WASD</b>
-      <span class="sub">Rather use the mouse or trackpad? <b>Click once</b> to start flying, then just move the pointer — your ship follows. Point at the middle of the screen to stop, and click again to turn it off.</span>
+      <span class="sub">Or click once to fly with the mouse/trackpad — move the pointer to steer, click again to stop.</span>
     </span>
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Press <b>SPACE</b>
-      <span class="sub">You need a missile first — fly through a math ring and answer its question correctly.</span>
+      <span class="sub">Needs a missile — earned from math rings.</span>
     </span>
     <span class="ctrl-label">⏸ PAUSE</span>
     <span class="ctrl-desc">Press <b>P</b></span>
@@ -685,7 +684,7 @@
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Tap the <b>🚀 FIRE</b> button at the bottom-right
-      <span class="sub">You need a missile first — fly through a math ring and answer its question correctly.</span>
+      <span class="sub">Needs a missile — earned from math rings.</span>
     </span>
   </div>
 
@@ -1025,15 +1024,16 @@ const sounds = {
     });
   },
 
-  // No ammo click — dry click when firing with 0 missiles
+  // No ammo buzz — short descending error tone when firing with 0 missiles
   missileEmpty() {
     const ctx = getAudio();
     const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'square'; o.frequency.value = 180;
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(220, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.14);
     o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.08, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
-    o.start(); o.stop(ctx.currentTime + 0.07);
+    g.gain.setValueAtTime(0.14, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
+    o.start(); o.stop(ctx.currentTime + 0.15);
   },
 
   // Fuel pickup — bright rising chime
@@ -1247,6 +1247,8 @@ const N_FUEL_PICKUPS   = 6;
 const MISSILE_SPEED     = 14;   // px/frame player missile speed
 const COMET_MAX        = 6;     // max comets on screen at once
 const COMET_INTERVAL   = 1800;  // ms between comet spawns
+const NO_AMMO_HINT_MS  = 1800;  // how long the "fly to a ring" hint stays up near the ship
+const NO_AMMO_BUZZ_COOLDOWN_MS = 1200; // min gap between buzz sounds while Space is held
 
 // ===== PLANET FACTS =====
 const PLANET_FACTS = {
@@ -1392,6 +1394,8 @@ let screenShake;
 let animId, lastTs;
 let keys = {};
 let wrongFlashTimer = null;
+let noAmmoHintUntil = 0;      // Date.now() timestamp; hint text draws near the ship until this passes
+let noAmmoBuzzedAt = 0;       // throttles the buzz sound so holding Space doesn't machine-gun it
 let rainbowAngle = 0;
 let nextCometTime = 0;
 let hudUpdatePending = false;
@@ -1439,6 +1443,8 @@ function initGame() {
   stopLowFuelTicks();
   activatedGate = null;
   invincibleUntil = 0;
+  noAmmoHintUntil = 0;
+  noAmmoBuzzedAt = 0;
   screenShake   = 0;
   paused        = false;
   keys          = {};
@@ -2345,7 +2351,14 @@ function drawComets() {
 // ===== MISSILE POWERUPS =====
 // ===== PLAYER MISSILES =====
 function firePlayerMissile() {
-  if (!missiles || missiles <= 0) { sounds.missileEmpty(); showFlightBanner('🎯 Fly through a math ring for missiles!', 1200); return; }
+  if (!missiles || missiles <= 0) {
+    const now = Date.now();
+    // Holding Space auto-repeats fast — only re-buzz every NO_AMMO_BUZZ_COOLDOWN_MS
+    // so hammering it doesn't machine-gun the sound, but keep the hint text up.
+    if (now - noAmmoBuzzedAt > NO_AMMO_BUZZ_COOLDOWN_MS) { sounds.missileEmpty(); noAmmoBuzzedAt = now; }
+    noAmmoHintUntil = now + NO_AMMO_HINT_MS;
+    return;
+  }
   missiles--;
   missilesFireTotal++;
   updateHUD();
@@ -2578,6 +2591,7 @@ function render() {
   drawLasers();
   drawParticles();
   drawShip();
+  drawNoAmmoHint();
   ctx.restore();
 
   // Screen-space drawing (not shaken)
@@ -3246,6 +3260,21 @@ function drawShip() {
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.beginPath(); ctx.arc(-1.5, -18.5, 1.8, 0, Math.PI*2); ctx.fill();
 
+  ctx.restore();
+}
+
+// Warning text that floats just above the ship when firing with 0 missiles —
+// stays upright (drawn outside drawShip's rotate transform) and follows the
+// ship every frame so it doesn't get left behind if the ship keeps moving.
+function drawNoAmmoHint() {
+  if (Date.now() > noAmmoHintUntil) return;
+  const p = w2s(ship.x, ship.y);
+  const lines = ['Fly to the rings and', 'complete problems to get missiles!'];
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,45,85,0.95)';
+  ctx.font = '700 12px Orbitron,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 12;
+  lines.forEach((line, i) => ctx.fillText(line, p.x, p.y - 62 + i * 15));
   ctx.restore();
 }
 
