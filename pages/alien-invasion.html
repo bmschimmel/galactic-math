@@ -607,7 +607,7 @@
 <div id="planetPopup" style="display:none; position:fixed; background:rgba(3,7,18,0.95); border:1.5px solid #00d4ff; border-radius:12px; padding:16px 22px; max-width:360px; text-align:center; z-index:30; box-shadow:0 0 24px rgba(0,212,255,0.25); cursor:pointer;" onclick="if(typeof dismissPlanetFact==='function')dismissPlanetFact()">
   <div style="font-family:'Orbitron',monospace; font-size:10px; color:#6b7fa3; letter-spacing:3px; margin-bottom:6px;" id="planetPopupTitle">MARS</div>
   <div style="font-family:'Exo 2',sans-serif; font-size:15px; color:#e8f4ff; line-height:1.5; margin-bottom:12px;" id="planetPopupFact"></div>
-  <div style="font-family:'Orbitron',monospace; font-size:10px; color:#6b7fa3; letter-spacing:2px;">Tap or press ENTER / ESC to continue</div>
+  <div style="font-family:'Orbitron',monospace; font-size:10px; color:#6b7fa3; letter-spacing:2px;">Tap or press any key to continue</div>
 </div>
 
 <!-- ===== SETUP SCREEN ===== -->
@@ -1660,6 +1660,7 @@ function makeQuestion(op) {
 const MOVE_KEYS = new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','a','A','d','D','w','W','s','S']);
 
 function onKeyDown(e) {
+  if (gameState === 'planet_fact') { e.preventDefault(); dismissPlanetFact(); return; }
   // Keyboard takes control back — before keys[] is set, since leaving fly mode
   // clears the very arrow key that is being pressed.
   if (MOVE_KEYS.has(e.key)) setFlyMode(false);
@@ -1673,7 +1674,6 @@ function onKeyDown(e) {
   if (e.key === 'Enter' && gameState === 'question') { e.preventDefault(); submitAnswer(); }
   if ((e.key === 'p' || e.key === 'P') && (gameState==='playing'||gameState==='question')) togglePause();
   if (e.key === 'Escape' && gameState === 'question') dismissQuestion();
-  if ((e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') && gameState === 'planet_fact') { e.preventDefault(); dismissPlanetFact(); }
 }
 function onKeyUp(e) {
   keys[e.key] = false;
