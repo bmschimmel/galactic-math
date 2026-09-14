@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
+### IDT-296 — Rename Sneak Attack to Recon and fix aliens firing while "unarmed" (PR #146)
+
+The easy Alien Invasion card was labeled "Sneak Attack" on the setup deck while its sub line already promised "Alien ships unarmed" — renamed to "Recon" everywhere it's user-facing (`index.html`'s card label and `data-invasion`/`setInvasion` value; `game.js`'s internal `invasionSize` key was already renamed in a direct main commit). The "unarmed" promise wasn't actually kept: `generateObstacles()` in `pages/alien-invasion.html` always made exactly half the spawned aliens shooters regardless of mode, so the 5-alien Recon run still took laser fire. `isShooter` is now `false` for every alien when `N_ALIENS` is 5 (Recon), leaving the half-shooters rule for Invasion and Chaos. Docs: `docs/setup.md` and `docs/game-modes.md` updated.
+
 ### IDT-291 — Auto-expand the most recent release on the release notes page (PR #143)
 
 Every release row on `pages/release-notes.html` started collapsed unless it matched the footer's `?version=` link, so a plain visit to the page showed nothing but a list of closed headers. The most recent release (index 0 of the newest-first list GitHub returns) now always starts expanded, alongside whichever release a `?version=` param targets if that's a different, older one.
