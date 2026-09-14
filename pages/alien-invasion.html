@@ -298,6 +298,7 @@
   .end-stats { display: flex; gap: 28px; justify-content: center; margin-bottom: 28px; }
   .end-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .end-stat-val { font-family: 'Orbitron', monospace; font-size: 30px; color: var(--gold); }
+  .end-stat-percent { font-size: 16px; color: var(--muted); margin-left: 6px; }
   .end-stat-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
   .end-btns { display: flex; gap: 12px; }
   .end-btn { padding: 12px 28px; background: rgba(0,212,255,0.12); border: 1px solid var(--saber-blue); border-radius: 8px; color: var(--saber-blue); font-family: 'Orbitron', monospace; font-size: 11px; cursor: pointer; letter-spacing: 1px; transition: all 0.15s; }
@@ -742,7 +743,7 @@
     <div class="end-stat"><div class="end-stat-val" id="endTime">0:00</div><div class="end-stat-label">TOTAL TIME</div></div>
     <div class="end-stat"><div class="end-stat-val" id="endOxygen">0%</div><div class="end-stat-label">FUEL LEFT</div></div>
     <div class="end-stat"><div class="end-stat-val" id="endAccuracy">0/0</div><div class="end-stat-label">SHOT ACCURACY</div></div>
-    <div class="end-stat"><div class="end-stat-val" id="endMathScore">0/0</div><div class="end-stat-label">MATH SCORE</div></div>
+    <div class="end-stat"><div class="end-stat-val" id="endMathScore">0/0<span class="end-stat-percent" id="endMathPercent"></span></div><div class="end-stat-label">MATH SCORE</div></div>
   </div>
   <div class="end-btns">
     <button class="end-btn"         onclick="goHome()">MAIN MENU</button>
@@ -2525,7 +2526,8 @@ function endGame(type, title, subtitle) {
   document.getElementById('endTime').textContent        = timeStr;
   document.getElementById('endOxygen').textContent      = Math.round(Math.max(0,oxygen)) + '%';
   document.getElementById('endAccuracy').textContent    = `${missilesHitAliens}/${missilesFireTotal}`;
-  document.getElementById('endMathScore').textContent   = `${questionsCorrect}/${questionsTotal}`;
+  document.getElementById('endMathScore').firstChild.textContent = `${questionsCorrect}/${questionsTotal}`;
+  document.getElementById('endMathPercent').textContent = questionsTotal > 0 ? `${Math.round(questionsCorrect / questionsTotal * 100)}%` : '';
   document.getElementById('endScreen').style.display    = 'flex';
 }
 
