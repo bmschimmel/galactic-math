@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
-### IDT-283 — Bump version to 2.0.0 and document the release process (PR #TBD)
+### IDT-283 — Bump version to 2.0.0 and document the release process (PR #136)
 
 The footer version in `index.html` moves from v1.0.0 to v2.0.0 ahead of the v2.0.0 GitHub release, which gathers everything merged since the v1.0.0 tag in March — Alien Invasion, the Flight Deck setup deck, the Cloudflare feedback worker, security headers and the CSP split, the starfield battery fix and the wall-clock timers. `CONTRIBUTING.md` gains a **Releases** section that writes down the process for the first time: the version string lives only in the footer and is bumped in its own PR; a release is drafted from `main` with `gh release create --generate-notes --notes-start-tag <previous>`, which lists every PR since the last tag; publishing the draft is what creates the tag; and GitHub milestones are an optional tracking record that release notes do not depend on.
 
@@ -82,7 +82,7 @@ Kids who find arrow keys awkward can now drive the ship with a trackpad. Flying 
 
 ## 2026-05-05
 
-### IDT-134 — Add sound effect to transmit feedback button (PR #TBD)
+### IDT-134 — Add sound effect to transmit feedback button (PR #136)
 
 Added a themed transmission sound effect to the "📡 TRANSMIT FEEDBACK" button on `pages/feedback.html`. The sound plays an ascending radio-chirp sweep followed by a two-beep confirmation, giving the feel of a signal being beamed out. A self-contained Web Audio engine (mirroring the patterns used in `game.js`) was added inline to the feedback page since it does not load `game.js`.
 
@@ -90,7 +90,7 @@ Added a themed transmission sound effect to the "📡 TRANSMIT FEEDBACK" button 
 
 ## 2026-05-11
 
-### IDT-142 — Docs audit: remove "Academy" branding, sync docs with recent work (PR #TBD)
+### IDT-142 — Docs audit: remove "Academy" branding, sync docs with recent work (PR #136)
 
 Removed all occurrences of "Galactic Math Academy" from documentation, page titles, and link text across `docs/`, `README.md`, `CONTRIBUTING.md`, and `pages/`. The banner in the app already used "GALACTIC MATH"; the docs were just stale. Also filled documentation gaps introduced by recent issues: added an Alien Invasion mode section to `docs/game-modes.md`, added Alien Invasion touch-control details to `docs/ui.md`, documented the IDT-134 feedback audio in `docs/feedback-system.md`, and added the Alien Invasion game mode to `README.md`'s feature list.
 
@@ -98,7 +98,7 @@ Removed all occurrences of "Galactic Math Academy" from documentation, page titl
 
 Rebuilt `og-image.png` using `logo-planet-only.png` (transparent background) composited on a full-bleed dark-navy gradient canvas with scattered stars and nebula blobs, eliminating the black letterbox bars that appeared in social share previews after IDT-109. Expanded `og:title`, `twitter:title`, and `<title>` from 21 characters ("Galactic Math Academy") to 55 characters ("Galactic Math — Space themed free math trainer for kids"), meeting the 30–60 character guideline for social validators.
 
-### IDT-109 — Replace favicons and OG image with new branded logo (PR #TBD)
+### IDT-109 — Replace favicons and OG image with new branded logo (PR #136)
 
 Replaced `favicon.ico`, `favicon-192.png`, and `og-image.png` with a new planet logo featuring the four math operation symbols (+, −, ×, ÷, =) arranged in a Saturn-ring design. The planet-only mark is used for all favicon sizes; the full wordmark version (logo + "GALACTIC MATH" text) is used for the Open Graph / Twitter Card share image. An `apple-touch-icon` link was added to `index.html` pointing to the 192×192 PNG so iOS home-screen bookmarks also use the new icon. Source PNGs are stored in `assets/images/`.
 
@@ -106,7 +106,7 @@ Replaced `favicon.ico`, `favicon-192.png`, and `og-image.png` with a new planet 
 
 ## 2026-04-15
 
-### IDT-108 — Mobile support for Alien Invasion mode (PR #TBD)
+### IDT-108 — Mobile support for Alien Invasion mode (PR #136)
 
 Added full touch-device support for `pages/alien-invasion.html`. A virtual D-pad (four directional buttons, bottom-left) and a fire button (bottom-right) appear automatically on touch devices, wiring into the same `keys[]` state used by keyboard input so all existing physics and thrust audio remain unchanged. A pause button is also overlaid on-screen. Responsive CSS media queries (≤600px) shrink the HUD bar, question text, and answer input to fit small phone screens, and the end screen buttons stack vertically. The planet fact popup now dismisses on tap. Hint text in the how-to-play section, question overlay, and planet popup was updated to reference both keyboard and touch controls.
 
@@ -130,7 +130,7 @@ Post-launch polish pass on `pages/alien-invasion.html` based on initial playtest
 
 ## 2026-04-13 (4)
 
-### IDT-102 — Block input after hyperspace timer completes (PR #TBD)
+### IDT-102 — Block input after hyperspace timer completes (PR #136)
 
 When the hyperspace countdown reached zero, a brief animation window before the results screen allowed players to sneak in one more answer. The fix disables the answer input and submit button immediately in `hyperspaceFailure()`, and guards `loadQuestion()` from re-enabling them once `hyperspaceHandled` is set. A ticking sound also plays each second for the final 10 seconds, rising in pitch as time runs out.
 
