@@ -309,6 +309,12 @@
   #pauseBanner { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); display: none; font-family: 'Orbitron', monospace; font-size: 22px; color: var(--saber-blue); text-shadow: 0 0 20px var(--saber-blue); letter-spacing: 4px; pointer-events: none; z-index: 25; }
   #flightBanner { position: fixed; top: 72px; left: 50%; transform: translateX(-50%); display: none; font-family: 'Orbitron', monospace; font-size: 18px; color: var(--saber-green); text-shadow: 0 0 16px var(--saber-green); letter-spacing: 3px; pointer-events: none; z-index: 25; white-space: nowrap; }
   .hud-missiles { font-family: 'Orbitron', monospace; font-size: 15px; color: var(--saber-green); min-width: 24px; text-align: center; }
+  .hud-missiles.pulse, #ammoLabel.pulse { animation: ammoPulse 0.6s ease-out; }
+  @keyframes ammoPulse {
+    0%   { transform: scale(1);    text-shadow: none; }
+    35%  { transform: scale(1.5);  text-shadow: 0 0 14px var(--saber-green); }
+    100% { transform: scale(1);    text-shadow: none; }
+  }
 
   /* ===== KEY HINT ===== */
   #flyModeBadge {
@@ -672,7 +678,7 @@
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Press <b>SPACE</b>
-      <span class="sub">Needs a missile — earned from math rings.</span>
+      <span class="sub">Need a missile, complete math problems at the rings!</span>
     </span>
     <span class="ctrl-label">⏸ PAUSE</span>
     <span class="ctrl-desc">Press <b>P</b></span>
@@ -684,7 +690,7 @@
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Tap the <b>🚀 FIRE</b> button at the bottom-right
-      <span class="sub">Needs a missile — earned from math rings.</span>
+      <span class="sub">Need a missile, complete math problems at the rings!</span>
     </span>
   </div>
 
@@ -705,7 +711,7 @@
     <div class="hud-sep"></div>
     <div class="hud-lives" id="livesDisplay"></div>
     <div class="hud-sep"></div>
-    <span class="hud-label">🚀</span>
+    <span class="hud-label" id="ammoLabel">AMMO</span>
     <span class="hud-missiles" id="missileCount">0</span>
     <div class="hud-sep"></div>
     <button class="hud-abort" onclick="abortMission()">✕ ABORT</button>
@@ -1394,6 +1400,7 @@ let screenShake;
 let animId, lastTs;
 let keys = {};
 let wrongFlashTimer = null;
+let ammoPulseTimer = null;
 let noAmmoHintUntil = 0;      // Date.now() timestamp; hint text draws near the ship until this passes
 let noAmmoBuzzedAt = 0;       // throttles the buzz sound so holding Space doesn't machine-gun it
 let rainbowAngle = 0;
@@ -2133,8 +2140,9 @@ function clearGate(gate) {
   document.getElementById('questionOverlay').style.display = 'none';
   gameState = 'playing';
   updateHUD();
+  pulseAmmoHUD();
   sounds.missilePickup();
-  showFlightBanner('🚀 AMMO +2', 900);
+  showFlightBanner('✨ AMMO +2', 900);
 }
 
 // ===== HUD =====
@@ -2172,6 +2180,17 @@ function showFlightBanner(msg, duration) {
   b.textContent = msg;
   b.style.display = 'block';
   setTimeout(() => { if (b.textContent === msg) b.style.display = 'none'; }, duration);
+}
+
+// Pulses the AMMO stat in the top HUD so a missile pickup is impossible to miss
+function pulseAmmoHUD() {
+  const count = document.getElementById('missileCount');
+  const label = document.getElementById('ammoLabel');
+  count.classList.remove('pulse'); label.classList.remove('pulse');
+  void count.offsetWidth; // restart the animation even if a pulse is already mid-flight
+  count.classList.add('pulse'); label.classList.add('pulse');
+  clearTimeout(ammoPulseTimer);
+  ammoPulseTimer = setTimeout(() => { count.classList.remove('pulse'); label.classList.remove('pulse'); }, 600);
 }
 
 function abortMission() {
