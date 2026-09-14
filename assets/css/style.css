@@ -740,10 +740,14 @@
 
   /* ===== MOBILE LAYOUT ===== */
   @media (max-width: 600px) {
-    /* Push content below the fixed history/theme buttons */
+    /* Push content below the fixed history/theme buttons. Tighter side
+       padding (20px -> 12px) reclaims width for the 7-column number grid
+       so its touch targets can get closer to the 44px guideline (IDT-301). */
     .container {
       justify-content: flex-start;
       padding-top: 56px;
+      padding-left: 12px;
+      padding-right: 12px;
     }
 
     /* Ensure fixed nav buttons respect safe area insets (iOS notch) */
@@ -759,16 +763,17 @@
 
     /* Reduce card padding so the 7-column number grid fits without overflow */
     .setup-card {
-      padding: 16px;
+      padding: 16px 10px;
     }
 
-    /* Tighter gap and smaller touch targets to fit 7 buttons across ~303px */
+    /* Tighter gap so the 7-column grid's touch targets can get as close to
+       the 44px guideline as a 7-across mobile layout allows (IDT-301). */
     .number-grid {
-      gap: 6px;
+      gap: 4px;
     }
 
     .num-btn {
-      min-height: 36px;
+      min-height: 42px;
       font-size: 12px;
     }
 
