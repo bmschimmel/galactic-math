@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Release Notes — Galactic Math</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23030712'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%231a2744' stroke='%2300d4ff' stroke-width='1.5'/%3E%3Cellipse cx='16' cy='16' rx='12' ry='4.5' fill='none' stroke='%23ffd700' stroke-width='1.5' opacity='0.9'/%3E%3Ccircle cx='7' cy='8' r='1.2' fill='%23e8f4ff' opacity='0.7'/%3E%3Ccircle cx='26' cy='7' r='1' fill='%23e8f4ff' opacity='0.5'/%3E%3Ccircle cx='27' cy='24' r='1.2' fill='%23e8f4ff' opacity='0.6'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --space-black: #030712;
+    --saber-blue: #00d4ff;
+    --saber-green: #39ff14;
+    --saber-red: #ff2d55;
+    --saber-purple: #b94fff;
+    --gold: #ffd700;
+    --star-white: #e8f4ff;
+    --muted: #6b7fa3;
+    --border: #1e2d4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--space-black);
+    color: var(--star-white);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1152px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .back-link {
+    display: block;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--saber-blue); }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: var(--saber-blue);
+    text-align: center;
+    filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.4));
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(9px, 1.8vw, 11px);
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .status-msg, .muted-note {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    padding: 20px 0;
+  }
+
+  .error-box {
+    text-align: center;
+    color: var(--saber-red);
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 20px;
+    border: 1px solid rgba(255, 45, 85, 0.3);
+    border-radius: 10px;
+    background: rgba(255, 45, 85, 0.06);
+  }
+
+  .error-box a { color: var(--saber-blue); }
+
+  /* ===== TWO-PANEL LAYOUT ===== */
+  .panels-wrap {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 0 32px;
+    align-items: start;
+  }
+
+  /* Grid items don't shrink below their content's intrinsic width by default,
+     so a long unbroken token (a raw URL) can force the whole page to scroll
+     sideways without this. */
+  .panel {
+    min-width: 0;
+  }
+
+  @media (max-width: 720px) {
+    .panels-wrap { grid-template-columns: 1fr; }
+  }
+
+  .section-heading {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ===== RELEASE CARDS (collapsible) ===== */
+  .release-card {
+    background: rgba(10, 15, 30, 0.85);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
+
+  .release-card.highlight {
+    border-color: var(--saber-blue);
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.25);
+  }
+
+  .release-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    background: none;
+    border: none;
+    padding: 16px 20px;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .release-toggle:hover { background: rgba(0, 212, 255, 0.06); }
+
+  .release-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--gold);
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 6px;
+    padding: 4px 10px;
+  }
+
+  .release-date {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  .release-chevron {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 11px;
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  .release-card.expanded .release-chevron {
+    transform: rotate(90deg);
+    color: var(--saber-blue);
+  }
+
+  .release-body {
+    padding: 0 20px 20px;
+  }
+
+  .release-body h3, .release-body h4 {
+    font-family: 'Orbitron', monospace;
+    color: var(--saber-blue);
+    letter-spacing: 0.5px;
+    margin: 16px 0 8px;
+  }
+  .release-body h3 { font-size: 15px; }
+  .release-body h4 { font-size: 13px; }
+  .release-body h3:first-child, .release-body h4:first-child { margin-top: 0; }
+
+  .release-body p {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--star-white);
+    margin-bottom: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  .release-body ul {
+    margin: 0 0 10px 20px;
+  }
+
+  .release-body li {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--star-white);
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
+  }
+
+  .release-body a {
+    color: var(--saber-blue);
+    overflow-wrap: anywhere;
+  }
+
+  .release-body strong {
+    color: var(--gold);
+  }
+
+  /* ===== RECENT CHANGES LIST ===== */
+  .pr-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .pr-row:hover {
+    border-color: var(--saber-purple);
+    background: rgba(185, 79, 255, 0.06);
+  }
+
+  .pr-number {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--saber-purple);
+  }
+
+  .pr-title {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--star-white);
+    overflow-wrap: anywhere;
+  }
+
+  .pr-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pr-release {
+    font-family: 'Orbitron', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.5px;
+    color: var(--gold);
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 5px;
+    padding: 2px 6px;
+    white-space: nowrap;
+  }
+
+  .pr-date {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    margin-left: auto;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="../index.html" class="back-link">← BACK TO GALACTIC MATH</a>
+  <h1>📜 Mission Log</h1>
+  <div class="subtitle">Release Notes &amp; Recent Changes</div>
+
+  <div id="status" class="status-msg">📡 Contacting mission control…</div>
+
+  <div id="errorMsg" class="error-box" style="display:none;">
+    🛰️ Couldn't reach GitHub from here. <a href="https://github.com/bmschimmel/galactic-math/releases" target="_blank" rel="noopener">View releases on GitHub →</a>
+  </div>
+
+  <div id="panelsWrap" class="panels-wrap" style="display:none;">
+    <section class="panel">
+      <div class="section-heading">🛰️ Recent Changes</div>
+      <div id="prsList"></div>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading">🚀 Releases</div>
+      <div id="releasesList"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+// ===== RELEASE NOTES DATA =====
+const REPO = 'bmschimmel/galactic-math';
+const wantedVersion = (new URLSearchParams(window.location.search).get('version') || '').replace(/^v/i, '').trim();
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+// A bare GitHub PR URL (as GitHub's auto-generated "What's Changed" list uses)
+// links as "#123" instead of the full URL.
+function linkifyUrl(url) {
+  const prMatch = url.match(/^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\/(\d+)\/?$/);
+  const label = prMatch ? `#${prMatch[1]}` : url;
+  return `<a href="${url}" target="_blank" rel="noopener">${label}</a>`;
+}
+
+// Minimal, safe Markdown-to-HTML: strips raw HTML first, escapes everything,
+// then re-introduces only the handful of tags GitHub release notes actually use.
+function mdToHtml(md) {
+  let text = escapeHtml((md || '').replace(/<[^>]+>/g, ''));
+
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Markdown links and bare URLs (e.g. the "What's Changed" PR list) in one pass,
+  // so a bare URL already consumed as part of a markdown link isn't re-linked.
+  text = text.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<]+)/g,
+    (match, linkText, linkUrl, bareUrl) => {
+      if (linkUrl !== undefined) {
+        return `<a href="${linkUrl}" target="_blank" rel="noopener">${linkText}</a>`;
+      }
+      const cleaned = bareUrl.replace(/[.,;:!?)]+$/, '');
+      const trailing = bareUrl.slice(cleaned.length);
+      return linkifyUrl(cleaned) + trailing;
+    }
+  );
+
+  let html = '';
+  let inList = false;
+  const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trim();
+    if (/^###\s+/.test(line)) {
+      closeList();
+      html += `<h4>${line.replace(/^###\s+/, '')}</h4>`;
+    } else if (/^##\s+/.test(line)) {
+      closeList();
+      html += `<h3>${line.replace(/^##\s+/, '')}</h3>`;
+    } else if (/^[-*]\s+/.test(line)) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${line.replace(/^[-*]\s+/, '')}</li>`;
+    } else if (line === '' || line === '---') {
+      closeList();
+    } else {
+      closeList();
+      html += `<p>${line}</p>`;
+    }
+  }
+  closeList();
+  return html || '<p><em>No description provided.</em></p>';
+}
+
+// Every release renders collapsed except the one named in ?version=,
+// which arrives expanded, highlighted, and scrolled into view.
+function toggleRelease(btn) {
+  const card = btn.closest('.release-card');
+  const body = card.querySelector('.release-body');
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', String(!expanded));
+  body.hidden = expanded;
+  card.classList.toggle('expanded', !expanded);
+}
+
+function renderReleases(releases) {
+  const list = document.getElementById('releasesList');
+  const visible = releases.filter(r => !r.draft);
+  if (!visible.length) {
+    list.innerHTML = '<p class="muted-note">No releases yet.</p>';
+    return;
+  }
+
+  list.innerHTML = visible.map(r => {
+    const version = (r.tag_name || '').replace(/^v/i, '');
+    const isTarget = wantedVersion && version.toLowerCase() === wantedVersion.toLowerCase();
+    return `
+      <div class="release-card${isTarget ? ' highlight expanded' : ''}" id="release-${escapeHtml(version)}">
+        <button class="release-toggle" onclick="toggleRelease(this)" aria-expanded="${isTarget}">
+          <span class="release-badge">${escapeHtml(r.tag_name || version)}</span>
+          <span class="release-date">${formatDate(r.published_at || r.created_at)}</span>
+          <span class="release-chevron">▸</span>
+        </button>
+        <div class="release-body"${isTarget ? '' : ' hidden'}>${mdToHtml(r.body)}</div>
+      </div>
+    `;
+  }).join('');
+
+  if (wantedVersion) {
+    const target = document.querySelector('.release-card.highlight');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Releases don't say which PRs they contain, but their auto-generated
+// "What's Changed" body links to each one — map PR number -> release version
+// from that instead of an extra API call per PR.
+function buildPRReleaseMap(releases) {
+  const map = {};
+  for (const r of releases) {
+    if (r.draft) continue;
+    const version = (r.tag_name || '').replace(/^v/i, '');
+    const re = /\/pull\/(\d+)/g;
+    let m;
+    while ((m = re.exec(r.body || ''))) {
+      const num = Number(m[1]);
+      if (!(num in map)) map[num] = version;
+    }
+  }
+  return map;
+}
+
+function renderPRs(prs, prReleaseMap) {
+  const list = document.getElementById('prsList');
+  if (!prs.length) {
+    list.innerHTML = '<p class="muted-note">No recent changes found.</p>';
+    return;
+  }
+
+  list.innerHTML = prs.map(pr => {
+    const version = prReleaseMap[pr.number];
+    const releaseBadge = version ? `<span class="pr-release">v${escapeHtml(version)}</span>` : '';
+    return `
+      <a class="pr-row" href="${pr.html_url}" target="_blank" rel="noopener">
+        <span class="pr-number">#${pr.number}</span>
+        <span class="pr-title">${escapeHtml(pr.title)}</span>
+        <span class="pr-meta-row">
+          ${releaseBadge}
+          <span class="pr-date">${formatDate(pr.merged_at)}</span>
+        </span>
+      </a>
+    `;
+  }).join('');
+}
+
+async function loadReleaseNotes() {
+  try {
+    const [releasesRes, pullsRes] = await Promise.all([
+      fetch(`https://api.github.com/repos/${REPO}/releases`, { headers: { Accept: 'application/vnd.github+json' } }),
+      fetch(`https://api.github.com/repos/${REPO}/pulls?state=closed&sort=updated&direction=desc&per_page=30`, { headers: { Accept: 'application/vnd.github+json' } })
+    ]);
+
+    if (!releasesRes.ok || !pullsRes.ok) throw new Error('GitHub API request failed');
+
+    const releases = await releasesRes.json();
+    const pulls = await pullsRes.json();
+    const mergedPRs = pulls.filter(pr => pr.merged_at).slice(0, 15);
+
+    renderReleases(releases);
+    renderPRs(mergedPRs, buildPRReleaseMap(releases));
+
+    document.getElementById('status').style.display = 'none';
+    document.getElementById('panelsWrap').style.display = '';
+  } catch (err) {
+    document.getElementById('status').style.display = 'none';
+    document.getElementById('errorMsg').style.display = '';
+  }
+}
+
+loadReleaseNotes();
+</script>
+
+</body>
+</html>

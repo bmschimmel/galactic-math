@@ -1614,6 +1614,15 @@ document.addEventListener('keydown', e => {
 });
 
 
+// ===== FOOTER =====
+// Points the version link at its release notes, reading the version from the
+// visible text so it stays the single source of truth (see CONTRIBUTING.md).
+const versionLink = document.querySelector('.version-link');
+if (versionLink) {
+  const version = versionLink.textContent.trim().replace(/^v/i, '');
+  versionLink.href = `pages/release-notes.html?version=${encodeURIComponent(version)}`;
+}
+
 // First paint of the setup deck.
 goToStep(0, 'fwd');
 
