@@ -74,7 +74,7 @@ which browser you tested in.
 | **Backlog** | Accepted, not yet scheduled | Manual — you accept from Triage |
 | **To Do** | Ready to be worked | Manual — you prioritize |
 | **In Progress** | Branch created, actively building | Manual — when you start work |
-| **In Review** | PR open, awaiting review | Auto — GitHub PR opened |
+| **In Review** | PR open, awaiting review | Manual — set by whoever opens the PR |
 | **Done** | Merged to main | Auto — PR merged with `Fixes IDT-XX` |
 
 ---
@@ -225,4 +225,6 @@ After committing, always:
 1. Push the branch: `git push origin <branch-name>`
 2. Open a PR using GitHub CLI:
    `gh pr create --base main --title "IDT-XX description" --body "Fixes IDT-XX"`
-3. Remove the worktree: `git worktree remove <path>` from the shared checkout
+3. Transition the Linear issue to **"In Review"**. GitHub's PR-open sync does not
+   reliably move it for you — set the state explicitly rather than assuming it happened.
+4. Remove the worktree: `git worktree remove <path>` from the shared checkout
