@@ -507,8 +507,6 @@
   }
   .game-card.on .game-check { opacity: 1; }
   .new-badge {
-    position: absolute;
-    top: 8px; left: 10px;
     font-family: 'Orbitron', monospace;
     font-size: 8px;
     font-weight: 900;
@@ -518,7 +516,11 @@
     text-transform: uppercase;
     color: var(--deep-space);
     background: var(--gold);
-    box-shadow: 0 0 10px var(--glow-gold);
+    animation: newBadgePulse 1.6s ease-in-out infinite;
+  }
+  @keyframes newBadgePulse {
+    0%, 100% { box-shadow: 0 0 6px var(--glow-gold); transform: scale(1); }
+    50% { box-shadow: 0 0 16px var(--glow-gold); transform: scale(1.08); }
   }
   .game-card.galactic:hover, .game-card.galactic.on {
     border-color: var(--saber-blue);
