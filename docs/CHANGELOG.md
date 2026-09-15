@@ -7,7 +7,7 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-15
 
-### IDT-306 — Add the Web Analytics beacon to the feedback, workflow and release-notes pages (PR #TBD)
+### IDT-306 — Add the Web Analytics beacon to the feedback, workflow and release-notes pages (PR #157)
 
 IDT-305 put the Cloudflare Web Analytics beacon on `index.html` and `pages/alien-invasion.html` only, so visits to the feedback form, the How It Works page and the release notes were invisible. The same tag is now in the `<head>` of all three, so they appear under **Paths** as ordinary page views. No CSP change was needed; `_headers` already allow-lists the beacon origins site-wide. `docs/analytics.md` lists all five pages.
 
