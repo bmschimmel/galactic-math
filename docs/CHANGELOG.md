@@ -5,7 +5,21 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
-## 2026-09-14
+## 2026-09-15
+
+### IDT-299 — Fix oval circles, too-fast movement, touch targets, and a control overlap in Alien Invasion on mobile (PR #153)
+
+Closes out the IDT-135 mobile research: several fixes, all in `pages/alien-invasion.html`.
+
+**Oval circles:** `#gameCanvas`'s CSS box was sized with `100vw`/`100vh` while its drawing-buffer resolution came from `window.innerWidth`/`innerHeight` — on mobile these disagree whenever the address bar shows or hides (`100vh` reflects the large viewport, `innerHeight` the current one), stretching every `ctx.arc()` circle into an ellipse. `resizeCanvas()` now reads the canvas's own `getBoundingClientRect()` instead, backed by a `ResizeObserver` so it stays in sync through address-bar changes and orientation switches, not just the `resize` event. Verified by deliberately forcing the CSS box out of sync with `innerWidth`/`innerHeight` (the exact bug scenario) and confirming a freshly-drawn circle measured a perfect 1.000 width/height pixel ratio.
+
+**Movement too fast on mobile:** the world renders at a fixed 1:1 world-to-screen pixel mapping with no zoom, so a ~390px-wide phone canvas shows a much smaller slice of the 2000×5600 world than a ~1400px desktop canvas — the same world-px/frame speed then crosses a far bigger fraction of the visible screen each frame. Missile, comet, and alien-laser speeds multiply by `viewScale()` (`canvas.width / 1400`, capped at 1 so desktop pacing is unchanged). Ship speed does not — view-scaling it made the ship feel way too slow on feedback, so it's back to a flat speed, just 10% under the original (4.2 → 3.78).
+
+**Touch targets:** Alien Invasion's own setup-screen number grid had the same fixed-7-column problem as the main game's Numbers step ([IDT-301](https://linear.app/thehomefront/issue/IDT-301/number-grid-touch-targets-still-too-small-on-mobile-numbers-step)) — buttons measured 40×40px on phones. Same fix: `repeat(auto-fill, minmax(44px, 1fr))` on mobile instead of a fixed 7 columns, wrapping onto a third row. Now measures 45.5-51.7px across tested phones, desktop's 7-column/2-row layout unaffected.
+
+**Controls overlapping the gate question:** `#questionOverlay` spans the full screen width at the bottom (`z-index: 20`) — exactly where the virtual D-pad and fire button sit (`z-index: 50`), so they rendered on top of the math question card. The D-pad/fire buttons now hide for the duration of the question (`openGateQuestion()`) and reappear once it closes, whichever way it closes (correct answer, wrong answer, or dismiss).
+
+**Dead gap between the question card and the on-screen keyboard:** `#questionOverlay` is `position:fixed; bottom:0`, which anchors to the layout viewport — opening the mobile keyboard shrinks the *visual* viewport but leaves the layout viewport unchanged in most mobile browsers, so the overlay stayed pinned to where the screen bottom would be with no keyboard, leaving a dead gap above the keyboard. A `window.visualViewport` listener now keeps the overlay's `bottom` flush with the keyboard's actual top edge.
 
 ### IDT-301 — Make the mobile number grid responsive instead of squeezing 7 fixed columns (PR #152)
 
