@@ -7,9 +7,9 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-14
 
-### IDT-301 — Grow the mobile number grid's touch targets closer to the 44px guideline (PR #152)
+### IDT-301 — Make the mobile number grid responsive instead of squeezing 7 fixed columns (PR #152)
 
-The Numbers step's 7-column number grid rendered its `.num-btn` tiles at 38-43px on real phones (iPhone SE/13/Pixel 7) even after the mobile `min-height` was raised — that floor was never actually binding, since `aspect-ratio: 1` derives each square tile's size from the grid's own per-column width, which was capped by how much horizontal room `.container` and `.setup-card` padding left for 7 columns. Tightened `.container`'s mobile side padding (20px → 12px) and `.setup-card`'s (16px → 10px) plus the grid gap (6px → 4px), reclaiming enough width to reach ~44-49px tiles on every tested phone without any horizontal overflow. A true 44px square isn't reachable at 7 columns on the very narrowest phones without a bigger layout change (fewer columns), so this gets as close as the current grid allows rather than forcing it.
+Trimming padding/gap to fit 7 fixed columns only got mobile `.num-btn` tiles to 44-49px in measurement, with no real perceptible improvement — the layout was still fundamentally fighting to cram 7 columns into a narrow phone width. Replaced the fixed `repeat(7, 1fr)` with `repeat(auto-fill, minmax(46px, 1fr))` on mobile so the column count adapts to the available width, wrapping the 14 numbers onto a third row (6+6+2) on narrow phones instead of forcing an undersized 7-across row. This surfaced a real bug: `game.js` hardcoded `if (i === 7) btn.style.gridColumn = '1'` to force a row break at exactly the old fixed 7-column boundary, which collided with the grid's own natural wrapping under a variable column count and produced broken, uneven rows (6, then 1, then 6, then 1). Removed it — it was already redundant on the fixed 7-column desktop grid and actively wrong for a responsive one. Real measured button size after the fix: 46-52px across iPhone SE/13/14 Pro/Pixel 7, no horizontal overflow, no regression to IDT-300's vertical-fit fix, and desktop's 7-column/2-row layout is unaffected.
 
 ### IDT-300 — Fix a mobile regression from IDT-297: title overlapping the header buttons, setup deck overflowing (PR #151)
 
