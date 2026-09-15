@@ -740,14 +740,14 @@
 
   /* ===== MOBILE LAYOUT ===== */
   @media (max-width: 600px) {
-    /* Push content below the fixed history/theme buttons. Tighter side
-       padding (20px -> 12px) reclaims width for the 7-column number grid
-       so its touch targets can get closer to the 44px guideline (IDT-301). */
+    /* Push content below the fixed history/theme buttons. Slightly tighter
+       side padding (20px -> 16px) gives the number grid a bit more room to
+       work with (IDT-301). */
     .container {
       justify-content: flex-start;
       padding-top: 56px;
-      padding-left: 12px;
-      padding-right: 12px;
+      padding-left: 16px;
+      padding-right: 16px;
     }
 
     /* Ensure fixed nav buttons respect safe area insets (iOS notch) */
@@ -761,20 +761,25 @@
       left: max(16px, env(safe-area-inset-left, 16px));
     }
 
-    /* Reduce card padding so the 7-column number grid fits without overflow */
+    /* Reduce card padding to give the number grid more room */
     .setup-card {
-      padding: 16px 10px;
+      padding: 16px 12px;
     }
 
-    /* Tighter gap so the 7-column grid's touch targets can get as close to
-       the 44px guideline as a 7-across mobile layout allows (IDT-301). */
+    /* A fixed 7-across grid can't reach a real 44px touch target on narrow
+       phones no matter how much padding is trimmed (7 x 44px + gaps alone
+       exceeds most phone widths). Let the grid size its own column count
+       instead: as many 44px+ columns as fit the width, wrapping the 14
+       numbers onto a third row on narrower phones, two rows on wider ones.
+       Every button stays the same size as its row-mates either way (IDT-301). */
     .number-grid {
-      gap: 4px;
+      grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+      gap: 8px;
     }
 
     .num-btn {
-      min-height: 42px;
-      font-size: 12px;
+      min-height: 46px;
+      font-size: 14px;
     }
 
     /* Center operation and preset button rows */
