@@ -724,7 +724,6 @@ for (let i = 0; i <= 13; i++) {
   btn.className = 'num-btn' + (i >= 2 && i <= 12 ? ' selected' : '');
   btn.textContent = i;
   btn.dataset.num = i;
-  if (i === 7) btn.style.gridColumn = '1';
   btn.onclick = () => toggleNum(i, btn);
   grid.appendChild(btn);
 }
