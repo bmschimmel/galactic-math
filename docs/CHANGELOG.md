@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-15
 
+### IDT-306 — Add the Web Analytics beacon to the feedback, workflow and release-notes pages (PR #TBD)
+
+IDT-305 put the Cloudflare Web Analytics beacon on `index.html` and `pages/alien-invasion.html` only, so visits to the feedback form, the How It Works page and the release notes were invisible. The same tag is now in the `<head>` of all three, so they appear under **Paths** as ordinary page views. No CSP change was needed; `_headers` already allow-lists the beacon origins site-wide. `docs/analytics.md` lists all five pages.
+
 ### IDT-305 — Count game-mode launches with virtual paths and Cloudflare Web Analytics (PR #155)
 
 Standard, Hyperspace and Kessel Run all run inside `index.html` without navigating, so page-view analytics saw one path for everything. When a mode launches from the flight deck the game now swaps the address bar to a virtual path (`/classic/kessel/`, `/classic/hyperspace/harder/`, `/alien/recon/`, …) with `history.replaceState()`, and a cookieless Cloudflare Web Analytics beacon in SPA mode reports each swap as a page view. New Mission swaps the URL back to `/`. A new `_redirects` file sends any real load of a virtual path back to `/`, both pages pin their relative links to absolute URLs so they keep working while a virtual path is active, and `_headers` allow-lists the beacon origins. The beacon tag ships with a placeholder token; `docs/analytics.md` has the Cloudflare setup steps.

@@ -25,7 +25,7 @@ When a mode launches, the game swaps the visible URL for a **virtual path** with
 
 | Piece | Location |
 |---|---|
-| Beacon `<script>` tag (`"spa": true`) | `<head>` of `index.html` and `pages/alien-invasion.html` |
+| Beacon `<script>` tag (`"spa": true`) | `<head>` of `index.html` and every page under `pages/` (`alien-invasion`, `feedback`, `workflow`, `release-notes`) |
 | `markPath()` / `classicModePath()` | `assets/js/game.js`, `// ===== ANALYTICS PATHS =====`; called from `startQuiz()` and `newMission()` |
 | `markLaunchPath()` | `pages/alien-invasion.html`, `// ===== ANALYTICS PATH =====`; called from `initGame()` |
 | CSP allow-list | `_headers` — `static.cloudflareinsights.com` in `script-src`, `cloudflareinsights.com` in `connect-src` |
@@ -38,6 +38,8 @@ When a mode launches, the game swaps the visible URL for a **virtual path** with
 A virtual path changes the document's base URL, so a relative link like `pages/feedback.html` would resolve to `/classic/kessel/pages/feedback.html`. Both pages pin their links to absolute URLs on load (`a.href = a.href`), and `pages/alien-invasion.html` resolves its audio clip URL and home URL up front for the same reason. Anything that still slips through lands on `/` via `_redirects` rather than a 404.
 
 ## The Cloudflare side
+
+Plain pages (`feedback`, `workflow`, `release-notes`) carry the same tag and show up under **Paths** as ordinary page views of `/pages/<name>.html`.
 
 The Web Analytics site for `galacticmath.app` lives in the Cloudflare dashboard under **Analytics & Logs → Web Analytics**. Its token (`c4e72870bf94459abffc8adfc8247408`) is in both beacon tags. The token is not a secret — it is visible in page source on every site that uses Web Analytics — so it lives in the repo.
 
