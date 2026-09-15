@@ -37,15 +37,13 @@ When a mode launches, the game swaps the visible URL for a **virtual path** with
 
 A virtual path changes the document's base URL, so a relative link like `pages/feedback.html` would resolve to `/classic/kessel/pages/feedback.html`. Both pages pin their links to absolute URLs on load (`a.href = a.href`), and `pages/alien-invasion.html` resolves its audio clip URL and home URL up front for the same reason. Anything that still slips through lands on `/` via `_redirects` rather than a 404.
 
-## Setting up the Cloudflare side
+## The Cloudflare side
 
-The repo ships with `CF_BEACON_TOKEN_PLACEHOLDER` in both beacon tags. The token is not a secret (it is visible in page source on every site that uses Web Analytics), so it lives in the repo once issued.
+The Web Analytics site for `galacticmath.app` lives in the Cloudflare dashboard under **Analytics & Logs → Web Analytics**. Its token (`c4e72870bf94459abffc8adfc8247408`) is in both beacon tags. The token is not a secret — it is visible in page source on every site that uses Web Analytics — so it lives in the repo.
 
-1. Cloudflare dashboard → **Analytics & Logs** → **Web Analytics** → **Add a site**, hostname `galacticmath.app`.
-2. Turn **off** "Automatic setup". That option injects Cloudflare's own beacon at the edge without the SPA flag and would double-count alongside ours.
-3. Copy the `token` from the snippet Cloudflare shows and replace the placeholder in `index.html` and `pages/alien-invasion.html`.
-4. After deploy, launch a Kessel Run on the live site and confirm in DevTools → Network that a request to `cloudflareinsights.com/cdn-cgi/rum` fires after the URL changes to `/classic/kessel/`.
-5. If the swaps never show up under **Paths**, the beacon may only hook `pushState`; change `markPath()` and `markLaunchPath()` from `replaceState` to `pushState`.
+The site must stay on **Enable with JS Snippet installation** (Manage site → RUM). The other "Enable" options inject Cloudflare's own beacon at the edge; that copy has no SPA flag, so it would miss the mode paths, and it would double-count alongside ours. Before this was set, the auto-injected beacon was also being blocked by the CSP in `_headers`, which is why the site showed zero views for months.
+
+To confirm it is working: launch a Kessel Run on the live site and check DevTools → Network for a request to `cloudflareinsights.com/cdn-cgi/rum` after the URL changes to `/classic/kessel/`; the path appears under **Paths** in the dashboard a few minutes later. If the swaps never show up, the beacon may only hook `pushState`; change `markPath()` and `markLaunchPath()` from `replaceState` to `pushState`.
 
 ## What it does not tell you
 
