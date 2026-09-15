@@ -17,6 +17,7 @@ galactic-math/
 │   ├── feedback-worker.js   # Cloudflare Worker: receives feedback, creates GitHub issues
 │   └── wrangler.toml        # Cloudflare deployment config
 ├── _headers            # Cloudflare Pages response headers (CSP and other security headers)
+├── _redirects          # Cloudflare Pages redirects: analytics virtual paths back to / (see analytics.md)
 ├── og-image-v2.png     # Open Graph / Twitter Card preview image (1200×630)
 ├── CLAUDE.md           # Instructions for Claude Code
 ├── CONTRIBUTING.md     # Contributor and workflow guide
@@ -114,11 +115,11 @@ The CSP is split into per-resource directives rather than one `default-src`:
 | Directive | Allows | Needed by |
 |---|---|---|
 | `default-src 'self'` | Same-origin only | Fallback for anything not listed (media, workers, frames…) |
-| `script-src 'self' 'unsafe-inline'` | Own scripts plus inline handlers | `game.js`, the inline `onclick=` handlers and the inline scripts in `pages/` |
+| `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com` | Own scripts, inline handlers, the Web Analytics beacon | `game.js`, the inline `onclick=` handlers and the inline scripts in `pages/`, the beacon `<script>` (see `analytics.md`) |
 | `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com` | Own CSS, inline styles, Google Fonts stylesheet | `style.css`, `style=` attributes, the Orbitron / Exo 2 `<link>` |
 | `font-src https://fonts.gstatic.com` | Google Fonts files | Pulled in by the Google Fonts stylesheet |
 | `img-src 'self' data:` | Own images and `data:` URIs | Favicons; the sub-pages use inline SVG `data:` favicons |
-| `connect-src 'self' https://galactic-math-feedback.bmschimmel.workers.dev https://api.github.com` | `fetch()` targets | The feedback worker, the `fetch()` of `assets/audio/low-fuel.m4a` in Alien Invasion, and the GitHub REST API calls in `pages/release-notes.html` |
+| `connect-src 'self' https://galactic-math-feedback.bmschimmel.workers.dev https://api.github.com https://cloudflareinsights.com` | `fetch()` / beacon targets | The feedback worker, the `fetch()` of `assets/audio/low-fuel.m4a` in Alien Invasion, the GitHub REST API calls in `pages/release-notes.html`, and the Web Analytics beacon's reports |
 | `object-src 'none'` | Nothing | No plugins |
 | `base-uri 'self'` | Same-origin `<base>` only | Blocks base-tag hijacking |
 | `frame-ancestors 'none'` | No embedding | The game cannot be put in another site's iframe |

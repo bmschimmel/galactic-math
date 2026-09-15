@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-15
 
+### IDT-305 — Count game-mode launches with virtual paths and Cloudflare Web Analytics (PR #155)
+
+Standard, Hyperspace and Kessel Run all run inside `index.html` without navigating, so page-view analytics saw one path for everything. When a mode launches from the flight deck the game now swaps the address bar to a virtual path (`/classic/kessel/`, `/classic/hyperspace/harder/`, `/alien/recon/`, …) with `history.replaceState()`, and a cookieless Cloudflare Web Analytics beacon in SPA mode reports each swap as a page view. New Mission swaps the URL back to `/`. A new `_redirects` file sends any real load of a virtual path back to `/`, both pages pin their relative links to absolute URLs so they keep working while a virtual path is active, and `_headers` allow-lists the beacon origins. The beacon tag ships with a placeholder token; `docs/analytics.md` has the Cloudflare setup steps.
+
 ### IDT-299 — Fix oval circles, too-fast movement, touch targets, and a control overlap in Alien Invasion on mobile (PR #153)
 
 Closes out the IDT-135 mobile research: several fixes, all in `pages/alien-invasion.html`.

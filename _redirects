@@ -1,0 +1,5 @@
+# Virtual paths set by history.replaceState() when a game mode launches (see
+# docs/analytics.md). They exist only for Cloudflare Web Analytics; on a real
+# page load (refresh, shared link) send the player back to the setup deck.
+/classic/*  /  301
+/alien/*    /  301

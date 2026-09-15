@@ -18,6 +18,7 @@ This folder contains developer documentation explaining how each part of Galacti
 | [design-ux.md](design-ux.md) | Design concept, color palette, typography, tone, wording, interaction patterns |
 | [feedback-system.md](feedback-system.md) | Feedback form, Cloudflare Worker, GitHub Issues integration |
 | [release-notes.md](release-notes.md) | Release notes page — GitHub releases, recent PRs, the version-link footer |
+| [analytics.md](analytics.md) | Cloudflare Web Analytics, virtual mode paths, `_redirects`, Cloudflare setup steps |
 | [CHANGELOG.md](CHANGELOG.md) | Full history of changes by Linear issue and PR |
 
 ---
