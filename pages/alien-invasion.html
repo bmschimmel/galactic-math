@@ -452,6 +452,19 @@
 
   /* ===== MOBILE ===== */
   @media (max-width: 600px) {
+    /* A fixed 7-across number grid can't reach a real 44px touch target on
+       narrow phones (same problem as the main game's Numbers step, fixed in
+       IDT-301) — let the grid pick its own column count instead of forcing
+       7, wrapping onto a third row on narrower phones. Slightly tighter
+       screen/panel padding gives it a bit more room to work with. */
+    #setupScreen { padding: 16px; }
+    .setup-panel { padding: 22px 14px; }
+    .num-grid {
+      grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+      gap: 8px;
+    }
+    .num-btn { min-height: 44px; font-size: 15px; }
+
     .hud-bar { padding: 6px 10px; gap: 8px; }
     .hud-label { font-size: 7px; letter-spacing: 1px; }
     .fuel-bar-outer { height: 8px; }
@@ -1263,6 +1276,16 @@ const N_ALIENS         = (() => {
 })();
 const N_FUEL_PICKUPS   = 6;
 const MISSILE_SPEED     = 14;   // px/frame player missile speed
+// Ship/missile/comet speeds below were tuned by feel on a ~1400px-wide
+// desktop canvas. The world is rendered at a 1:1 world-to-screen pixel
+// mapping with no zoom, so a narrower canvas shows a smaller slice of the
+// world at any moment — the same world-px/frame speed then crosses a much
+// bigger fraction of the visible screen each frame, feeling 3-4x faster on
+// a ~390px phone than on desktop. Scaling by canvas width (capped at 1, so
+// desktop pacing never changes) keeps the felt speed roughly constant
+// across screen sizes instead of just the raw world speed (IDT-299).
+const SPEED_BASELINE_WIDTH = 1400;
+function viewScale() { return Math.min(1, canvas.width / SPEED_BASELINE_WIDTH); }
 const COMET_MAX        = 6;     // max comets on screen at once
 const COMET_INTERVAL   = 1800;  // ms between comet spawns
 const NO_AMMO_HINT_MS  = 1800;  // how long the "fly to a ring" hint stays up near the ship
@@ -1386,7 +1409,7 @@ const _planetFactIndex = {};
 const OP_COLOR = { multiply:'#b94fff', divide:'#ffd700', add:'#39ff14', subtract:'#ff2d55' };
 
 // ===== GAME STATE =====
-let canvas, ctx;
+let canvas = document.getElementById('gameCanvas'), ctx;
 let gameState = 'setup'; // 'playing' | 'question' | 'gameover' | 'victory'
 let paused = false;
 let ship, camera;
@@ -1431,14 +1454,12 @@ function launchGame() {
 
 // ===== GAME INIT =====
 function initGame() {
-  canvas = document.getElementById('gameCanvas');
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
   ctx = canvas.getContext('2d');
 
   document.getElementById('setupScreen').style.display = 'none';
   document.getElementById('endScreen').style.display   = 'none';
   canvas.style.display = 'block';
+  resizeCanvas(); // after display:block, so the canvas has a real box to measure
   document.getElementById('hud').style.display            = 'block';
   document.getElementById('alienCounter').style.display   = 'flex';
   document.getElementById('keyHint').style.display        = 'block';
@@ -1569,10 +1590,22 @@ function runCountdown() {
   showStep();
 }
 
+// The canvas's CSS box is sized with 100vw/100vh, which can briefly disagree
+// with window.innerWidth/innerHeight on mobile whenever the address bar
+// shows or hides (100vh reflects the large viewport, innerHeight the
+// current one) — that mismatch stretched every ctx.arc() circle into an
+// ellipse. Reading the canvas's own rendered box instead keeps the buffer's
+// aspect ratio locked to what's actually on screen (IDT-299).
+function resizeCanvas() {
+  const box = canvas.getBoundingClientRect();
+  if (box.width === 0 || box.height === 0) return; // canvas is hidden (display:none)
+  canvas.width  = box.width;
+  canvas.height = box.height;
+}
+new ResizeObserver(resizeCanvas).observe(canvas);
+
 function onResize() {
-  if (!canvas) return;
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
+  resizeCanvas();
 }
 
 // ===== WORLD GENERATION =====
@@ -1943,8 +1976,8 @@ function updateShip(dt) {
   ship.moving = thrusting;
 
   if (thrusting) {
-    ship.x += dx * SHIP_SPEED * dt;
-    ship.y += dy * SHIP_SPEED * dt;
+    ship.x += dx * SHIP_SPEED * viewScale() * dt;
+    ship.y += dy * SHIP_SPEED * viewScale() * dt;
     ship.facing = Math.atan2(dy, dx) + Math.PI / 2;
     oxygen = Math.max(0, oxygen - THRUST_FUEL_RATE * dt);
   }
@@ -2015,7 +2048,7 @@ function updateAlienLasers() {
       const dist = Math.hypot(dx, dy) || 1;
       // Only fire if within ~900 world units of the ship
       if (dist > 900) continue;
-      const speed = 3.7;
+      const speed = 3.7 * viewScale();
       lasers.push({ x: obs.x, y: obs.y, vx: (dx/dist)*speed, vy: (dy/dist)*speed, color: obs.color, life: 1.0 });
       sounds.laserShot();
     }
@@ -2299,7 +2332,7 @@ function spawnComet() {
   const tx = ship.x + (Math.random() - 0.5) * spread;
   const ty = ship.y + (Math.random() - 0.5) * spread;
   const dist = Math.hypot(tx - wx, ty - wy) || 1;
-  const speed = 4 + Math.random() * 4.7;
+  const speed = (4 + Math.random() * 4.7) * viewScale();
   comets.push({
     x: wx, y: wy,
     vx: (tx - wx) / dist * speed,
@@ -2395,8 +2428,8 @@ function firePlayerMissile() {
   missiles--;
   missilesFireTotal++;
   updateHUD();
-  const vx = Math.sin(ship.facing) * MISSILE_SPEED;
-  const vy = -Math.cos(ship.facing) * MISSILE_SPEED;
+  const vx = Math.sin(ship.facing) * MISSILE_SPEED * viewScale();
+  const vy = -Math.cos(ship.facing) * MISSILE_SPEED * viewScale();
   playerMissiles.push({ x: ship.x, y: ship.y, vx, vy, life: 1.0 });
   sounds.missileFire();
 }

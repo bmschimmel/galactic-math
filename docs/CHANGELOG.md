@@ -5,7 +5,17 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
-## 2026-09-14
+## 2026-09-15
+
+### IDT-299 — Fix oval circles, too-fast movement, and touch targets in Alien Invasion on mobile (PR #153)
+
+Closes out the IDT-135 mobile research: three fixes, all in `pages/alien-invasion.html`.
+
+**Oval circles:** `#gameCanvas`'s CSS box was sized with `100vw`/`100vh` while its drawing-buffer resolution came from `window.innerWidth`/`innerHeight` — on mobile these disagree whenever the address bar shows or hides (`100vh` reflects the large viewport, `innerHeight` the current one), stretching every `ctx.arc()` circle into an ellipse. `resizeCanvas()` now reads the canvas's own `getBoundingClientRect()` instead, backed by a `ResizeObserver` so it stays in sync through address-bar changes and orientation switches, not just the `resize` event. Verified by deliberately forcing the CSS box out of sync with `innerWidth`/`innerHeight` (the exact bug scenario) and confirming a freshly-drawn circle measured a perfect 1.000 width/height pixel ratio.
+
+**Movement too fast on mobile:** the world renders at a fixed 1:1 world-to-screen pixel mapping with no zoom, so a ~390px-wide phone canvas shows a much smaller slice of the 2000×5600 world than a ~1400px desktop canvas — the same world-px/frame speed then crosses a far bigger fraction of the visible screen each frame. Ship, missile, comet, and alien-laser speeds now multiply by `viewScale()` (`canvas.width / 1400`, capped at 1 so desktop pacing is unchanged). Measured: ship now crosses the same fraction of screen width per second on a 1440px desktop and a 390px phone (ratio 1.01, was ~3-4x before).
+
+**Touch targets:** Alien Invasion's own setup-screen number grid had the same fixed-7-column problem as the main game's Numbers step ([IDT-301](https://linear.app/thehomefront/issue/IDT-301/number-grid-touch-targets-still-too-small-on-mobile-numbers-step)) — buttons measured 40×40px on phones. Same fix: `repeat(auto-fill, minmax(44px, 1fr))` on mobile instead of a fixed 7 columns, wrapping onto a third row. Now measures 45.5-51.7px across tested phones, desktop's 7-column/2-row layout unaffected.
 
 ### IDT-301 — Make the mobile number grid responsive instead of squeezing 7 fixed columns (PR #152)
 
