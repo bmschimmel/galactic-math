@@ -1611,6 +1611,24 @@ function onResize() {
   resizeCanvas();
 }
 
+// #questionOverlay is `position:fixed; bottom:0`, which anchors to the LAYOUT
+// viewport. Opening the on-screen keyboard shrinks the VISUAL viewport but
+// leaves the layout viewport (and innerHeight) unchanged in most mobile
+// browsers, so the overlay stayed pinned to where the bottom of the screen
+// would be with no keyboard — leaving a dead gap between the question card
+// and the keyboard. Tracking window.visualViewport keeps it flush with the
+// keyboard's actual top edge (IDT-299).
+function updateQuestionOverlayPosition() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const keyboardInset = window.innerHeight - (vv.height + vv.offsetTop);
+  document.getElementById('questionOverlay').style.bottom = Math.max(0, keyboardInset) + 'px';
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateQuestionOverlayPosition);
+  window.visualViewport.addEventListener('scroll', updateQuestionOverlayPosition);
+}
+
 // ===== WORLD GENERATION =====
 function generateStars() {
   const stars = [];
@@ -2169,6 +2187,7 @@ function submitAnswer() {
     ship.x = Math.max(SHIP_RADIUS, Math.min(WORLD_W-SHIP_RADIUS, ship.x + Math.cos(angle)*115));
     ship.y = Math.max(SHIP_RADIUS, Math.min(WORLD_H-SHIP_RADIUS, ship.y + Math.sin(angle)*115));
     document.getElementById('questionOverlay').style.display = 'none';
+    document.getElementById('questionOverlay').style.bottom = '0px';
     if (isTouchDevice) showVpad();
     activatedGate = null;
     gameState = 'playing';
@@ -2178,6 +2197,7 @@ function submitAnswer() {
 
 function dismissQuestion() {
   document.getElementById('questionOverlay').style.display = 'none';
+  document.getElementById('questionOverlay').style.bottom = '0px';
   if (isTouchDevice) showVpad();
   activatedGate = null;
   gameState = 'playing';
@@ -2188,6 +2208,7 @@ function clearGate(gate) {
   missiles += 2;
   activatedGate = null;
   document.getElementById('questionOverlay').style.display = 'none';
+  document.getElementById('questionOverlay').style.bottom = '0px';
   if (isTouchDevice) showVpad();
   gameState = 'playing';
   updateHUD();
