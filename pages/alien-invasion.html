@@ -1257,7 +1257,10 @@ function rteSelectNone() {
 const WORLD_W          = 2000;
 const WORLD_H          = 5600;
 const TOTAL_GATES      = 18;
-const SHIP_SPEED       = 4.2;
+// 4.2 was the original speed; scaling it by viewScale() made the ship feel
+// way too slow, so it's back to a flat speed (not view-scaled) — just 10%
+// under the original per feedback.
+const SHIP_SPEED       = 4.2 * 0.9;
 const SHIP_RADIUS      = 14;
 const GATE_TRIGGER     = 68;    // proximity to trigger question (px)
 const GATE_RADIUS      = 60;    // visual ring radius (px)
@@ -1976,8 +1979,8 @@ function updateShip(dt) {
   ship.moving = thrusting;
 
   if (thrusting) {
-    ship.x += dx * SHIP_SPEED * viewScale() * dt;
-    ship.y += dy * SHIP_SPEED * viewScale() * dt;
+    ship.x += dx * SHIP_SPEED * dt;
+    ship.y += dy * SHIP_SPEED * dt;
     ship.facing = Math.atan2(dy, dx) + Math.PI / 2;
     oxygen = Math.max(0, oxygen - THRUST_FUEL_RATE * dt);
   }
@@ -2136,6 +2139,7 @@ function openGateQuestion(gate) {
   document.getElementById('bonusProgress').style.display = 'none';
 
   document.getElementById('questionOverlay').style.display = 'block';
+  if (isTouchDevice) hideVpad(); // the D-pad/fire buttons would otherwise overlap the question card
   setTimeout(() => document.getElementById('answerInput').focus(), 60);
 }
 
@@ -2165,6 +2169,7 @@ function submitAnswer() {
     ship.x = Math.max(SHIP_RADIUS, Math.min(WORLD_W-SHIP_RADIUS, ship.x + Math.cos(angle)*115));
     ship.y = Math.max(SHIP_RADIUS, Math.min(WORLD_H-SHIP_RADIUS, ship.y + Math.sin(angle)*115));
     document.getElementById('questionOverlay').style.display = 'none';
+    if (isTouchDevice) showVpad();
     activatedGate = null;
     gameState = 'playing';
     if (oxygen <= 0) endGame('gameover', '💨 OUT OF FUEL', 'The aliens have taken over! Try again to save the solar system.');
@@ -2173,6 +2178,7 @@ function submitAnswer() {
 
 function dismissQuestion() {
   document.getElementById('questionOverlay').style.display = 'none';
+  if (isTouchDevice) showVpad();
   activatedGate = null;
   gameState = 'playing';
 }
@@ -2182,6 +2188,7 @@ function clearGate(gate) {
   missiles += 2;
   activatedGate = null;
   document.getElementById('questionOverlay').style.display = 'none';
+  if (isTouchDevice) showVpad();
   gameState = 'playing';
   updateHUD();
   pulseHUDStat('missileCount', 'ammoLabel');
