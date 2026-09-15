@@ -8,6 +8,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
 <link rel="apple-touch-icon" href="/favicon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<!-- Cloudflare Web Analytics: cookieless launch counts per game mode. See docs/analytics.md. -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "CF_BEACON_TOKEN_PLACEHOLDER", "spa": true}'></script>
 <style>
   /* ===== RESET & VARIABLES ===== */
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -820,8 +822,9 @@ function getAudio() {
   return audioCtx;
 }
 
-// Voice clip: son saying "low fuel" — loaded from local file
-const LOW_FUEL_CLIP = '../assets/audio/low-fuel.m4a';
+// Voice clip: son saying "low fuel" — loaded from local file. Resolved now
+// because the URL later carries a virtual path (see markLaunchPath).
+const LOW_FUEL_CLIP = new URL('../assets/audio/low-fuel.m4a', window.location.href).href;
 let lowFuelAudioBuffer = null;
 function loadLowFuelClip() {
   if (lowFuelAudioBuffer) return;
@@ -1277,6 +1280,21 @@ const N_ALIENS         = (() => {
   const n = Number(new URLSearchParams(window.location.search).get('aliens'));
   return ALIEN_COUNTS.includes(n) ? n : 10;
 })();
+
+// ===== ANALYTICS PATH =====
+// Swaps the visible URL for a virtual path when the game starts so Cloudflare
+// Web Analytics (SPA mode) counts launches per invasion size. Nothing
+// navigates; on a real page load `_redirects` bounces the path back to `/`.
+const ALIEN_SIZE_NAMES = { 5: 'recon', 10: 'invasion', 25: 'chaos' };
+const HOME_URL = new URL('../index.html', window.location.href).href;
+function markLaunchPath() {
+  const path = `/alien/${ALIEN_SIZE_NAMES[N_ALIENS]}/`;
+  if (window.location.protocol === 'file:' || window.location.pathname === path) return;
+  history.replaceState(null, '', path);
+}
+// Relative links would resolve against the virtual path, so pin them now.
+document.querySelectorAll('a[href]').forEach(a => { a.href = a.href; });
+
 const N_FUEL_PICKUPS   = 6;
 const MISSILE_SPEED     = 14;   // px/frame player missile speed
 // Ship/missile/comet speeds below were tuned by feel on a ~1400px-wide
@@ -1469,6 +1487,7 @@ function initGame() {
   document.getElementById('devBanner').style.display      = 'block';
 
   loadLowFuelClip(); // load after user gesture so AudioContext starts cleanly
+  markLaunchPath();
 
   oxygen            = 100;
   lives             = 5;
@@ -2283,7 +2302,7 @@ function abortMission() {
     setTimeout(() => sweep(300, 40, 'sine', 0.4, 0.12), 300);
     setTimeout(() => sweep(80, 20, 'sine', 0.3, 0.08), 700);
   } catch(e) { /* audio not available */ }
-  setTimeout(() => { cleanupListeners(); window.location.href = '../index.html'; }, 50);
+  setTimeout(() => { cleanupListeners(); window.location.href = HOME_URL; }, 50);
 }
 
 // ===== WRONG FLASH =====
@@ -2651,7 +2670,7 @@ function cleanupListeners() {
 }
 
 function restartGame() { document.getElementById('endScreen').style.display = 'none'; initGame(); }
-function goHome()      { window.location.href = '../index.html'; }
+function goHome()      { window.location.href = HOME_URL; }
 
 // ===== COORDINATE HELPERS =====
 function w2s(wx, wy) {

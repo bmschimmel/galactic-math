@@ -967,6 +967,20 @@ function launchMission() {
   else startQuiz();
 }
 
+// ===== ANALYTICS PATHS =====
+// Swaps the visible URL for a virtual path when a game launches so Cloudflare
+// Web Analytics (SPA mode) counts launches per mode. Nothing navigates; on a
+// real page load `_redirects` bounces these paths back to `/`.
+function markPath(path) {
+  if (window.location.protocol === 'file:' || window.location.pathname === path) return;
+  history.replaceState(null, '', path);
+}
+
+function classicModePath() {
+  const mode = gameMode === 'hyperspace' ? `hyperspace/${hyperspaceDiff}` : gameMode;
+  return `/classic/${mode}/`;
+}
+
 // ===== HYPERSPACE MODE =====
 // Standard / Hyperspace / Kessel Run are one choice. Hyperspace stays on the
 // card so its difficulty can be picked; the other two move on by themselves.
@@ -1201,6 +1215,7 @@ function startQuiz() {
     document.getElementById('setupError').textContent = '⚠ Select at least 3 numbers';
     return;
   }
+  markPath(classicModePath());
   const nums = [...selectedNums];
   questions = [];
   questionOps = [];
@@ -1564,6 +1579,7 @@ function retryQuiz() {
 function newMission() {
   stopHyperspaceTimer();
   stopKesselTimer();
+  markPath('/');
   showScreen('setup');
   goToStep(0, 'back');
 }
@@ -1621,6 +1637,10 @@ if (versionLink) {
   const version = versionLink.textContent.trim().replace(/^v/i, '');
   versionLink.href = `pages/release-notes.html?version=${encodeURIComponent(version)}`;
 }
+
+// Relative links would resolve against a virtual mode path once one is active
+// (see markPath), so pin them to their real targets now while the URL is `/`.
+document.querySelectorAll('a[href]').forEach(a => { a.href = a.href; });
 
 // First paint of the setup deck.
 goToStep(0, 'fwd');
