@@ -1,20 +1,30 @@
-# Block AI training crawlers
+# Galactic Math crawler policy
+#
+# Search engines and AI search / assistant bots are welcome -- a free kids'
+# math game is worth finding. AI *training* crawlers are not. This file is
+# the version-controlled statement of that stance; Cloudflare's "Configure AI
+# bot policies" setting (Search: Allow, Training: Disallow AI Training,
+# Agent: Allow) enforces it at the edge. See docs/overview.md.
+#
+# Content Signals (https://contentsignals.org/) are machine-readable usage
+# preferences read alongside the User-agent rules:
+#   search   = building a search index and returning links / short excerpts
+#   ai-input = feeding pages into an AI model at answer time (RAG, grounding)
+#   ai-train = training or fine-tuning AI models
+# Any restriction expressed here is an express reservation of rights under
+# Article 4 of EU Directive 2019/790 on Copyright in the Digital Single Market.
+
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+Allow: /
+
+# ----- AI training crawlers: disallowed -----
+# Cloudflare's "AI Crawler" category plus the vendor opt-out tokens
+# (developers.cloudflare.com/ai-crawl-control/reference/bots/). Search and
+# assistant bots such as OAI-SearchBot, ChatGPT-User, PerplexityBot,
+# Claude-SearchBot and DuckAssistBot are deliberately not listed.
+
 User-agent: GPTBot
-Disallow: /
-
-User-agent: ChatGPT-User
-Disallow: /
-
-User-agent: OAI-SearchBot
-Disallow: /
-
-User-agent: CCBot
-Disallow: /
-
-User-agent: anthropic-ai
-Disallow: /
-
-User-agent: Claude-Web
 Disallow: /
 
 User-agent: ClaudeBot
@@ -23,16 +33,19 @@ Disallow: /
 User-agent: Google-Extended
 Disallow: /
 
-User-agent: PerplexityBot
+User-agent: Google-CloudVertexBot
+Disallow: /
+
+User-agent: CCBot
 Disallow: /
 
 User-agent: Bytespider
 Disallow: /
 
-User-agent: FacebookBot
+User-agent: meta-externalagent
 Disallow: /
 
-User-agent: cohere-ai
+User-agent: FacebookBot
 Disallow: /
 
 User-agent: Amazonbot
@@ -41,10 +54,7 @@ Disallow: /
 User-agent: Applebot-Extended
 Disallow: /
 
-User-agent: YouBot
-Disallow: /
-
-User-agent: DuckAssistBot
+User-agent: cohere-ai
 Disallow: /
 
 User-agent: Diffbot
@@ -58,7 +68,3 @@ Disallow: /
 
 User-agent: ImagesiftBot
 Disallow: /
-
-# Allow all other crawlers (e.g. Google, Bing for search indexing)
-User-agent: *
-Allow: /
