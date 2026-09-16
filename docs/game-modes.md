@@ -106,6 +106,19 @@ Pilot a rocket through 20 math gates scattered around the canvas. Answer each ga
 - **UFO saucers** — cause a multi-layered explosion on hit (boom, noise burst, alien screech, colorful particles)
 - **Comets** — streak across the canvas from random directions with glowing color trails
 
+### Projectile speeds on small screens
+
+The world draws at a 1:1 world-to-screen pixel mapping, so a phone shows a
+much smaller slice of it than a desktop and the same world-px/frame speed
+feels several times faster. `viewScale()` (`canvas.width / 1400`, capped at 1)
+scales **comets and alien lasers** down on narrow canvases so they stay
+dodgeable. The **ship and the player's own missiles are not scaled** — doing
+so made both feel sluggish on phones (IDT-299 feedback, IDT-307), so they run
+at the same flat `SHIP_SPEED` / `MISSILE_SPEED` everywhere. Alien lasers fire
+at `ALIEN_LASER_SPEED` (5.55 px/frame before scaling; IDT-307 raised it 50%
+from 3.7 so shooters stay a threat now that the player's missiles are quick
+again).
+
 ### Bonus gates
 
 Three rainbow-colored gates require 3 correct answers each. Completing one refuels +10% O₂.

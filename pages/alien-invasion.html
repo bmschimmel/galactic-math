@@ -1296,8 +1296,15 @@ function markLaunchPath() {
 document.querySelectorAll('a[href]').forEach(a => { a.href = a.href; });
 
 const N_FUEL_PICKUPS   = 6;
+// The player's own missiles are NOT view-scaled: like the ship (see
+// SHIP_SPEED), scaling them down on a phone made firing feel sluggish, so
+// they're back to the flat original speed on every screen size (IDT-307).
 const MISSILE_SPEED     = 14;   // px/frame player missile speed
-// Ship/missile/comet speeds below were tuned by feel on a ~1400px-wide
+// Alien return fire is still view-scaled so it stays dodgeable on a small
+// screen, but 50% faster than it was — the old pace made shooters harmless
+// once the player's missiles were quick again (IDT-307).
+const ALIEN_LASER_SPEED = 5.55; // px/frame, before viewScale() (was 3.7)
+// Ship/comet speeds below were tuned by feel on a ~1400px-wide
 // desktop canvas. The world is rendered at a 1:1 world-to-screen pixel
 // mapping with no zoom, so a narrower canvas shows a smaller slice of the
 // world at any moment — the same world-px/frame speed then crosses a much
@@ -2088,7 +2095,7 @@ function updateAlienLasers() {
       const dist = Math.hypot(dx, dy) || 1;
       // Only fire if within ~900 world units of the ship
       if (dist > 900) continue;
-      const speed = 3.7 * viewScale();
+      const speed = ALIEN_LASER_SPEED * viewScale();
       lasers.push({ x: obs.x, y: obs.y, vx: (dx/dist)*speed, vy: (dy/dist)*speed, color: obs.color, life: 1.0 });
       sounds.laserShot();
     }
@@ -2475,8 +2482,9 @@ function firePlayerMissile() {
   missiles--;
   missilesFireTotal++;
   updateHUD();
-  const vx = Math.sin(ship.facing) * MISSILE_SPEED * viewScale();
-  const vy = -Math.cos(ship.facing) * MISSILE_SPEED * viewScale();
+  // Not view-scaled — see MISSILE_SPEED.
+  const vx = Math.sin(ship.facing) * MISSILE_SPEED;
+  const vy = -Math.cos(ship.facing) * MISSILE_SPEED;
   playerMissiles.push({ x: ship.x, y: ship.y, vx, vy, life: 1.0 });
   sounds.missileFire();
 }

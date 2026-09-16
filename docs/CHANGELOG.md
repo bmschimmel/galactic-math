@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-15
 
+### IDT-307 — Put player missiles back to full speed on mobile; alien lasers 50% faster (PR #159)
+
+IDT-299 multiplied the player's missile speed by `viewScale()` alongside comets and alien lasers, so on a ~390px phone a fired missile crawled at ~3.9 world-px/frame instead of 14 — "way too slow" per feedback, the same complaint that had already pulled the ship back off view-scaling. `firePlayerMissile()` in `pages/alien-invasion.html` now uses the flat `MISSILE_SPEED` on every screen size, matching the ship. Alien return fire stays view-scaled but the base speed is a new `ALIEN_LASER_SPEED` constant of 5.55 px/frame, 50% up from the old inline 3.7. Verified in headless Chromium inside the running game loop: desktop missile 14 → 14, phone missile 3.9 → 14; alien laser 3.7 → 5.55 (desktop) and 1.03 → 1.55 (phone). `docs/game-modes.md` gains a short note on which speeds are view-scaled and which are not.
+
 ### IDT-306 — Add the Web Analytics beacon to the feedback, workflow and release-notes pages (PR #157)
 
 IDT-305 put the Cloudflare Web Analytics beacon on `index.html` and `pages/alien-invasion.html` only, so visits to the feedback form, the How It Works page and the release notes were invisible. The same tag is now in the `<head>` of all three, so they appear under **Paths** as ordinary page views. No CSP change was needed; `_headers` already allow-lists the beacon origins site-wide. `docs/analytics.md` lists all five pages.
