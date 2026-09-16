@@ -18,6 +18,7 @@ galactic-math/
 │   └── wrangler.toml        # Cloudflare deployment config
 ├── _headers            # Cloudflare Pages response headers (CSP and other security headers)
 ├── _redirects          # Cloudflare Pages redirects: analytics virtual paths back to / (see analytics.md)
+├── robots.txt          # Crawler policy: search and AI assistants allowed, AI training disallowed
 ├── og-image-v2.png     # Open Graph / Twitter Card preview image (1200×630)
 ├── CLAUDE.md           # Instructions for Claude Code
 ├── CONTRIBUTING.md     # Contributor and workflow guide
@@ -127,3 +128,25 @@ The CSP is split into per-resource directives rather than one `default-src`:
 `'unsafe-inline'` has to stay in `script-src` while the pages use inline `onclick=` handlers (which `CLAUDE.md` prescribes). Scoping it to `script-src` and `style-src` means images, objects, frames and `<base>` no longer inherit it.
 
 **When adding an external resource** (a new font host, a CDN, an API), add its origin to the matching directive here or the browser will block it silently — check the console for CSP violation reports.
+
+### AI crawlers (`robots.txt` + Cloudflare)
+
+One stance, enforced in two places: search engines and AI search / assistant bots may index and cite the site; AI *training* crawlers may not.
+
+| Layer | Where | What it does |
+|---|---|---|
+| `robots.txt` (repo root) | Served by Pages | The version-controlled preference. `User-agent: *` carries a [Content Signals](https://contentsignals.org/) line — `search=yes, ai-input=yes, ai-train=no` — and each crawler in Cloudflare's **AI Crawler** category ([bot reference](https://developers.cloudflare.com/ai-crawl-control/reference/bots/)) gets `Disallow: /`. Advisory only: well-behaved bots honour it, nothing forces them to. |
+| **Configure AI bot policies** | Cloudflare dashboard → zone → Security → Settings | The enforcement. Should read **Search: Allow**, **Training: Disallow AI Training** (or Block), **Agent: Allow** (or "Block on pages with ads" — the site has no ads, so that is the same thing). Training crawlers get a `403` at the edge before Pages is ever reached. |
+
+Keep the two in agreement: if a bot is moved between the Search / Training / Agent buckets in the dashboard, update `robots.txt` to match, and vice versa.
+
+Leave the dashboard's managed `robots.txt` toggle ("Set your preference to block training in robots.txt") **off**. When it is on, Cloudflare prepends its own block to the file above, which is harmless but duplicates it; `curl https://galacticmath.app/robots.txt` will show `# BEGIN Cloudflare Managed content` if it has been switched on.
+
+To check the edge block is working:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' -A 'GPTBot/1.0'   https://galacticmath.app/   # 403
+curl -s -o /dev/null -w '%{http_code}\n' -A 'Googlebot/2.1' https://galacticmath.app/   # 200
+```
+
+Google Search Console may occasionally report `Syntax not understood` for the `Content-Signal` line; Cloudflare has observed no effect on crawling or ranking from that warning.
