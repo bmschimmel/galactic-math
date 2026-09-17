@@ -924,7 +924,7 @@ function refreshSetup() {
   document.getElementById('optionsTitle').textContent = alien ? 'How bad is the alien invasion?' : 'Pick your game mode!';
   document.getElementById('galacticOptions').hidden = alien;
   document.getElementById('alienOptions').hidden = !alien;
-  document.getElementById('optionsHint').textContent = alien ? 'More aliens means more missiles — and more math to earn them.' : '';
+  document.getElementById('optionsHint').textContent = alien ? 'The big number is how many alien ships attack. More aliens means more math to earn missiles!' : '';
 
   document.getElementById('briefNums').textContent = numsLabel();
   document.getElementById('briefOps').textContent = opsLabel();

@@ -659,6 +659,14 @@
     color: var(--saber-green);
     filter: drop-shadow(0 0 8px var(--saber-green));
   }
+  /* "ALIENS" under the big number, so it reads as a count of attacking ships */
+  .invasion-unit {
+    display: block;
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
   .invasion-grid .diff-name { font-size: 9px; }
   .diff-desc {
     font-family: 'Exo 2', sans-serif;
