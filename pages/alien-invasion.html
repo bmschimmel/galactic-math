@@ -1738,14 +1738,14 @@ function generateObstacles() {
     obs.push({ type:'asteroid', x, y, radius:baseR*0.8, verts, vx:(Math.random()-0.5)*0.30, vy:(Math.random()-0.5)*0.30, rotation:Math.random()*Math.PI*2, rotSpeed:(Math.random()-0.5)*0.012 });
   }
   // Aliens — Recon mode (5) is unarmed, Invasion (10) has half shooting,
-  // Chaos (25) is every ship armed (EXPERIMENTAL — see IDT-309 discussion)
+  // Chaos (25) has 20 shooting (EXPERIMENTAL — see IDT-309 discussion)
   for (let tries = 0; obs.filter(o=>o.type==='alien').length < N_ALIENS && tries < 700; tries++) {
     const x = 80 + Math.random()*(WORLD_W-160);
     const y = 400 + Math.random()*(WORLD_H-600);
     if (tooClose(x,y)) continue;
     const a = Math.random()*Math.PI*2;
     const alienIndex = obs.filter(o=>o.type==='alien').length;
-    const isShooter = N_ALIENS === 25 ? true : (N_ALIENS > 5 && alienIndex < N_ALIENS / 2); // Chaos: all shoot; Invasion: first half; Recon: none
+    const isShooter = N_ALIENS === 25 ? alienIndex < 20 : (N_ALIENS > 5 && alienIndex < N_ALIENS / 2); // Chaos: first 20 of 25 shoot; Invasion: first half; Recon: none
     obs.push({ type:'alien', x, y, radius:22, vx:Math.cos(a)*(0.6+Math.random()*0.65), vy:Math.sin(a)*(0.6+Math.random()*0.65), wobble:Math.random()*Math.PI*2, color:'#ff2d55', isShooter, nextShot: Date.now() + 4000 + Math.random() * 5000 });
   }
   return obs;
