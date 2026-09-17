@@ -87,24 +87,42 @@ A **comet celebration** plays on a passing score (≥75%).
 
 ## Alien Invasion Mode
 
-A canvas-based space shooter at `pages/alien-invasion.html`. Selected numbers and operations are passed in via URL params (`nums`, `ops`) by the main setup screen, along with how bad the invasion is: `aliens=5|10|25` sets `N_ALIENS` (Recon / Invasion / Chaos on the setup deck). Any other value, or opening the page on its own, gives the normal 10. The count also decides who shoots — Recon (5) spawns no shooters, otherwise the first half of aliens are shooters; comets and fuel don't yet vary by mode, tracked in IDT-278.
+A canvas-based space shooter at `pages/alien-invasion.html`. Selected numbers and operations are passed in via URL params (`nums`, `ops`) by the main setup screen, along with how bad the invasion is: `aliens=5|10|25` sets `N_ALIENS` (Recon / Invasion / Chaos on the setup deck). Any other value, or opening the page on its own, gives the normal 10.
 
 ### Objective
 
-Pilot a rocket through 20 math gates scattered around the canvas. Answer each gate's question correctly to clear it. All gates must be cleared (in any order) to win.
+Shoot down every alien ship. Flying into one of the 18 **math rings** opens a question; a correct answer earns **2 missiles** (`clearGate()`), a wrong one costs 5% fuel and pushes the ship away so it must re-approach. Rings can be reused, just not the same ring twice in a row. The game ends in victory the moment the last alien is destroyed (`aliensRemaining` hits 0), and in defeat when fuel or lives reach 0.
+
+### Modes
+
+The alien count is the only thing the mode changes. It also decides how many aliens shoot back: none in Recon, otherwise half, rounded up (`N_SHOOTERS = N_ALIENS > 5 ? Math.ceil(N_ALIENS / 2) : 0`). The first `N_SHOOTERS` aliens spawned in `generateObstacles()` get `isShooter: true` and are drawn with a gun barrel aimed at the ship.
+
+| Mode | `aliens=` | Alien ships | Shoot back | Lives | Fuel | Rings | Asteroids / comets |
+|---|---|---|---|---|---|---|---|
+| 🛸 Recon | 5 | 5 | 0 (0%) | 5 | 100% | 18 | 28 / up to 6 |
+| 👾 Invasion | 10 | 10 | 5 (50%) | 5 | 100% | 18 | 28 / up to 6 |
+| 🌀 Chaos | 25 | 25 | 13 (52%) | 5 | 100% | 18 | 28 / up to 6 |
+
+Lives, fuel, fuel pickups (6), comets and asteroids do not vary by mode — that is tracked in IDT-278. The setup deck cards, the setup screen and the intro explainer all state the shooter count for the chosen mode (`missionLine()` fills every `.mission-line` element with e.g. "👾 INVASION · 10 alien ships · 5 shoot back").
+
+### Alien lasers
+
+`updateAlienLasers()` runs every frame. Each shooter has its own `nextShot` timestamp: the first shot comes 4–9 s after spawn, then every 3–6.5 s. A shooter only fires when the ship is within 900 world px; if the ship is farther away the shot is skipped and the timer resets. Lasers travel at `ALIEN_LASER_SPEED` (5.55 px/frame, view-scaled — see below) straight at where the ship was when fired, fade out after ~5.5 s, and cost one life on contact (`hitByLaser()`), followed by 2 s of invincibility.
 
 ### Resources
 
 | Resource | Starting value | Notes |
 |---|---|---|
-| Oxygen | 100% | Drains continuously while thrusting; wrong answers cost −5% |
-| Lives | 5 | Lost by colliding with asteroids, UFO saucers, or comets |
+| Fuel | 100% | Drains while thrusting (`THRUST_FUEL_RATE`); wrong answers cost −5%; ⛽ pickups restore +10% |
+| Missiles | 0 | +2 per correct ring answer |
+| Lives | 5 | Lost by colliding with asteroids, aliens, or comets, or by being hit by an alien laser |
 
 ### Hazards
 
-- **Asteroids** — drifting rocks; collision causes screen shake and debris particles
-- **UFO saucers** — cause a multi-layered explosion on hit (boom, noise burst, alien screech, colorful particles)
-- **Comets** — streak across the canvas from random directions with glowing color trails
+- **Asteroids** — drifting rocks; collision costs a life with screen shake and debris particles
+- **Alien ships** — flying into one costs a life; shooting one triggers a multi-layered explosion (boom, noise burst, alien screech, colorful particles)
+- **Alien lasers** — fired by shooter aliens (see above); cost a life on contact
+- **Comets** — streak across the canvas from random directions with glowing color trails; collision costs a life
 
 ### Projectile speeds on small screens
 
@@ -118,10 +136,6 @@ at the same flat `SHIP_SPEED` / `MISSILE_SPEED` everywhere. Alien lasers fire
 at `ALIEN_LASER_SPEED` (5.55 px/frame before scaling; IDT-307 raised it 50%
 from 3.7 so shooters stay a threat now that the player's missiles are quick
 again).
-
-### Bonus gates
-
-Three rainbow-colored gates require 3 correct answers each. Completing one refuels +10% O₂.
 
 ### Audio warning
 
@@ -177,7 +191,9 @@ explanation, Space to shoot, P to pause) or `#introControlsTouch` (D-pad, FIRE
 button). The touch variant omits pause because there is no on-screen pause
 control.
 
-A pulsing directional arrow points toward the nearest uncleaned gate when it is off-screen.
+Below the story text a `.mission-line` states the rules for the chosen mode — alien count and how many shoot back.
+
+A pulsing directional arrow points toward the nearest alien when it is off-screen.
 
 ---
 

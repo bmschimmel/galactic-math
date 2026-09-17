@@ -7,6 +7,10 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ## 2026-09-16
 
+### IDT-309 — Clarify Alien Invasion rules and the alien-count selector (PR #162)
+
+Traced the per-mode rules in `pages/alien-invasion.html`: the alien count is the only thing Recon / Invasion / Chaos change, and it also decides who shoots back — nobody in Recon, half rounded up otherwise (5 of 10, 13 of 25), each shooter firing every 3–6.5 s when the ship is within 900 px. Lives, fuel, rings, comets and asteroids are the same in every mode. The copy did not say so: the setup-deck cards never said the big number was a count of alien ships, only the Invasion card mentioned lasers, the launch screens never mentioned return fire at all, and the how-to-play said a correct answer earns "a missile" when it earns 2. The cards now carry an ALIENS unit label and per-mode "None / 5 / 13 shoot back!" lines, the options hint explains the number, and both the setup screen and the intro explainer show a mode line such as "👾 INVASION · 10 alien ships · 5 shoot back" driven by a new shared `N_SHOOTERS` constant, so the copy cannot drift from the spawn rule. No gameplay change. `docs/game-modes.md` replaces its stale gate-clearing description with the real objective, a per-mode table and the laser rules.
+
 ### IDT-310 — Show shot accuracy as a percentage on the Alien Invasion end screen (PR #161)
 
 The SHOT ACCURACY tile on the Alien Invasion end screen showed only the raw `hits/total` fraction, which is hard for kids to read at a glance. It now shows the fraction and a whole-number percentage side by side in the same tile (`12/15 · 80%`), computed the same way as the math GRADE tile and reading `0/0 · 0%` when no missiles were fired. `.end-stat-val` no longer wraps mid-value and `.end-stats-row` can wrap a whole tile if a row ever overflows, so the wider tile stays tidy on ~375px phones.

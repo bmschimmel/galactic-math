@@ -14,7 +14,7 @@ Space themed math trainer for elementary school kids
 - **Comet celebration** — passing scores (75%+) trigger streaking comets across the screen
 - **Hyperspace mode** — optional timed challenge: complete all 20 before the countdown hits zero (Wicked Easy / Harder / Hyperdrive)
 - **Kessel Run mode** — race against the clock; wrong answers add a 5-second penalty
-- **Alien Invasion mode** — canvas-based space shooter; pilot your rocket through 20 math gates, dodge asteroids and UFOs, and manage your oxygen supply
+- **Alien Invasion mode** — canvas-based space shooter; fly through math rings to earn missiles, blast 5 / 10 / 25 alien ships (some shoot back), dodge asteroids and comets, and watch your fuel
 - **Theme cycler** — switch between Dark, Dim, Midnight, Deep Blue, and Retro color themes
 - **Session history** — track your scores across all rounds without any persistent storage
 - **Live grading** — see your score as you go, full breakdown at the end with missed problems reviewed

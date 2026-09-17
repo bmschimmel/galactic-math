@@ -93,15 +93,17 @@ The difficulty cards carry Easy / Normal / Hard badges: Wicked Easy 5:00 · Hard
 
 ### Alien Invasion — "How bad is the alien invasion?"
 
-Three cards in the same shape as the Hyperspace difficulty cards, one big number each, **Invasion preselected**:
+Three cards in the same shape as the Hyperspace difficulty cards, one big number each with an **ALIENS** unit label under it (`.invasion-unit`) so it reads as the number of alien ships attacking, **Invasion preselected**:
 
 | Card | Badge | Aliens | Sub line |
 |---|---|---|---|
-| 🛸 Recon | Easy | 5 | Alien ships unarmed |
-| 👾 Invasion | Normal | 10 | Aliens fire lasers! |
-| 🌀 Chaos | Hard | 25 | Good luck, pilot |
+| 🛸 Recon | Easy | 5 | None shoot back |
+| 👾 Invasion | Normal | 10 | 5 shoot back! |
+| 🌀 Chaos | Hard | 25 | 13 shoot back! |
 
-`setInvasion(size)` sets `invasionSize`; the alien count is passed to the game as `aliens=5|10|25`. The count also decides who shoots: 5 (Recon) spawns no shooters, otherwise the first half of aliens are shooters. Comets and fuel don't yet vary by mode — that's IDT-278.
+The hint under the grid reads "The big number is how many alien ships attack. More aliens means more math to earn missiles!"
+
+`setInvasion(size)` sets `invasionSize`; the alien count is passed to the game as `aliens=5|10|25`. The count also decides who shoots: 5 (Recon) spawns no shooters, otherwise half of the aliens, rounded up (5 of 10, 13 of 25) — see the Modes table in [game-modes.md](game-modes.md). Comets and fuel don't yet vary by mode — that's IDT-278.
 
 ---
 
