@@ -555,6 +555,19 @@
     margin-bottom: 32px;
   }
   .intro-body strong { color: var(--saber-green); }
+  /* Mode line under the setup blurb and the intro explainer —
+     "👾 INVASION · 10 alien ships · 5 shoot back" (filled by missionLine) */
+  .mission-line {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--saber-green);
+    text-shadow: 0 0 12px var(--saber-green);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .setup-panel .mission-line { font-size: 10px; margin-bottom: 10px; }
   .intro-controls {
     display: none;
     grid-template-columns: auto 1fr;
@@ -642,7 +655,8 @@
 <div id="setupScreen">
   <div class="setup-panel">
     <div class="setup-title">👾 ALIEN INVASION</div>
-    <div class="setup-subtitle">Clear the solar system of alien invaders! Fly through math rings to earn missiles, then blast every alien ship before you run out of fuel. Wrong answers drain fuel. Dodge comets and asteroids. You have 5 lives.</div>
+    <div class="mission-line"></div>
+    <div class="setup-subtitle">Clear the solar system of alien invaders! Fly through math rings to earn missiles, then blast every alien ship before you run out of fuel. Some aliens shoot back — dodge their lasers, plus comets and asteroids. Wrong answers drain fuel. You have 5 lives.</div>
 
     <div class="divider"></div>
 
@@ -667,8 +681,9 @@
     <div class="how-to-play">
       <b>Arrow keys / D-pad</b> to thrust &nbsp;·&nbsp; <b>Space / D-pad center</b> to fire &nbsp;·&nbsp; <b>P / ⏸</b> to pause<br>
       <b>Prefer using the mouse or trackpad?</b> Click once to start flying, then move the pointer — middle of the screen stops the ship, click again to turn it off<br>
-      <b>Fly through a ring</b> and answer correctly to earn a missile — you can reuse rings, just not the same one twice in a row<br>
-      <b>Shoot all alien ships</b> to win &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> restore +10% &nbsp;·&nbsp; Watch out for comets and asteroids
+      <b>Fly through a ring</b> and answer correctly to earn 2 missiles — you can reuse rings, just not the same one twice in a row<br>
+      <b>Shoot all alien ships</b> to win &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> restore +10% &nbsp;·&nbsp; Crashing into comets, asteroids or aliens costs a life<br>
+      <b>Some aliens shoot back</b> — none in Recon, half in Invasion and Chaos. Dodge their lasers or lose a life
     </div>
 
     <div class="error-msg" id="alienError"></div>
@@ -688,8 +703,9 @@
   <div class="intro-icon">👾</div>
   <div class="intro-title">⚠ ALIEN INVASION!</div>
   <div class="intro-body">
-    Aliens have taken over the solar system! Fly through <strong>math rings</strong> to earn <strong>missiles</strong>, then shoot down every alien ship. Wrong answers cost fuel — dodge comets and asteroids too.
+    Aliens have taken over the solar system! Fly through <strong>math rings</strong> to earn <strong>missiles</strong>, then shoot down every alien ship. Some aliens <strong>shoot back</strong> — dodge their lasers, and the comets and asteroids too. Wrong answers cost fuel.
   </div>
+  <div class="mission-line"></div>
 
   <div class="intro-controls" id="introControlsKeys">
     <span class="ctrl-label">🕹 MOVE</span>
@@ -700,7 +716,7 @@
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Press <b>SPACE</b>
-      <span class="sub">Need a missile, complete math problems at the rings!</span>
+      <span class="sub">Out of missiles? Answer a math problem at a ring — each correct answer earns 2!</span>
     </span>
     <span class="ctrl-label">⏸ PAUSE</span>
     <span class="ctrl-desc">Press <b>P</b></span>
@@ -712,7 +728,7 @@
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Tap the <b>🚀 FIRE</b> button at the bottom-right
-      <span class="sub">Need a missile, complete math problems at the rings!</span>
+      <span class="sub">Out of missiles? Answer a math problem at a ring — each correct answer earns 2!</span>
     </span>
   </div>
 
@@ -1275,18 +1291,24 @@ const LOW_FUEL_WARNING_PCT = 20; // audio warning + ticking starts at/below this
 const N_ASTEROIDS      = 28;
 // How bad the invasion is comes from the main setup flow as ?aliens=5|10|25.
 // Anything else (or nothing, when this page is opened on its own) is the
-// normal 10. 5 is Recon mode — unarmed aliens (see isShooter below).
+// normal 10.
 const ALIEN_COUNTS     = [5, 10, 25];
 const N_ALIENS         = (() => {
   const n = Number(new URLSearchParams(window.location.search).get('aliens'));
   return ALIEN_COUNTS.includes(n) ? n : 10;
 })();
+// How many of them shoot back: none in Recon (5), otherwise half, rounded up —
+// 5 of 10 in Invasion, 13 of 25 in Chaos. The first N_SHOOTERS aliens spawned
+// are the shooters (see generateObstacles). Everything else — lives, fuel,
+// comets, asteroids, rings — is the same in every mode.
+const N_SHOOTERS       = N_ALIENS > 5 ? Math.ceil(N_ALIENS / 2) : 0;
 
 // ===== ANALYTICS PATH =====
 // Swaps the visible URL for a virtual path when the game starts so Cloudflare
 // Web Analytics (SPA mode) counts launches per invasion size. Nothing
 // navigates; on a real page load `_redirects` bounces the path back to `/`.
 const ALIEN_SIZE_NAMES = { 5: 'recon', 10: 'invasion', 25: 'chaos' };
+const ALIEN_SIZE_ICONS = { 5: '🛸', 10: '👾', 25: '🌀' };
 const HOME_URL = new URL('../index.html', window.location.href).href;
 function markLaunchPath() {
   const path = `/alien/${ALIEN_SIZE_NAMES[N_ALIENS]}/`;
@@ -1295,6 +1317,16 @@ function markLaunchPath() {
 }
 // Relative links would resolve against the virtual path, so pin them now.
 document.querySelectorAll('a[href]').forEach(a => { a.href = a.href; });
+
+// ===== MISSION LINE =====
+// "👾 INVASION · 10 alien ships · 5 shoot back" — shown under the setup
+// blurb and on the intro explainer so the launch screen states the rules
+// for this exact mode.
+function missionLine() {
+  const who = N_SHOOTERS === 0 ? 'none shoot back' : `${N_SHOOTERS} shoot back`;
+  return `${ALIEN_SIZE_ICONS[N_ALIENS]} ${ALIEN_SIZE_NAMES[N_ALIENS]} · ${N_ALIENS} alien ships · ${who}`;
+}
+document.querySelectorAll('.mission-line').forEach(el => { el.textContent = missionLine(); });
 
 const N_FUEL_PICKUPS   = 6;
 // The player's own missiles are NOT view-scaled: like the ship (see
@@ -1737,14 +1769,14 @@ function generateObstacles() {
     }
     obs.push({ type:'asteroid', x, y, radius:baseR*0.8, verts, vx:(Math.random()-0.5)*0.30, vy:(Math.random()-0.5)*0.30, rotation:Math.random()*Math.PI*2, rotSpeed:(Math.random()-0.5)*0.012 });
   }
-  // Aliens — Recon mode (5) is unarmed, otherwise exactly half are shooters
+  // Aliens — the first N_SHOOTERS spawned shoot back (none in Recon mode)
   for (let tries = 0; obs.filter(o=>o.type==='alien').length < N_ALIENS && tries < 700; tries++) {
     const x = 80 + Math.random()*(WORLD_W-160);
     const y = 400 + Math.random()*(WORLD_H-600);
     if (tooClose(x,y)) continue;
     const a = Math.random()*Math.PI*2;
     const alienIndex = obs.filter(o=>o.type==='alien').length;
-    const isShooter = N_ALIENS > 5 && alienIndex < N_ALIENS / 2; // unarmed in Recon mode, first half shoot otherwise
+    const isShooter = alienIndex < N_SHOOTERS;
     obs.push({ type:'alien', x, y, radius:22, vx:Math.cos(a)*(0.6+Math.random()*0.65), vy:Math.sin(a)*(0.6+Math.random()*0.65), wobble:Math.random()*Math.PI*2, color:'#ff2d55', isShooter, nextShot: Date.now() + 4000 + Math.random() * 5000 });
   }
   return obs;
