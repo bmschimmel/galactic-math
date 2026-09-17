@@ -5,6 +5,12 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-09-16
+
+### IDT-310 — Show shot accuracy as a percentage on the Alien Invasion end screen (PR #161)
+
+The SHOT ACCURACY tile on the Alien Invasion end screen showed only the raw `hits/total` fraction, which is hard for kids to read at a glance. It now shows the fraction and a whole-number percentage side by side in the same tile (`12/15 · 80%`), computed the same way as the math GRADE tile and reading `0/0 · 0%` when no missiles were fired. `.end-stat-val` no longer wraps mid-value and `.end-stats-row` can wrap a whole tile if a row ever overflows, so the wider tile stays tidy on ~375px phones.
+
 ## 2026-09-15
 
 ### IDT-307 — Put player missiles back to full speed on mobile; alien lasers 50% faster (PR #159)
