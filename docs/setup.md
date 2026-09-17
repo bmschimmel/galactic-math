@@ -97,9 +97,9 @@ Three cards in the same shape as the Hyperspace difficulty cards, one big number
 
 | Card | Badge | Aliens | Sub line |
 |---|---|---|---|
-| 🛸 Recon | Easy | 5 | None shoot back |
-| 👾 Invasion | Normal | 10 | 5 shoot back! |
-| 🌀 Chaos | Hard | 25 | 13 shoot back! |
+| 🛸 Recon | Easy | 5 | Alien ships unarmed |
+| 👾 Invasion | Normal | 10 | Aliens fire lasers! |
+| 🌀 Chaos | Hard | 25 | Good luck, pilot |
 
 The hint under the grid reads "The big number is how many alien ships attack. More aliens means more math to earn missiles!"
 

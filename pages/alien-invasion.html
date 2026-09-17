@@ -555,19 +555,6 @@
     margin-bottom: 32px;
   }
   .intro-body strong { color: var(--saber-green); }
-  /* Mode line under the setup blurb and the intro explainer —
-     "👾 INVASION · 10 alien ships · 5 shoot back" (filled by missionLine) */
-  .mission-line {
-    font-family: 'Orbitron', monospace;
-    font-size: 11px;
-    color: var(--saber-green);
-    text-shadow: 0 0 12px var(--saber-green);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    line-height: 1.6;
-    margin-bottom: 28px;
-  }
-  .setup-panel .mission-line { font-size: 10px; margin-bottom: 10px; }
   .intro-controls {
     display: none;
     grid-template-columns: auto 1fr;
@@ -655,8 +642,7 @@
 <div id="setupScreen">
   <div class="setup-panel">
     <div class="setup-title">👾 ALIEN INVASION</div>
-    <div class="mission-line"></div>
-    <div class="setup-subtitle">Clear the solar system of alien invaders! Fly through math rings to earn missiles, then blast every alien ship before you run out of fuel. Some aliens shoot back — dodge their lasers, plus comets and asteroids. Wrong answers drain fuel. You have 5 lives.</div>
+    <div class="setup-subtitle">Clear the solar system of alien invaders! Fly through math rings to earn missiles, then blast every alien ship before you run out of fuel. Wrong answers drain fuel. Dodge comets and asteroids. You have 5 lives.</div>
 
     <div class="divider"></div>
 
@@ -682,8 +668,7 @@
       <b>Arrow keys / D-pad</b> to thrust &nbsp;·&nbsp; <b>Space / D-pad center</b> to fire &nbsp;·&nbsp; <b>P / ⏸</b> to pause<br>
       <b>Prefer using the mouse or trackpad?</b> Click once to start flying, then move the pointer — middle of the screen stops the ship, click again to turn it off<br>
       <b>Fly through a ring</b> and answer correctly to earn 2 missiles — you can reuse rings, just not the same one twice in a row<br>
-      <b>Shoot all alien ships</b> to win &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> restore +10% &nbsp;·&nbsp; Crashing into comets, asteroids or aliens costs a life<br>
-      <b>Some aliens shoot back</b> — none in Recon, half in Invasion and Chaos. Dodge their lasers or lose a life
+      <b>Shoot all alien ships</b> to win &nbsp;·&nbsp; <b>⛽ Fuel pickups</b> restore +10% &nbsp;·&nbsp; Watch out for comets and asteroids
     </div>
 
     <div class="error-msg" id="alienError"></div>
@@ -703,9 +688,8 @@
   <div class="intro-icon">👾</div>
   <div class="intro-title">⚠ ALIEN INVASION!</div>
   <div class="intro-body">
-    Aliens have taken over the solar system! Fly through <strong>math rings</strong> to earn <strong>missiles</strong>, then shoot down every alien ship. Some aliens <strong>shoot back</strong> — dodge their lasers, and the comets and asteroids too. Wrong answers cost fuel.
+    Aliens have taken over the solar system! Fly through <strong>math rings</strong> to earn <strong>missiles</strong>, then shoot down every alien ship. Wrong answers cost fuel — dodge comets and asteroids too.
   </div>
-  <div class="mission-line"></div>
 
   <div class="intro-controls" id="introControlsKeys">
     <span class="ctrl-label">🕹 MOVE</span>
@@ -716,7 +700,7 @@
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Press <b>SPACE</b>
-      <span class="sub">Out of missiles? Answer a math problem at a ring — each correct answer earns 2!</span>
+      <span class="sub">Need a missile, complete math problems at the rings!</span>
     </span>
     <span class="ctrl-label">⏸ PAUSE</span>
     <span class="ctrl-desc">Press <b>P</b></span>
@@ -728,7 +712,7 @@
     <span class="ctrl-label">🚀 SHOOT</span>
     <span class="ctrl-desc">
       Tap the <b>🚀 FIRE</b> button at the bottom-right
-      <span class="sub">Out of missiles? Answer a math problem at a ring — each correct answer earns 2!</span>
+      <span class="sub">Need a missile, complete math problems at the rings!</span>
     </span>
   </div>
 
@@ -1308,7 +1292,6 @@ const N_SHOOTERS       = N_ALIENS > 5 ? Math.ceil(N_ALIENS / 2) : 0;
 // Web Analytics (SPA mode) counts launches per invasion size. Nothing
 // navigates; on a real page load `_redirects` bounces the path back to `/`.
 const ALIEN_SIZE_NAMES = { 5: 'recon', 10: 'invasion', 25: 'chaos' };
-const ALIEN_SIZE_ICONS = { 5: '🛸', 10: '👾', 25: '🌀' };
 const HOME_URL = new URL('../index.html', window.location.href).href;
 function markLaunchPath() {
   const path = `/alien/${ALIEN_SIZE_NAMES[N_ALIENS]}/`;
@@ -1317,16 +1300,6 @@ function markLaunchPath() {
 }
 // Relative links would resolve against the virtual path, so pin them now.
 document.querySelectorAll('a[href]').forEach(a => { a.href = a.href; });
-
-// ===== MISSION LINE =====
-// "👾 INVASION · 10 alien ships · 5 shoot back" — shown under the setup
-// blurb and on the intro explainer so the launch screen states the rules
-// for this exact mode.
-function missionLine() {
-  const who = N_SHOOTERS === 0 ? 'none shoot back' : `${N_SHOOTERS} shoot back`;
-  return `${ALIEN_SIZE_ICONS[N_ALIENS]} ${ALIEN_SIZE_NAMES[N_ALIENS]} · ${N_ALIENS} alien ships · ${who}`;
-}
-document.querySelectorAll('.mission-line').forEach(el => { el.textContent = missionLine(); });
 
 const N_FUEL_PICKUPS   = 6;
 // The player's own missiles are NOT view-scaled: like the ship (see

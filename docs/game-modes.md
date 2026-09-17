@@ -103,7 +103,7 @@ The alien count is the only thing the mode changes. It also decides how many ali
 | 👾 Invasion | 10 | 10 | 5 (50%) | 5 | 100% | 18 | 28 / up to 6 |
 | 🌀 Chaos | 25 | 25 | 13 (52%) | 5 | 100% | 18 | 28 / up to 6 |
 
-Lives, fuel, fuel pickups (6), comets and asteroids do not vary by mode — that is tracked in IDT-278. The setup deck cards, the setup screen and the intro explainer all state the shooter count for the chosen mode (`missionLine()` fills every `.mission-line` element with e.g. "👾 INVASION · 10 alien ships · 5 shoot back").
+Lives, fuel, fuel pickups (6), comets and asteroids do not vary by mode — that is tracked in IDT-278. Player-facing copy deliberately keeps the exact shooter counts a surprise: the setup deck cards say "Alien ships unarmed" / "Aliens fire lasers!" / "Good luck, pilot" rather than stating numbers, and the alien-count cards carry an `ALIENS` unit label so the big number reads as a ship count without spelling out who shoots.
 
 ### Alien lasers
 
@@ -190,8 +190,6 @@ device: `#introControlsKeys` (arrow keys / WASD, the trackpad click-to-fly
 explanation, Space to shoot, P to pause) or `#introControlsTouch` (D-pad, FIRE
 button). The touch variant omits pause because there is no on-screen pause
 control.
-
-Below the story text a `.mission-line` states the rules for the chosen mode — alien count and how many shoot back.
 
 A pulsing directional arrow points toward the nearest alien when it is off-screen.
 
