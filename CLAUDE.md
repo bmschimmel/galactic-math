@@ -98,5 +98,5 @@ The one piece of server-side code is the feedback worker in `worker/` (see [Feed
 ## Workflow
 
 - See CONTRIBUTING.md for branching, commit message format, PR rules, and Linear state transitions. Linear project ID is IDT. Always create a branch before starting work.
-- Commit in the worktree, then stop: Brendan tests the branch locally by opening the worktree's `index.html`. Push and open the PR only when he says so.
+- Commit in the worktree, serve it on a free localhost port (`python3 -m http.server 8001`), move the issue to In Review and comment the localhost link. Push and open the PR only when Brendan says so.
 - Never push directly to main. Never merge your own PR.
