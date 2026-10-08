@@ -217,10 +217,20 @@ When picking up a Linear issue:
 5a. After making changes, review `docs/` and update any files whose described behavior has changed; always add a `docs/CHANGELOG.md` entry
 6. Follow all rules in `CLAUDE.md` — single file, no dependencies, no localStorage
 7. Commit with the Linear ID in every commit message
-8. Open a PR with `Fixes IDT-XX` in the description
+8. Open a PR with `Fixes IDT-XX` in the description — but only after the local test below
 9. Do not merge — leave the PR for human review and approval
 
-After committing, always:
+After committing, **stop and hand it to Brendan to test locally.** Don't push until he
+says so; the issue stays **"In Progress"** meanwhile. Tell him the worktree path and how
+to open it (no server needed):
+
+```bash
+explorer.exe "$(wslpath -w ~/projects/worktrees/idt-NNN-description/index.html)"
+```
+
+Fixes from his testing are more commits on the same branch.
+
+Once he says it's good, always:
 
 1. Push the branch: `git push origin <branch-name>`
 2. Open a PR using GitHub CLI:
