@@ -217,14 +217,27 @@ When picking up a Linear issue:
 5a. After making changes, review `docs/` and update any files whose described behavior has changed; always add a `docs/CHANGELOG.md` entry
 6. Follow all rules in `CLAUDE.md` — single file, no dependencies, no localStorage
 7. Commit with the Linear ID in every commit message
-8. Open a PR with `Fixes IDT-XX` in the description
+8. Open a PR with `Fixes IDT-XX` in the description — but only after the local test below
 9. Do not merge — leave the PR for human review and approval
 
-After committing, always:
+After committing, **serve it locally for Brendan and stop.** Don't push until he says so.
 
-1. Push the branch: `git push origin <branch-name>`
-2. Open a PR using GitHub CLI:
+1. Serve the worktree on a free port (8001, 8002, … — one per worktree):
+   ```bash
+   setsid nohup python3 -m http.server 8001 --bind 127.0.0.1 --directory ~/projects/worktrees/idt-NNN-description > ~/projects/worktrees/idt-NNN-description.log 2>&1 < /dev/null &
+   ```
+   Check `http://localhost:8001/index.html` answers 200.
+2. Move the Linear issue to **"In Review"** and comment with the link: `Ready to test
+   locally: http://localhost:8001/` plus what to look at and the worktree path.
+3. Fixes from his testing are more commits on the same branch; move the issue back to
+   In Progress while you work, then In Review with a new comment.
+
+Once he says it's good:
+
+1. Stop the worktree's server.
+2. Push the branch: `git push origin <branch-name>`
+3. Open a PR using GitHub CLI:
    `gh pr create --base main --title "IDT-XX description" --body "Fixes IDT-XX"`
-3. Transition the Linear issue to **"In Review"**. GitHub's PR-open sync does not
-   reliably move it for you — set the state explicitly rather than assuming it happened.
-4. Remove the worktree: `git worktree remove <path>` from the shared checkout
+4. Check the Linear issue is still **"In Review"** (the PR-open sync can move it back to
+   In Progress) and comment with the PR link.
+5. Remove the worktree: `git worktree remove <path>` from the shared checkout

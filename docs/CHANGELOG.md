@@ -5,6 +5,12 @@ Each entry references the Linear issue ID (IDT-XX) and the GitHub PR that merged
 
 ---
 
+## 2026-10-08
+
+### IDT-319 — Test locally before pushing a branch (PR #164)
+
+Claude Code sessions now commit in their worktree, serve it on its own localhost port, move the issue to In Review and comment the link, so Brendan can try the change before anything is pushed. The branch is pushed and the PR opened only once he says it's good, the same pattern as Vinyl Repo and Pumpkin Beer Tasting.
+
 ## 2026-09-16
 
 ### IDT-310 — Show shot accuracy as a percentage on the Alien Invasion end screen (PR #161)
